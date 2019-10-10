@@ -1,0 +1,76 @@
+﻿
+@model List<mvc4.Models.DocumentoViewModel>
+@{
+    ViewBag.Title = "Documento";
+}
+
+<script>
+    var id = 0;
+    ready(function () {
+        $('.del').click(function () {
+            id = $(this).attr("id");
+            $('#sino').modal({
+                keyboard: false
+            })
+        });
+
+        $('#btn-eliminar').click(function () {
+            location.href = "#";
+        });
+    });
+</script>
+
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+</section>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <i class="fa fa-table"></i>
+                    <h3 class="box-title">Base de Datos Medio Ambiental</h3>
+                    <div class="pull-right box-tools">
+                        <a href="~/Document/Ma_Nuevo" class="btn btn-primary">Nuevo Documento</a>
+                    </div>
+                </div>
+                <div class="box-body">
+                    <form action="~/Document/Buscar" method="post" id="formBusqueda">
+                        <label for="q">Ingrese el texto a buscar ...</label>
+                        <div class="input-group">
+                            <input type="text" name="q" id="q" class="form-control" placeholder="Search...">
+                            <input type="hidden" name="p" id="p" value="0">
+                            <span class="input-group-btn">
+                                <button type="submit" id="btnBusqueda" name="search" class="btn btn-flat">
+                                    <i class="fa fa-search"></i>
+                                </button>
+                            </span>
+                        </div>
+                    </form>
+                    <br /><br />
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="sino" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="gridSystemModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="gridSystemModalLabel">¡Atención!</h4>
+            </div>
+            <div id="modal-text" class="modal-body">
+                ¿Seguro que desea eliminar el documento seleccionado?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" id="btn-eliminar">Si</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal">No</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->

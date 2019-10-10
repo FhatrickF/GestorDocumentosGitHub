@@ -1,0 +1,180 @@
+﻿
+@{
+    ViewBag.Title = "Buscar";
+    int indice = ((ViewBag.Pagina * 5) - 5);
+    int pIndice = indice;
+}
+
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+</section>
+
+<script>
+	var registros = @ViewBag.Query.response.numFound;
+	var listado = "";
+	var p = @ViewBag.Pagina;
+
+	ready(function () {
+		$(document).on('click', '.page-link', function () {
+			var id = $(this).html();
+			$("#q").val("");
+			$("#p").val(id);
+			$('#btnBusqueda').click();
+		});
+
+		var i;
+		if (registros > 5) {
+			var d = (registros / 5);
+			if (d % 1 != 0) {
+				d = d + 1;
+				var d_ = d.toString().split(".");
+				d = parseInt(d_);
+			}
+		} else {
+			d = registros;
+		}
+
+		var tp = d;
+		var lim_iz = 1 + 4;
+		var lim_de = tp - 4;
+
+		var pag_sel_l = "<strong>";
+		var pag_sel_r = "</strong>";
+		var medio = true;
+
+		if (tp <= 7) {
+			for (i = 1; i <= tp; i++) {
+				var active = "";
+				if (i == p)
+					active = "active";
+				listado += "<li class=\"page-item " + active + "\"><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
+			};
+		} else {
+			if (p < lim_iz) {
+				for (i = 1; i <= lim_iz; i++) {
+					var active = "";
+					if (i == p)
+						active = "active";
+					listado += "<li class=\"page-item " + active + "\"><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
+				};
+				listado += "<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>";
+				listado += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + tp + "</a></li>";
+				medio = false;
+			}
+			if (p > lim_de) {
+				for (i = lim_de; i <= tp; i++) {
+					var active = "";
+					if (i == p)
+						active = "active";
+					listado += "<li class=\"page-item " + active + "\"><a class=\"page-link\" href=\"#\">" + i + "</a></li>";
+				};
+				listado = "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">1</a></li>" +
+					"<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>" + listado;
+
+				medio = false;
+			}
+			if (medio) {
+				listado += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">1</a></li>";
+				listado += "<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>";
+				listado += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + (p - 1) + "</a></li>";
+				listado += "<li class=\"page-item active\"><a class=\"page-link\" href=\"#\">" + p + "</a></li>";
+				listado += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + (p + 1) + "</a></li>";
+				listado += "<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>";
+				listado += "<li class=\"page-item\"><a class=\"page-link\" href=\"#\">" + tp + "</a></li>";
+			}
+		}
+		listado = "<nav><ul class=\"pagination\">" + listado + "</ul></nav>";
+		$("#paginacion").html(listado);
+
+	});
+</script>
+
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <i class="fa fa-table"></i>
+                    <h3 class="box-title">Coincidencias</h3>
+                </div>
+                <div class="box-body">
+                    <table id="resultado" class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">
+                                    N°
+                                </th>
+                                <th>
+                                    Registros
+                                </th>
+                                <th colspan="3"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (dynamic doc in ViewBag.Query.response.docs)
+                            {
+                                <tr>
+                                    <td>
+                                        <strong>
+                                            @(indice = indice + 1)
+                                        </strong>
+                                    </td>
+                                    <td>
+                                        @try
+                                        {@doc.ma_organismo}
+                                    catch { } - @try
+                                        {@doc.ma_categoria}
+                                    catch { }
+                                    <br />
+                                    @foreach (dynamic h in ViewBag.Query.highlighting)
+                                    {
+                                        if (h.Key == doc.id)
+                                        {
+                                            <label>... </label>
+                                            try
+                                            {
+                                                @Html.Raw(h.Value.ma_texto[0])
+                                            }
+                                            catch
+                                            {
+                                                @Html.Raw("Texto no disponible")
+                                            }
+                                            <label> ...</label>
+                                        }
+                                    }
+                                </td>
+                                <td style="text-align: center; width: 50px;">
+                                    <a href="~/Document/Ma_VerDocumento/@doc.id" class="text-blue">
+                                        Ver
+                                    </a>
+                                </td>
+                                <td style="text-align: center; width: 50px;">
+                                    <a href="~/Document/Ma_EditarDocumento/@doc.id" class="text-green">
+                                        Editar
+                                    </a>
+                                </td>
+                                <td style="text-align: center; width: 50px;">
+                                    <span id="@doc.id" style="cursor: pointer;" class="text-red del">Eliminar</span>
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <br />
+                            <strong>
+                                Registro(s) @(pIndice + 1) al @(indice) de @ViewBag.Query.response.numFound coincidencias
+                            </strong>
+                        </div>
+                        <div class="col-md-6" style="text-align: right" id="paginacion">
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

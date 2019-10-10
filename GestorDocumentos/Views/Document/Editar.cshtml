@@ -1,0 +1,131 @@
+﻿
+@model mvc4.Models.DetalleDocumento
+@{
+    ViewBag.Title = "Edición de documentos";
+}
+
+<script>
+	var versionFinal = @(Convert.ToString(Model.Document.VersionFinal).ToLower());
+	var esBorrador = @(Convert.ToString(Model.Document.EsBorrador).ToLower());
+
+	ready(function () {
+		CKEDITOR.replace('Document_Texto', {
+			height: 500
+		});
+
+		if (esBorrador) {
+			$('#btn-nueva-version').hide();
+			$('#txt-borrador').show();
+			$('#Document_EsBorrador').val("true");
+			$('#Document_VersionFinal').val("false");
+			$('#btn-guardar').text("Guardar borrador");
+			$('#btn-guardar').removeClass("btn-primary");
+			$('#btn-guardar').addClass("btn-danger");
+			$('#btn-publicar').show();
+		} else {
+			$('#btn-nueva-version').show();
+			$('#txt-borrador').hide();
+			$('#btn-publicar').hide();
+		}
+
+		$('#btn-nueva-version').click(function () {
+			$('#btn-nueva-version').hide();
+			$('#txt-borrador').show();
+			$('#Document_EsBorrador').val("true");
+			$('#Document_VersionFinal').val("false");
+			$('#btn-guardar').text("Guardar borrador");
+			$('#btn-guardar').text("Guardar borrador");
+			$('#btn-guardar').removeClass("btn-primary");
+			$('#btn-guardar').addClass("btn-danger");
+			$('#btn-publicar').show();
+		});
+
+		$('#btn-publicar').click(function () {
+			//$('#Document_EsBorrador').val("false");
+			$('#Document_VersionFinal').val("true");
+			$('#btn-guardar').click();
+		});
+	});
+</script>
+
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+</section>
+
+<section class="content">
+    @using (Html.BeginForm("Editar", "Document", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-3">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <i class="fa fa-copy"></i>
+                        <h3 class="box-title">Versiones</h3>
+                    </div>
+                    <div class="box-body">
+                        @if (Model.Document.Version > 0)
+                        {
+                            foreach (var v in Model.ListaVersiones)
+                            {
+                                <a href="#">@(v.nombre)</a><br />
+                            }
+                        }
+                        else
+                        {
+                            <a>Documento con versión única</a>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <i class="fa fa-file-text-o"></i>
+                        <h3 class="box-title">Editar documento</h3>
+                        <div class="pull-right">
+                            <a href="#" id="btn-nueva-version" class="btn btn-success">Nueva versión</a>
+                            <span id="txt-borrador" class="text-red">Borrador</span>
+                        </div>
+                    </div>
+                    <div class="box-body">
+                        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                        Creado el @Model.Document.FechaCreacion<br /><br />
+                        <div class="form-group">
+                            @Html.LabelFor(m => m.Document.Titulo)
+                            @Html.TextBoxFor(m => m.Document.Titulo, new { @class = "form-control" })
+                            @Html.ValidationMessageFor(m => m.Document.Titulo, "", new { @class = "text-danger" })
+                        </div>
+                        <div class="form-group">
+                            <label>Descripción</label>
+                            @Html.TextAreaFor(m => m.Document.Descripcion, new { @class = "form-control", row = "3" })
+                            @Html.ValidationMessageFor(m => m.Document.Descripcion, "", new { @class = "text-danger" })
+                        </div>
+                        <label>Texto del documento</label>
+                        @Html.TextAreaFor(m => m.Document.Texto, new { @class = "form-control", row = "10", cols = "80" })
+
+                        @Html.HiddenFor(m => m.Document.IdDocumento)
+                        @Html.HiddenFor(m => m.Document.EsBorrador)
+                        @Html.HiddenFor(m => m.Document.VersionFinal)
+                        <br />
+                        <div class="row">
+                            <div class="col-md-8">
+                                <a href="~/Document" class="btn btn-default">Cancelar</a>
+                            </div>
+                            <div class="col-md-4">
+                                <button id="btn-guardar" type="submit" class="btn btn-primary btn-block">Guardar documento</button>
+                                <button id="btn-publicar" type="button" class="btn btn-default btn-block">Publicar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</section>
+
+
+

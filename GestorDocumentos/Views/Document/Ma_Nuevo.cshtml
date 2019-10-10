@@ -1,0 +1,101 @@
+﻿@model mvc4.Models.MedioAmbiental
+@{
+    ViewBag.Title = "Nuevo Documento (BD Medio Ambiental)";
+}
+
+<script>
+	ready(function () {
+		CKEDITOR.replace('Texto', {
+			height: 500
+		});
+	});
+</script>
+
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+</section>
+
+<section class="content">
+    @using (Html.BeginForm("Ma_Nuevo", "Document", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <i class="fa fa-file-text-o"></i>
+                        <h3 class="box-title">Nuevo documento</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="nav-tabs-custom">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active">
+                                            <a href="#tab_1" data-toggle="tab">Metadatos</a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div id="tab_1" class="tab-pane active">
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Organismo, "Organismo")
+                                                @Html.TextBoxFor(m => m.Organismo, new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(m => m.Organismo, "", new { @class = "text-danger" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.SubOrganismo, "Sub organismo")
+                                                @Html.TextBoxFor(m => m.SubOrganismo, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Seccion, "Sección")
+                                                @Html.TextBoxFor(m => m.Seccion, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Numero, "Número")
+                                                @Html.TextBoxFor(m => m.Numero, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Categoria, "Categoría")
+                                                @Html.TextBoxFor(m => m.Categoria, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Tema, "Tema")
+                                                @Html.TextBoxFor(m => m.Tema, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Titulo, "Título")
+                                                @Html.TextBoxFor(m => m.Titulo, new { @class = "form-control" })
+                                                @Html.ValidationMessageFor(m => m.Titulo, "", new { @class = "text-danger" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Norma, "Norma")
+                                                @Html.TextBoxFor(m => m.Norma, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-8">
+                                <label>Texto del documento</label>
+                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                @Html.ValidationMessageFor(m => m.Texto, "", new { @class = "text-danger" })
+                                @Html.TextAreaFor(m => m.Texto, new { @class = "form-control", row = "10", cols = "80" })
+                                <br />
+                                <div class="row">
+                                    <div class="col-md-8">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button id="btn-guardar" type="submit" class="btn btn-primary btn-block">Guardar documento</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</section>
