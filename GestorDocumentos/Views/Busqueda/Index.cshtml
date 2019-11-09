@@ -1,0 +1,423 @@
+﻿@model mvc4.Models.Documento
+@{
+    ViewBag.Title = "Busqueda";
+}
+
+<script>
+    var p_ = 1;
+    var referencia = "@ViewBag.Referencia";
+    ready(function () {
+        $('#Fecha').datepicker({
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        })
+
+        $('#sel-coleccion').on('change', function () {
+            $(".coleccion").hide();
+            $("#" + this.value).show();
+        });
+
+        $('#btn-guardar').click(function () {
+            p_ = 1;
+            setPaginacion();
+        });
+    });
+
+    function pagina(p) {
+        p_ = p;
+        setPaginacion();
+    }
+
+    function setPaginacion() {
+        $('#msgError').hide();
+        var params = new Object();
+        params.form = $('#formBite').toJSON();
+        if (p_ == 1)
+            p_ = 0;
+        else
+            p_ = (p_ - 1) * 10;
+
+        params.form.Pagina = p_;
+        $('#paginacion').empty();
+        $("#paginacion").html("");
+        $.ajax({
+            type: "POST",
+            url: "/Busqueda/Index",
+            content: "application/json; charset=utf-8",
+            dataType: "json",
+            data: params, //JSON.stringify(params),
+            success: function (d) {
+                if (d.numFound == 0) {
+                    $('#msgError').show();
+                    $('#tblResultado').hide();
+                    $('#paginacion').hide();
+                    $('#lblTotal').hide();
+                } else {
+                    if (d.numFound == "1")
+                        $('#lblTotal').html("1 registro encontrado");
+                    else
+                        $('#lblTotal').html(d.numFound + " registros encontrados");
+
+                    $('#tablaBody').html("");
+                    $('#tblResultado').show();
+                    $('#lblTotal').show();
+                    for (var i = 0; i < d.docs.length; i++) {
+                        var f = "";
+                        var r = "<td>";
+                        try {
+                            f = d.docs[i].Fecha.substring(0, 10);
+                            f = f.substring(8, 10) + "-" + f.substring(5, 7) + "-" + f.substring(0, 4);
+                            if (f == "01-01-3000")
+                                r += "";
+                            else
+                                r += f + " - ";
+                        } catch (e) {
+                            r += "";
+                        }
+                        r += "<strong>" + d.docs[i].Norma + "</strong>.- ";
+
+                        if (d.docs[i].Numero) {
+                            r += "Número " + d.docs[i].Numero + ".- ";
+                        } else {
+                            if (d.docs[i].Articulo) {
+                                r += "Artículo número " + d.docs[i].Articulo;
+                            }
+                            if (d.docs[i].Inciso) {
+                                r += ", Inciso " + d.docs[i].Inciso
+                            }
+                            r += ".- ";
+                        }
+
+                        r += d.docs[i].Titulo;
+                        r += "</td>"
+
+                        r += "<td>";
+                        r += "<a class=\"text-blue\" href=\"/Document/Ma_VerDocumento/" + d.docs[i].id + "\" >Ver</a>";
+                        r += "</td>";
+                        if (referencia == "True") {
+                            r += "<td></td>";
+                        } else {
+                            r += "<td>";
+                            r += "<a class=\"text-green\" href=\"/Document/Ma_EditarDocumento/" + d.docs[i].id + "\" target=\"_blank\">Editar</a>";
+                            r += "</td>";
+                        }
+
+                        $('#tablaBody').append("<tr>" + r + "</tr>")
+                    }
+                    if (d.numFound <= 10) {
+                        $('#paginacion').hide();
+                    } else {
+                        $('#paginacion').show();
+                        paginacion(d.numFound, p_);
+                    }
+
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error!!');
+            }
+        });
+    }
+
+    function paginacion(registros, p) {
+        if (p == 0)
+            p = 1;
+        else
+            p = (p / 10) + 1;
+
+        var listado = "";
+        var i;
+        if (registros > 10) {
+            var d = (registros / 10);
+            if (d % 1 != 0) {
+                d = d + 1;
+                var d_ = d.toString().split(".");
+                d = parseInt(d_);
+            }
+        } else {
+            d = registros;
+        }
+
+        var tp = d;
+        var lim_iz = 1 + 4;
+        var lim_de = tp - 4;
+
+        var pag_sel_l = "<strong>";
+        var pag_sel_r = "</strong>";
+        var medio = true;
+
+        if (tp <= 7) {
+            for (i = 1; i <= tp; i++) {
+                var active = "";
+                if (i == p)
+                    active = "active";
+                listado += "<li class=\"page-item " + active + "\"><a class=\"page-link\" onclick=\"pagina(" + i + ")\" style=\"cursor:pointer\" >" + i + "</a></li>";
+            };
+        } else {
+            if (p < lim_iz) {
+                for (i = 1; i <= lim_iz; i++) {
+                    var active = "";
+                    if (i == p)
+                        active = "active";
+                    listado += "<li class=\"page-item " + active + "\"><a class=\"page-link\" onclick=\"pagina(" + i + ")\" style=\"cursor:pointer\" >" + i + "</a></li>";
+                };
+                listado += "<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>";
+                listado += "<li class=\"page-item\"><a class=\"page-link\" onclick=\"pagina(" + tp + ")\" style=\"cursor:pointer\" >" + tp + "</a></li>";
+                medio = false;
+            }
+            if (p > lim_de) {
+                for (i = lim_de; i <= tp; i++) {
+                    var active = "";
+                    if (i == p)
+                        active = "active";
+                    listado += "<li class=\"page-item " + active + "\"><a class=\"page-link\" onclick=\"pagina(" + i + ")\" style=\"cursor:pointer\" >" + i + "</a></li>";
+                };
+                listado = "<li class=\"page-item\"><a class=\"page-link\" onclick=\"pagina(1)\" style=\"cursor:pointer\">1</a></li>" +
+                    "<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>" + listado;
+
+                medio = false;
+            }
+            if (medio) {
+                listado += "<li class=\"page-item\"><a class=\"page-link\" onclick=\"pagina(1)\" style=\"cursor:pointer\" >1</a></li>";
+                listado += "<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>";
+                listado += "<li class=\"page-item\"><a class=\"page-link\" onclick=\"pagina(" + (p - 1) + ")\" style=\"cursor:pointer\">" + (p - 1) + "</a></li>";
+                listado += "<li class=\"page-item active\"><a class=\"page-link\" onclick=\"pagina(" + p + ")\" style=\"cursor:pointer\" >" + p + "</a></li>";
+                listado += "<li class=\"page-item\"><a class=\"page-link\" onclick=\"pagina(" + (p + 1) + ")\" style=\"cursor:pointer\">" + (p + 1) + "</a></li>";
+                listado += "<li class=\"page-item disabled\"><a class=\"page-link \" href=\"#\">...</a></li>";
+                listado += "<li class=\"page-item\"><a class=\"page-link\" onclick=\"pagina(" + tp + ")\" style=\"cursor:pointer\">" + tp + "</a></li>";
+            }
+        }
+        listado = "<nav><ul class=\"pagination\">" + listado + "</ul></nav>";
+        $("#paginacion").html(listado);
+    }
+</script>
+
+<section class="content-header">
+    <h1>
+        Búsqueda avanzada
+    </h1>
+</section>
+
+<section class="content">
+    <div class="row" id="inicio">
+        <div class="col-md-4">
+            <!-- formulario -->
+            <!-- bite -->
+            <form action="~/Busqueda/Index" method="post" id="formBite" name="formBite">
+                <!-- <div id="BITE" class="col-md-12 coleccion"> -->
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <i class="fa fa-file-text-o"></i>
+                        <h3 class="box-title">BITE</h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <!--
+                            <div class="col-md-12">
+                                <a class="name" href="CT">Código Tributario</a> |
+                                <a class="name" href="LR">Ley de la Renta</a> |
+                                <a class="name" href="LT">Ley de Timbres y Estampillas</a> |
+                                <a class="name" href="LZ">Ley de Zona Franca</a> |
+                                <a class="name" href="LI">Ley del IVA</a>
+                                <br /><br />
+                            </div>
+                            -->
+                            <div class="col-md-12">
+                                <div class="box box-default">
+                                    <div class="box-header with-border">
+                                        <h3 class="box-title">Criterios de búsqueda</h3>
+                                    </div>
+                                    <div class="box-body">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Ct" />
+                                                        Código Tributario
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Lr" />
+                                                        Ley de la Renta
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Lt" />
+                                                        Ley de Timbres
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Lzf" />
+                                                        Ley de Zona Franca
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Liva" />
+                                                        Ley del IVA
+                                                    </label>
+                                                    <br />
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Circular" />
+                                                        Circular
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Decreto" />
+                                                        Decreto
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Dfl" />
+                                                        DFL
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Dl" />
+                                                        Decreto ley
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Ds" />
+                                                        Decreto supremo
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Ley" />
+                                                        Ley
+                                                    </label>
+                                                </div>
+                                                <div class="checkbox">
+                                                    <label>
+                                                        <input type="checkbox" name="Resolucion" />
+                                                        Resolución
+                                                    </label>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Fecha publicación:</label>
+                                                    <div class="input-group date">
+                                                        <div class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </div>
+                                                        <input id="Fecha" name="Fecha" class="form-control pull-right" type="text" />
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Número</label>
+                                                    <input type="text" class="form-control" name="Numero" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Artículo</label>
+                                                    <input type="text" class="form-control" name="Articulo" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Inciso</label>
+                                                    <input type="text" class="form-control" name="Inciso" />
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Texto</label>
+                                                    <input type="text" class="form-control" name="Texto" />
+                                                </div>
+                                                <button id="btn-guardar" type="button" class="btn btn-primary btn-block">Buscar</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- </div> -->
+                <input type="hidden" name="Coleccion" value="BITE" />
+            </form>
+            <!-- fin bite -->
+            <!-- fin formulario -->
+        </div>
+        <div class="col-md-7">
+            <div class="row">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <i class="fa fa-file-text-o"></i>
+                        <h3 class="box-title">Resultados</h3>
+                    </div>
+                    <div class="box-body">
+                        @if (ViewBag.Referencia)
+                        {
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="box box-success box-solid">
+                                        <div class="box-header with-border">
+                                            <h3>Nueva referencia</h3>
+                                        </div>
+                                        <div class="box-body">
+                                            <strong>@Model.Norma</strong><br />
+                                            @if (Model.Organismo != null && Model.Organismo != "")
+                                            {
+                                                @Model.Organismo
+                                            }
+                                            @if (Model.Numero != null && Model.Numero != "")
+                                            {
+                                                <label>Número @Model.Numero</label>
+                                            }
+                                            @if (Model.Articulo != null && Model.Articulo != "")
+                                            {
+                                                <label>Artículo @Model.Articulo</label>
+                                            }
+                                            @if (Model.Inciso != null && Model.Inciso != "")
+                                            {
+                                                <label>Inciso @Model.Inciso</label>
+                                            }
+                                            <br /><br />
+                                            @Model.Titulo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label id="lblTotal"></label>
+                                <div id="tblResultado">
+                                    <table id="resultado" class="table table-bordered">
+                                        <tbody id="tablaBody"></tbody>
+                                    </table>
+                                </div>
+                                <div id="msgError" style="display:none;">
+                                    <div class="alert alert-warning">
+                                        <h4>
+                                            <i class="icon fa fa-warning"></i>
+                                            Atención !!
+                                        </h4>
+                                        No se encontraron registros para la búsqueda indicada.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12" style="text-align: right" id="paginacion">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+
+    </div>
+
+</section>

@@ -123,9 +123,9 @@
                                     </td>
                                     <td>
                                         @try
-                                        {@doc.ma_organismo}
+                                        {@doc.Organismo}
                                     catch { } - @try
-                                        {@doc.ma_categoria}
+                                        {@doc.Categoria}
                                     catch { }
                                     <br />
                                     @foreach (dynamic h in ViewBag.Query.highlighting)
@@ -135,7 +135,7 @@
                                             <label>... </label>
                                             try
                                             {
-                                                @Html.Raw(h.Value.ma_texto[0])
+                                                @Html.Raw(h.Value.Texto[0])
                                             }
                                             catch
                                             {
@@ -146,17 +146,17 @@
                                     }
                                 </td>
                                 <td style="text-align: center; width: 50px;">
-                                    <a href="~/Document/Ma_VerDocumento/@doc.id" class="text-blue">
+                                    <a href="~/Document/Ma_VerDocumento/@doc.IdDocumento" class="text-blue">
                                         Ver
                                     </a>
                                 </td>
                                 <td style="text-align: center; width: 50px;">
-                                    <a href="~/Document/Ma_EditarDocumento/@doc.id" class="text-green">
+                                    <a href="~/Document/Ma_EditarDocumento/@doc.IdDocumento" class="text-green">
                                         Editar
                                     </a>
                                 </td>
                                 <td style="text-align: center; width: 50px;">
-                                    <span id="@doc.id" style="cursor: pointer;" class="text-red del">Eliminar</span>
+                                    <span id="@doc.IdDocumento" style="cursor: pointer;" class="text-red del">Eliminar</span>
                                 </td>
                             </tr>
                         }

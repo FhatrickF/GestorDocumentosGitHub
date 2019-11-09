@@ -211,32 +211,35 @@ namespace GestorDocumentos.Controllers
         }
 
         [HttpPost]
-        public ActionResult Ma_Nuevo(MedioAmbiental ma)
+        public ActionResult Ma_Nuevo(Documento ma)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    sgd_documentoEntity nuevo = new sgd_documentoEntity();
+                    string norma = ma.Norma.Replace(" ", "_") + "\\";
+                    //sgd_documentoEntity nuevo = new sgd_documentoEntity();
 
-                    nuevo.Descripcion = "Base de datos medio ambiental";
-                    nuevo.EsBorrador = false;
-                    nuevo.Titulo = ma.Titulo;
-                    nuevo.Texto = ma.Texto;
-                    nuevo.FechaCreacion = DateTime.Now;
-                    nuevo.VersionFinal = true;
-                    nuevo.Version = 1;
-                    int idDoc = DocumentoBO.setDocumentoMA(nuevo);
-                    if (idDoc == 0)
-                        throw new Exception("No se puede guerdar el documento");
+                    //nuevo.Descripcion = "Base de datos medio ambiental";
+                    //nuevo.EsBorrador = false;
+                    //nuevo.Titulo = ma.Titulo;
+                    //nuevo.Texto = ma.Texto;
+                    //nuevo.FechaCreacion = DateTime.Now;
+                    //nuevo.VersionFinal = true;
+                    //nuevo.Version = 1;
+                    //int idDoc = DocumentoBO.setDocumentoMA(nuevo);
+                    //if (idDoc == 0)
+                    //    throw new Exception("No se puede guerdar el documento");
 
-                    ma.IdDocumento = "N" + string.Format("{0:0000000000}", idDoc);
+                    //ma.IdDocumento = "N" + string.Format("{0:0000000000}", idDoc);
                     string xml = FileBo.SerializeXML(ma);
-                    FileBo.setXmlStringToFile(directorio_ma + "N" + string.Format("{0:0000000000}", idDoc) + ".xml", xml);
+                    string idDoc = UtilesBO.getMd5(xml);
+                    FileBo.setXmlStringToFile(directorio_ma + norma + idDoc + ".xml", xml);
 
                     Ma_SendSorl(ma, true);
                     return Redirect("~/Document/Ma_NuevoSuccess/");
                 }
+
                 return View(ma);
             }
             catch (Exception ex)
@@ -254,8 +257,20 @@ namespace GestorDocumentos.Controllers
 
         public ActionResult Ma_VerVersion(string id)
         {
-            MedioAmbiental ma = new MedioAmbiental();
+            string response = SolrBO.SolrQueryById(id.Substring(0, id.IndexOf("_")));
 
+            var expConverter = new ExpandoObjectConverter();
+            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
+
+            string idDocumento = "";
+            string norma = "";
+            foreach (var doc in obj.response.docs)
+            {
+                idDocumento = doc.IdDocumento;
+                norma = (doc.Norma).Replace(" ", "_") + "\\";
+            }
+
+            Documento ma = new Documento();
             try
             {
                 if (id.IndexOf("_") > -1)
@@ -268,8 +283,8 @@ namespace GestorDocumentos.Controllers
                     ViewBag.Version = "original";
                 }
 
-                string xml = System.IO.File.ReadAllText(directorio_ma + id + ".xml");
-                ma = (MedioAmbiental)FileBo.DeserializeXML(ma.GetType(), xml);
+                string xml = System.IO.File.ReadAllText(directorio_ma + norma + id + ".xml");
+                ma = (Documento)FileBo.DeserializeXML(ma.GetType(), xml);
                 return View(ma);
             }
             catch (Exception ex)
@@ -279,27 +294,160 @@ namespace GestorDocumentos.Controllers
             }
         }
 
-        public ActionResult Ma_VerDocumento(string id)
+        public ActionResult SetReferencia(string textoReferencia, string tipoReferencia, string tipoReferenciaDoc, string idDocumento)
         {
-            MedioAmbiental ma = new MedioAmbiental();
-
+            string idDocOriginal = "";
             try
             {
+                idDocOriginal = (string)System.Web.HttpContext.Current.Session["id-doc-referencia"];
+
+                string norma = tipoReferenciaDoc.Replace(" ", "_") + "\\";
+
+
+                if (System.IO.File.Exists(directorio_ma + norma + idDocOriginal + ".xml"))
+                {
+                    string xml = System.IO.File.ReadAllText(directorio_ma + norma + idDocOriginal + ".xml");
+                    Documento doc = new Documento();
+                    doc = (Documento)FileBo.DeserializeXML(doc.GetType(), xml);
+
+                    string textoReferenciaDestino = "";
+                    if (doc.Numero != null && doc.Numero != "")
+                    {                        
+                        textoReferenciaDestino = "Número " + doc.Numero + ".- " + doc.Titulo;
+                    }
+                    else
+                    {
+                        if (doc.Articulo != null && doc.Articulo != "")
+                            textoReferenciaDestino += "Artículo N° " + doc.Articulo;
+                        if (doc.Inciso != null && doc.Inciso != "")
+                            textoReferenciaDestino += ", Inciso " + doc.Inciso;
+                    }
+
+                    if (doc.Links == null)
+                        doc.Links = new List<Link>();
+
+                    List<Link> links = new List<Link>();
+                    Link l = new Link();
+                    l.Texto = textoReferencia;
+                    l.Tipo = tipoReferencia;
+                    l.Url = idDocumento;
+                    links.Add(l);
+
+                    foreach (Link link in doc.Links)
+                    {
+                        links.Add(link);
+                    }
+
+                    doc.Links = links;
+
+                    string versionFinal = FileBo.SerializeXML(doc);
+                    FileBo.setXmlStringToFile(directorio_ma + norma + idDocOriginal + ".xml", versionFinal);
+
+                    /* REFERENCIA DESTINO */
+                    norma = tipoReferencia.Replace(" ", "_") + "\\";
+                    xml = System.IO.File.ReadAllText(directorio_ma + norma + idDocumento + ".xml");
+                    doc = (Documento)FileBo.DeserializeXML(doc.GetType(), xml);
+                    if (doc.Links == null)
+                        doc.Links = new List<Link>();
+
+                    links = new List<Link>();
+                    l = new Link();
+                    l.Texto = textoReferenciaDestino;
+                    l.Tipo = tipoReferenciaDoc;
+                    l.Url = idDocOriginal;
+                    links.Add(l);
+
+                    foreach (Link link in doc.Links)
+                    {
+                        links.Add(link);
+                    }
+                    doc.Links = links;
+                    versionFinal = FileBo.SerializeXML(doc);
+                    FileBo.setXmlStringToFile(directorio_ma + norma + idDocumento + ".xml", versionFinal);
+
+                    System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
+                }
+                else
+                {
+
+                }
+            }
+            catch (Exception ex)
+            {
+
+            }
+
+            return Redirect("~/Document/Ma_VerDocumento/" + idDocOriginal);
+        }
+
+        public ActionResult Ma_VerDocumento(string id)
+        {
+            Documento ma = new Documento();
+            Documento docR = new Documento();
+            string rutaDoc = "";
+            ViewBag.Referencia = false;
+            try
+            {
+                try
+                {
+                    string idR = (string)System.Web.HttpContext.Current.Session["id-doc-referencia"];
+                    rutaDoc = SolrBO.SolrGetUrlDocumentById(idR);
+                    string xml = System.IO.File.ReadAllText(rutaDoc);
+                    docR = (Documento)FileBo.DeserializeXML(ma.GetType(), xml);
+                    ViewBag.Referencia = true;
+                    ViewBag.DocumentoR = docR;
+                }
+                catch (Exception ex)
+                { }
                 string response = SolrBO.SolrQueryById(id);
 
                 var expConverter = new ExpandoObjectConverter();
                 dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
 
                 string idDocumento = "";
+                string Norma = "";
                 foreach (var doc in obj.response.docs)
                 {
-                    idDocumento = doc.ma_iddocumento;
+                    idDocumento = doc.IdDocumento;
+                    Norma = (doc.Norma).Replace(" ", "_") + "\\";
                 }
-                string xml = System.IO.File.ReadAllText(directorio_ma + idDocumento + ".xml");
+                if (System.IO.File.Exists(directorio_ma + Norma + idDocumento + ".xml"))
+                {
+                    string xml = System.IO.File.ReadAllText(directorio_ma + Norma + idDocumento + ".xml");
 
-                ma = (MedioAmbiental)FileBo.DeserializeXML(ma.GetType(), xml);
+                    ma = (Documento)FileBo.DeserializeXML(ma.GetType(), xml);
 
-                return View(ma);
+                    #region links
+                    List<Link> links = new List<Link>();
+                    if (ma.Links != null && ma.Links.Count > 0)
+                    {
+
+                        foreach (Link l in ma.Links)
+                        {
+                            Link link = new Link();
+                            link.Texto = l.Texto;
+                            ViewBag.Aplica = "";
+                            link.Tipo = l.Tipo;
+                            link.Url = l.Url;
+                            links.Add(link);
+                        }
+                        ma.Links = null;
+                    }
+                    else
+                    {
+                        Link link = new Link();
+                        link.Tipo = "El documento no contiene links";
+                        links.Add(link);
+                    }
+                    ViewBag.Links = links;
+                    #endregion
+
+                    return View(ma);
+                }
+                else
+                {
+                    throw new Exception("No se pudo encontrar el documento. Contáctese con el administrador");
+                }
             }
             catch (Exception ex)
             {
@@ -310,7 +458,7 @@ namespace GestorDocumentos.Controllers
 
         public ActionResult Ma_EditarDocumento(string id)
         {
-            MedioAmbiental ma = new MedioAmbiental();
+            Documento ma = new Documento();
 
             try
             {
@@ -320,27 +468,29 @@ namespace GestorDocumentos.Controllers
                 dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
 
                 string idDocumento = "";
+                string Norma = "";
                 foreach (var doc in obj.response.docs)
                 {
-                    idDocumento = doc.ma_iddocumento;
+                    idDocumento = doc.IdDocumento;
+                    Norma = (doc.Norma).Replace(" ", "_") + "\\";
                 }
 
                 bool esBorrador = false;
-                if (System.IO.File.Exists(directorio_ma + idDocumento + "_borrador.xml"))
+                if (System.IO.File.Exists(directorio_ma + Norma + idDocumento + "_borrador.xml"))
                     esBorrador = true;
 
                 string xml = "";
                 if (!esBorrador)
-                    xml = System.IO.File.ReadAllText(directorio_ma + idDocumento + ".xml");
+                    xml = System.IO.File.ReadAllText(directorio_ma + Norma + idDocumento + ".xml");
                 else
-                    xml = System.IO.File.ReadAllText(directorio_ma + idDocumento + "_borrador.xml");
+                    xml = System.IO.File.ReadAllText(directorio_ma + Norma + idDocumento + "_borrador.xml");
 
                 ViewBag.EsBorrador = esBorrador;
-                ma = (MedioAmbiental)FileBo.DeserializeXML(ma.GetType(), xml);
+                ma = (Documento)FileBo.DeserializeXML(ma.GetType(), xml);
+                #region versiones
                 List<VersionesDocumento> versiones = new List<VersionesDocumento>();
                 if (ma.Versiones != null && ma.Versiones.Count > 0)
                 {
-
                     foreach (VersionesDocumento v in ma.Versiones)
                     {
                         VersionesDocumento version = new VersionesDocumento();
@@ -348,6 +498,7 @@ namespace GestorDocumentos.Controllers
                         version.id = v.id;
                         versiones.Add(version);
                     }
+                    ma.Versiones = null;
                 }
                 else
                 {
@@ -357,6 +508,31 @@ namespace GestorDocumentos.Controllers
                     versiones.Add(version);
                 }
                 ViewBag.Versiones = versiones;
+                #endregion
+                #region links
+                List<Link> links = new List<Link>();
+                if(ma.Links != null && ma.Links.Count > 0)
+                {
+
+                    foreach (Link l in ma.Links)
+                    {
+                        Link link = new Link();
+                        link.Texto = l.Texto;
+                        ViewBag.Aplica = "";
+                        link.Tipo = l.Tipo;
+                        link.Url = l.Url;
+                        links.Add(link);
+                    }
+                    ma.Links = null;
+                }
+                else
+                {
+                    Link link = new Link();
+                    link.Tipo = "El documento no contiene links";
+                    links.Add(link);
+                }
+                ViewBag.Links = links;
+                #endregion
                 return View(ma);
             }
             catch (Exception ex)
@@ -367,24 +543,25 @@ namespace GestorDocumentos.Controllers
         }
 
         [HttpPost]
-        public ActionResult Ma_EditarDocumento(MedioAmbiental ma)
+        public ActionResult Ma_EditarDocumento(Documento ma)
         {
             try
             {
-                bool existeBorrador = System.IO.File.Exists(directorio_ma + ma.IdDocumento + "_borrador.xml");
+                string norma = ma.Norma.Replace(" ", "_") + "\\";
+                bool existeBorrador = System.IO.File.Exists(directorio_ma + norma + ma.IdDocumento + "_borrador.xml");
                 if (!ma.EsBorrador && !existeBorrador)
                     ma.EsBorrador = true;
-
+ 
                 string xml = FileBo.SerializeXML(ma);
                 if (ma.EsBorrador)
                 {
                     ma.Versiones = null;
-                    FileBo.setXmlStringToFile(directorio_ma + ma.IdDocumento + "_borrador.xml", xml);
+                    FileBo.setXmlStringToFile(directorio_ma + norma + ma.IdDocumento + "_borrador.xml", xml);
                 }
                 else
                 {
-                    if (System.IO.File.Exists(directorio_ma + ma.IdDocumento + "_borrador.xml"))
-                        System.IO.File.Delete(directorio_ma + ma.IdDocumento + "_borrador.xml");
+                    if (System.IO.File.Exists(directorio_ma + norma + ma.IdDocumento + "_borrador.xml"))
+                        System.IO.File.Delete(directorio_ma + norma + ma.IdDocumento + "_borrador.xml");
 
                     string response = SolrBO.SolrQueryById(ma.id);
                     var expConverter = new ExpandoObjectConverter();
@@ -392,10 +569,10 @@ namespace GestorDocumentos.Controllers
                     string idDocumento = "";
                     foreach (var doc in obj.response.docs)
                     {
-                        idDocumento = doc.ma_iddocumento;
+                        idDocumento = doc.IdDocumento;
                     }
-                    string versionXmlOriginal = System.IO.File.ReadAllText(directorio_ma + idDocumento + ".xml");
-                    MedioAmbiental VersionOriginalMa = (MedioAmbiental)FileBo.DeserializeXML(ma.GetType(), versionXmlOriginal);
+                    string versionXmlOriginal = System.IO.File.ReadAllText(directorio_ma + norma + idDocumento + ".xml");
+                    Documento VersionOriginalMa = (Documento)FileBo.DeserializeXML(ma.GetType(), versionXmlOriginal);
 
                     int totalVersiones = 0;
                     VersionesDocumento v = new VersionesDocumento();
@@ -415,13 +592,27 @@ namespace GestorDocumentos.Controllers
                     VersionOriginalMa.Versiones.Add(v);
 
                     versionXmlOriginal = FileBo.SerializeXML(VersionOriginalMa);
-                    FileBo.setXmlStringToFile(directorio_ma + ma.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones) + ".xml", versionXmlOriginal);
+                    FileBo.setXmlStringToFile(directorio_ma + norma + ma.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones) + ".xml", versionXmlOriginal);
 
-                    ma.Versiones = VersionOriginalMa.Versiones;
-                    string versionFinal = FileBo.SerializeXML(ma);
-                    FileBo.setXmlStringToFile(directorio_ma + ma.IdDocumento + ".xml", versionFinal);
+                    //ma.Versiones = VersionOriginalMa.Versiones;
+                    //ma.Links = VersionOriginalMa.Links;
 
-                    Ma_SendSorl(ma, false);
+                    VersionOriginalMa.Norma = ma.Norma;
+                    VersionOriginalMa.Organismo = ma.Organismo;
+                    VersionOriginalMa.Suborganismo = ma.Suborganismo;
+                    VersionOriginalMa.Seccion = ma.Seccion;
+                    VersionOriginalMa.Articulo = ma.Articulo;
+                    VersionOriginalMa.Inciso = ma.Inciso;
+                    VersionOriginalMa.Numero = ma.Numero;
+                    VersionOriginalMa.Categoria = ma.Categoria;
+                    VersionOriginalMa.Tema = ma.Tema;
+                    VersionOriginalMa.Titulo = ma.Titulo;
+                    VersionOriginalMa.Texto = ma.Texto;
+
+                    string versionFinal = FileBo.SerializeXML(VersionOriginalMa);
+                    FileBo.setXmlStringToFile(directorio_ma + norma + ma.IdDocumento + ".xml", versionFinal);
+
+                    Ma_SendSorl(VersionOriginalMa, false);
                 }
             }
             catch (Exception ex)
@@ -509,7 +700,7 @@ namespace GestorDocumentos.Controllers
             return true;
         }
 
-        private bool Ma_SendSorl(MedioAmbiental ma, bool nuevo)
+        private bool Ma_SendSorl(Documento ma, bool nuevo)
         {
             ma.Texto = Regex.Replace(ma.Texto, "[<].*?>", " ");
             ma.Texto = Regex.Replace(ma.Texto, @"\s+", " ");
@@ -523,16 +714,36 @@ namespace GestorDocumentos.Controllers
             {
                 xml += "<field name=\"id\">" + ma.id + "</field>";
             }
-            xml += "<field name=\"ma_iddocumento\">" + ma.IdDocumento + "</field>";
-            xml += "<field name=\"ma_categoria\">" + ma.Categoria + "</field>";
-            xml += "<field name=\"ma_norma\">" + ma.Norma + "</field>";
-            xml += "<field name=\"ma_numero\">" + ma.Numero + "</field>";
-            xml += "<field name=\"ma_organismo\">" + ma.Organismo + "</field>";
-            xml += "<field name=\"ma_seccion\">" + ma.Seccion + "</field>";
-            xml += "<field name=\"ma_suborganismo\">" + ma.SubOrganismo + "</field>";
-            xml += "<field name=\"ma_tema\">" + ma.Tema + "</field>";
-            xml += "<field name=\"ma_texto\">" + ma.Texto + "</field>";
-            xml += "<field name=\"ma_titulo\">" + ma.Titulo + "</field>";
+            xml += "<field name=\"IdDocumento\">" + ma.IdDocumento + "</field>";
+            xml += "<field name=\"Orden\">" + ma.Orden + "</field>";
+            xml += "<field name=\"Coleccion\">" + ma.Coleccion + "</field>";
+            xml += "<field name=\"Anio\">" + ma.Anio + "</field>";
+            xml += "<field name=\"Apendice\">" + ma.Apendice + "</field>";
+            xml += "<field name=\"AplicaNorma\">" + ma.AplicaNorma + "</field>";
+            xml += "<field name=\"Articulo\">" + ma.Articulo + "</field>";
+            xml += "<field name=\"AplicaArticulo\">" + ma.AplicaArticulo + "</field>";
+            xml += "<field name=\"Categoria\">" + ma.Categoria + "</field>";
+            xml += "<field name=\"Comentario\">" + ma.Comentario + "</field>";
+            xml += "<field name=\"Cve\">" + ma.Cve + "</field>";
+            xml += "<field name=\"Fecha\">" + ma.Fecha + "</field>";
+            xml += "<field name=\"Iddo\">" + ma.Iddo + "</field>";
+            xml += "<field name=\"IdRep\">" + ma.IdRep + "</field>";
+            xml += "<field name=\"Inciso\">" + ma.Inciso + "</field>";
+            xml += "<field name=\"Minred\">" + ma.Minred + "</field>";
+            xml += "<field name=\"Nompop\">" + ma.Nompop + "</field>";
+            xml += "<field name=\"Norma\">" + ma.Norma + "</field>";
+            xml += "<field name=\"Numero\">" + ma.Numero + "</field>";
+            xml += "<field name=\"Organismo\">" + ma.Organismo + "</field>";
+            xml += "<field name=\"OrgansimoUno\">" + ma.OrganismoUno + "</field>";
+            xml += "<field name=\"Regco\">" + ma.Regco + "</field>";
+            xml += "<field name=\"Resuel\">" + ma.Resuel + "</field>";
+            xml += "<field name=\"Rol\">" + ma.Rol + "</field>";
+            xml += "<field name=\"Seccion\">" + ma.Seccion + "</field>";
+            xml += "<field name=\"Suborganismo\">" + ma.Suborganismo + "</field>";
+            xml += "<field name=\"Tema\">" + ma.Tema + "</field>";
+            xml += "<field name=\"Temas\">" + ma.Temas + "</field>";
+            xml += "<field name=\"Titulo\">" + ma.Titulo + "</field>";
+            xml += "<field name=\"Texto\">" + ma.Texto + "</field>";
             xml += "</doc></add>";
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(URL_SOLR);

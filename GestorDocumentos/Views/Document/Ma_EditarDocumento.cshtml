@@ -1,4 +1,4 @@
-﻿@model mvc4.Models.MedioAmbiental
+﻿@model mvc4.Models.Documento
 @{
     ViewBag.Title = "Editar documento";
 }
@@ -15,10 +15,10 @@
 		});
 	});
 
-	//$('#btn-guardar').click(function () {
-	//	$('#EsBorrador').val("true");
-	//	$('#btn-guardar').click();
-	//});
+	$('#btn-guardar').click(function () {
+		$('#EsBorrador').val("true");
+		$('#btn-guardar').click();
+	});
 </script>
 
 <section class="content-header">
@@ -40,67 +40,6 @@
                     </div>
                     <div class="box-body">
                         <div class="row">
-                            <div class="col-md-4">
-                                <div class="nav-tabs-custom">
-                                    <ul class="nav nav-tabs">
-                                        <li class="active">
-                                            <a href="#tab_1" data-toggle="tab">Metadatos</a>
-                                        </li>
-                                        <li>
-                                            <a href="#tab_2" data-toggle="tab">Versiones</a>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content">
-                                        <div id="tab_1" class="tab-pane active">
-                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Organismo, "Organismo")
-                                                @Html.TextBoxFor(m => m.Organismo, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.SubOrganismo, "Sub organismo")
-                                                @Html.TextBoxFor(m => m.SubOrganismo, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Seccion, "Sección")
-                                                @Html.TextBoxFor(m => m.Seccion, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Numero, "Número")
-                                                @Html.TextBoxFor(m => m.Numero, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Categoria, "Categoría")
-                                                @Html.TextBoxFor(m => m.Categoria, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Tema, "Tema")
-                                                @Html.TextBoxFor(m => m.Tema, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Titulo, "Título")
-                                                @Html.TextBoxFor(m => m.Titulo, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Norma, "Norma")
-                                                @Html.TextBoxFor(m => m.Norma, new { @class = "form-control" })
-                                            </div>
-                                        </div>
-                                        <div id="tab_2" class="tab-pane">
-                                            @foreach (var version in ViewBag.Versiones)
-                                            {
-                                                if (version.nombre.IndexOf("borrador") < 0)
-                                                {
-                                                    <a target="_blank" href="~/Document/Ma_VerVersion/@version.nombre" class="text-blue">
-                                                        Versión @version.id
-                                                    </a>
-                                                    <br />
-                                                }
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="col-md-8">
                                 @if (ViewBag.EsBorrador)
                                 {
@@ -129,6 +68,96 @@
                                         {
                                             <button id="btn-publicar" type="button" class="btn btn-success btn-block">Publicar</button>
                                         }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="nav-tabs-custom">
+                                    <ul class="nav nav-tabs">
+                                        <li class="active">
+                                            <a href="#tab_1" data-toggle="tab">Metadatos</a>
+                                        </li>
+                                        <li>
+                                            <a href="#tab_2" data-toggle="tab">Versiones</a>
+                                        </li>
+                                        <li>
+                                            <a href="#tab_3" data-toggle="tab">Referencias</a>
+                                        </li>
+                                    </ul>
+                                    <div class="tab-content">
+                                        <div id="tab_1" class="tab-pane active">
+                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Norma, "Norma")
+                                                @Html.TextBoxFor(m => m.Norma, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Organismo, "Organismo")
+                                                @Html.TextBoxFor(m => m.Organismo, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Suborganismo, "Sub organismo")
+                                                @Html.TextBoxFor(m => m.Suborganismo, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Seccion, "Sección")
+                                                @Html.TextBoxFor(m => m.Seccion, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Articulo, "Artículo")
+                                                @Html.TextBoxFor(m => m.Articulo, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Inciso, "Inciso")
+                                                @Html.TextBoxFor(m => m.Inciso, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Numero, "Número")
+                                                @Html.TextBoxFor(m => m.Numero, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Categoria, "Categoría")
+                                                @Html.TextBoxFor(m => m.Categoria, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Tema, "Tema")
+                                                @Html.TextBoxFor(m => m.Tema, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Titulo, "Título")
+                                                @Html.TextBoxFor(m => m.Titulo, new { @class = "form-control" })
+                                            </div>
+                                        </div>
+                                        <div id="tab_2" class="tab-pane">
+                                            @foreach (var version in ViewBag.Versiones)
+                                            {
+                                                if (version.nombre.IndexOf("borrador") < 0)
+                                                {
+                                                    <a target="_blank" href="~/Document/Ma_VerVersion/@version.nombre" class="text-blue">
+                                                        Versión @version.id
+                                                    </a>
+                                                    <br />
+                                                }
+                                            }
+                                        </div>
+                                        <div id="tab_3" class="tab-pane">
+                                            @foreach (var link in ViewBag.Links)
+                                            {
+                                                if (link.Tipo.IndexOf("no contiene referencias") > 0)
+                                                {
+                                                    @link.Tipo
+                                                }
+                                                else
+                                                {
+                                                        @link.Tipo
+                                                        <br />
+                                                        <a href="~/Document/Ma_EditarDocumento/@link.Url">
+                                                            @link.Texto
+                                                        </a>
+                                                        <br /><br />
+                                                }
+                                            }
+                                        </div>
                                     </div>
                                 </div>
                             </div>

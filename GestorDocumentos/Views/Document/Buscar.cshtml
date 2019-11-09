@@ -123,9 +123,9 @@
                                     </td>
                                     <td>
                                         @try
-                                        {@doc.ma_organismo}
+                                        {@doc.Organismo}
                                     catch { } - @try
-                                        {@doc.ma_categoria}
+                                        {@doc.Norma}
                                     catch { }
                                     <br />
                                     @foreach (dynamic h in ViewBag.Query.highlighting)
@@ -135,7 +135,7 @@
                                             <label>... </label>
                                             try
                                             {
-                                                @Html.Raw(h.Value.ma_texto[0])
+                                                @Html.Raw(h.Value.Texto[0])
                                             }
                                             catch
                                             {
