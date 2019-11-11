@@ -10,6 +10,7 @@ using System.Web;
 using System.Web.Configuration;
 using System.Web.Mvc;
 
+
 namespace GestorDocumentos.Controllers
 {
     public class BusquedaController : Controller
@@ -24,20 +25,8 @@ namespace GestorDocumentos.Controllers
             if (id != null)
             {
                 System.Web.HttpContext.Current.Session["id-doc-referencia"] = id;
-                
-                string response = SolrBO.SolrQueryById(id);
-                var expConverter = new ExpandoObjectConverter();
-                dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
-                string norma = "";
-                foreach (var doc in obj.response.docs)
-                {
-                    norma = (doc.Norma).Replace(" ", "_") + "\\";
-                }
-                if (System.IO.File.Exists(directorio_ma + norma + id + ".xml"))
-                {
-                    string xml = System.IO.File.ReadAllText(directorio_ma + norma + id + ".xml");
-                    d = (Documento)FileBo.DeserializeXML(d.GetType(), xml);
-                }
+
+                d = Indexador.Solr.getDocumentoById(id);
 
                 ViewBag.Referencia = true;
             }

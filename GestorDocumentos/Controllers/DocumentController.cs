@@ -33,8 +33,12 @@ namespace GestorDocumentos.Controllers
             return View();
         }
 
-        public ActionResult Nuevo()
+        public ActionResult Nuevo(string id)
         {
+            if(id != null && id != "")
+            {
+                System.Web.HttpContext.Current.Session["id-doc-referenciaNueva"] = id;
+            }
             NuevoDocumentViewModel modelo = new NuevoDocumentViewModel();
             return View(modelo);
         }
@@ -204,6 +208,87 @@ namespace GestorDocumentos.Controllers
             }
         }
 
+        public ActionResult Ma_NuevaReferencia(string id)
+        {
+            Documento doc = new Documento();
+            doc = Indexador.Solr.getDocumentoById(id);
+            ViewBag.TextoOriginal = doc.Texto;
+            Documento referencia = new Documento();
+            referencia.IdDocumento = id;
+            return View(referencia);
+        }
+
+        [HttpPost]
+        public ActionResult Ma_NuevaReferencia(Documento doc)
+        {
+            ViewBag.Error = null;
+            Documento docOriginal = Indexador.Solr.getDocumentoById(doc.IdDocumento);
+            if (doc.Norma == "0" || doc.Titulo == null || doc.Texto == null)
+            {
+                ViewBag.Error = "Estimado usuario, todos los campos son obligatorios,<br />por favor complete el formulario para continuar.";                
+                ViewBag.TextoOriginal = docOriginal.Texto;
+                return View(doc);
+            }
+            else
+            {
+                doc.Fecha = DateTime.Now;
+                doc.Coleccion = docOriginal.Coleccion;
+
+                #region links documento nuevo
+                doc.Links = new List<Link>();
+                Link l = new Link();
+                l.Tipo = docOriginal.Norma;
+                l.Url = docOriginal.IdDocumento;
+                string textoReferenciaDestino = "";
+                if (docOriginal.Numero != null && docOriginal.Numero != "")
+                {
+                    textoReferenciaDestino = "Número " + docOriginal.Numero;
+                }
+                else
+                {
+                    if (docOriginal.Articulo != null && docOriginal.Articulo != "")
+                        textoReferenciaDestino += "Artículo N° " + docOriginal.Articulo;
+                    if (docOriginal.Inciso != null && docOriginal.Inciso != "")
+                        textoReferenciaDestino += ", Inciso " + docOriginal.Inciso;
+                }
+                textoReferenciaDestino += ".- " + docOriginal.Titulo;
+                l.Texto = textoReferenciaDestino;
+                doc.Links.Add(l);
+                #endregion
+
+                string versionFinal = FileBo.SerializeXML(doc);
+                doc.id = null;
+                doc.IdDocumento = UtilesBO.getMd5(versionFinal);
+
+                #region links documento original
+
+                if (docOriginal.Links == null)
+                    docOriginal.Links = new List<Link>();
+
+                List<Link> links = new List<Link>();
+                l = new Link();
+                l.Texto = doc.Titulo;
+                l.Tipo = doc.Norma;
+                l.Url = doc.IdDocumento;
+                links.Add(l);
+
+                foreach (Link link in docOriginal.Links)
+                {
+                    links.Add(link);
+                }
+                docOriginal.Links = links;
+                #endregion
+
+                versionFinal = FileBo.SerializeXML(doc);
+                FileBo.setXmlStringToFile(directorio_ma + doc.Norma + "\\" + doc.IdDocumento + ".xml", versionFinal);
+
+                versionFinal = FileBo.SerializeXML(docOriginal);
+                FileBo.setXmlStringToFile(directorio_ma + docOriginal.Norma.Replace(" ", "_") + "\\" + docOriginal.IdDocumento + ".xml", versionFinal);
+                Ma_SendSorl(doc, true);
+            }
+            return Redirect("~/Document/Ma_VerDocumento/" + docOriginal.IdDocumento);
+        }
+
         public ActionResult Ma_Nuevo()
         {
             MedioAmbiental ma = new MedioAmbiental();
@@ -294,83 +379,77 @@ namespace GestorDocumentos.Controllers
             }
         }
 
-        public ActionResult SetReferencia(string textoReferencia, string tipoReferencia, string tipoReferenciaDoc, string idDocumento)
+        public ActionResult SetReferencia(string textoReferencia, string idDocumento)
         {
             string idDocOriginal = "";
             try
             {
                 idDocOriginal = (string)System.Web.HttpContext.Current.Session["id-doc-referencia"];
 
-                string norma = tipoReferenciaDoc.Replace(" ", "_") + "\\";
+                string norma = "";
 
+                Documento docOriginal = Indexador.Solr.getDocumentoById(idDocOriginal);
+                Documento docDestino = Indexador.Solr.getDocumentoById(idDocumento);
 
-                if (System.IO.File.Exists(directorio_ma + norma + idDocOriginal + ".xml"))
+                if (docOriginal != null)
                 {
-                    string xml = System.IO.File.ReadAllText(directorio_ma + norma + idDocOriginal + ".xml");
-                    Documento doc = new Documento();
-                    doc = (Documento)FileBo.DeserializeXML(doc.GetType(), xml);
-
+                    #region documento original
                     string textoReferenciaDestino = "";
-                    if (doc.Numero != null && doc.Numero != "")
-                    {                        
-                        textoReferenciaDestino = "Número " + doc.Numero + ".- " + doc.Titulo;
+                    if (docOriginal.Numero != null && docOriginal.Numero != "")
+                    {
+                        textoReferenciaDestino = "Número " + docOriginal.Numero + ".- " + docOriginal.Titulo;
                     }
                     else
                     {
-                        if (doc.Articulo != null && doc.Articulo != "")
-                            textoReferenciaDestino += "Artículo N° " + doc.Articulo;
-                        if (doc.Inciso != null && doc.Inciso != "")
-                            textoReferenciaDestino += ", Inciso " + doc.Inciso;
+                        if (docOriginal.Articulo != null && docOriginal.Articulo != "")
+                            textoReferenciaDestino += "Artículo N° " + docOriginal.Articulo;
+                        if (docOriginal.Inciso != null && docOriginal.Inciso != "")
+                            textoReferenciaDestino += ", Inciso " + docOriginal.Inciso;
                     }
 
-                    if (doc.Links == null)
-                        doc.Links = new List<Link>();
+                    if (docOriginal.Links == null)
+                        docOriginal.Links = new List<Link>();
 
                     List<Link> links = new List<Link>();
                     Link l = new Link();
                     l.Texto = textoReferencia;
-                    l.Tipo = tipoReferencia;
+                    l.Tipo = docDestino.Norma;
                     l.Url = idDocumento;
                     links.Add(l);
 
-                    foreach (Link link in doc.Links)
+                    foreach (Link link in docOriginal.Links)
                     {
                         links.Add(link);
                     }
 
-                    doc.Links = links;
+                    docOriginal.Links = links;
 
-                    string versionFinal = FileBo.SerializeXML(doc);
+                    norma = docOriginal.Norma.Replace(" ", "_") + "\\";
+                    string versionFinal = FileBo.SerializeXML(docOriginal);
                     FileBo.setXmlStringToFile(directorio_ma + norma + idDocOriginal + ".xml", versionFinal);
-
-                    /* REFERENCIA DESTINO */
-                    norma = tipoReferencia.Replace(" ", "_") + "\\";
-                    xml = System.IO.File.ReadAllText(directorio_ma + norma + idDocumento + ".xml");
-                    doc = (Documento)FileBo.DeserializeXML(doc.GetType(), xml);
-                    if (doc.Links == null)
-                        doc.Links = new List<Link>();
+                    #endregion
+                    #region documento destino                   
+                    if (docDestino.Links == null)
+                        docDestino.Links = new List<Link>();
 
                     links = new List<Link>();
                     l = new Link();
                     l.Texto = textoReferenciaDestino;
-                    l.Tipo = tipoReferenciaDoc;
+                    l.Tipo = docOriginal.Norma;
                     l.Url = idDocOriginal;
                     links.Add(l);
 
-                    foreach (Link link in doc.Links)
+                    foreach (Link link in docDestino.Links)
                     {
                         links.Add(link);
                     }
-                    doc.Links = links;
-                    versionFinal = FileBo.SerializeXML(doc);
+                    docDestino.Links = links;
+                    norma = docDestino.Norma.Replace(" ", "_") + "\\";
+                    versionFinal = FileBo.SerializeXML(docDestino);
                     FileBo.setXmlStringToFile(directorio_ma + norma + idDocumento + ".xml", versionFinal);
-
-                    System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
+                    #endregion
                 }
-                else
-                {
-
-                }
+                System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
             }
             catch (Exception ex)
             {

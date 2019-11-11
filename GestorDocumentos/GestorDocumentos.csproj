@@ -177,6 +177,7 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Indexador\Solr.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\Document\DocumentViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
@@ -2996,6 +2997,7 @@
     <Content Include="Views\Document\Buscar.cshtml" />
     <Content Include="Views\User\Index.cshtml" />
     <Content Include="Views\Busqueda\Index.cshtml" />
+    <Content Include="Views\Document\Ma_NuevaReferencia.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -1,0 +1,100 @@
+﻿@model mvc4.Models.Documento
+@{
+    ViewBag.Title = "Nueva referencia";
+}
+
+<script>
+	ready(function () {
+		CKEDITOR.replace('Texto', {
+			height: 500
+        });
+
+        CKEDITOR.replace('TextoReferencia', {
+            height: 500
+        });
+
+		$('#btn-publicar').click(function () {
+			$('#EsBorrador').val("false");
+			$('#btn-guardar').click();
+		});
+	});
+
+	$('#btn-guardar').click(function () {
+		$('#EsBorrador').val("true");
+		$('#btn-guardar').click();
+	});
+</script>
+
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+</section>
+
+<section class="content">
+    @using (Html.BeginForm("Ma_NuevaReferencia", "Document", FormMethod.Post))
+    {
+        @Html.AntiForgeryToken()
+        <div class="row">
+            @if (ViewBag.Error != null)
+            {
+            <div class="alert alert-danger">
+                <h4>
+                    <i class="icon fa fa-ban">
+
+                    </i>
+                    Atención !
+                </h4>
+                @ViewBag.Error
+            </div>
+            }
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="Norma">Tipo de referencia</label>
+                    <select class="form-control" id="Norma" name="Norma">
+                        <option value="0">Seleccionar</option>
+                        <option value="COMENTARIOS">Comentario</option>
+                        <option value="EJEMPLOS">Ejemplo</option>
+                        <option value="JURISPRUDENCIA_JUDICIAL">Jurisprudencia Judicial</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    @Html.LabelFor(m => m.Titulo, "Título")
+                    @Html.TextAreaFor(m => m.Titulo, new { @class = "form-control", row = "10", cols = "80" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box box-default">
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label>Documento original</label>
+                                @Html.Raw(ViewBag.TextoOriginal)
+                                @Html.HiddenFor(m => m.IdDocumento)
+                                <br />
+                                <div class="row">
+                                    <div class="col-md-8">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label>Nueva Referencia</label>
+                                @Html.TextAreaFor(m => m.Texto, new { @class = "form-control", row = "10", cols = "80" })
+                                <br />
+                                <div class="row">
+                                    <div class="col-md-8">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button id="btn-guardar" type="submit" class="btn btn-primary btn-block">Guardar documento</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</section>

@@ -1,13 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29326.143
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.757
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorDocumentos", "GestorDocumentos.csproj", "{B20C0DAF-774A-42EE-BA8C-A62FDBB071CA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorDocumentosBusiness", "..\GestorDocumentosBusiness\GestorDocumentosBusiness.csproj", "{02C2CFDC-12B7-4CB5-B7C2-6862CBD409E9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorDocumentosEntities", "..\GestorDocumentosEntities\GestorDocumentosEntities.csproj", "{3FF4EACB-844F-4187-8CC3-08CFC505F255}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GestorDocumentosEntities", "..\GestorDocumentosEntities\GestorDocumentosEntities.csproj", "{3FF4EACB-844F-4187-8CC3-08CFC505F255}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorDocumentosDataAccess", "..\GestorDocumentosDataAccess\GestorDocumentosDataAccess.csproj", "{F7126C3B-2A2B-4DF8-AD9A-79757EFFF42B}"
 EndProject
