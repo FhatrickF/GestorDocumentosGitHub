@@ -30,6 +30,7 @@ namespace GestorDocumentosDataAccess.Modelo
         public virtual DbSet<AspNetUserClaims> AspNetUserClaims { get; set; }
         public virtual DbSet<AspNetUserLogins> AspNetUserLogins { get; set; }
         public virtual DbSet<AspNetUsers> AspNetUsers { get; set; }
+        public virtual DbSet<Log_Documento> Log_Documento { get; set; }
         public virtual DbSet<RoleViewModels> RoleViewModels { get; set; }
         public virtual DbSet<sgd_documento> sgd_documento { get; set; }
         public virtual DbSet<sysdiagrams> sysdiagrams { get; set; }

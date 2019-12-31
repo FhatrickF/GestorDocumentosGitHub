@@ -1,0 +1,13 @@
+﻿.divLista {
+    border-bottom: 1px solid gray;
+    cursor: pointer;
+    background-color: white;
+}
+
+.divSelected {
+    background-color: yellow;
+}
+
+.divNoSelected {
+    background-color: white;
+}

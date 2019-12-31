@@ -1,4 +1,5 @@
-﻿using mvc4.Business;
+﻿using GestorDocumentosExceptions;
+using mvc4.Business;
 using mvc4.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -20,21 +21,30 @@ namespace GestorDocumentos.Controllers
         // GET: Busqueda
         public ActionResult Index(string id)
         {
-            System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
             Documento d = new Documento();
-            if (id != null)
+            try
             {
-                System.Web.HttpContext.Current.Session["id-doc-referencia"] = id;
+                System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
+                
+                if (id != null)
+                {
+                    System.Web.HttpContext.Current.Session["id-doc-referencia"] = id;
 
-                d = Indexador.Solr.getDocumentoById(id);
+                    d = Indexador.Solr.getDocumentoById(id, false);
 
-                ViewBag.Referencia = true;
+                    ViewBag.Referencia = true;
+                }
+                else
+                {
+                    ViewBag.Referencia = false;
+                }
+                return View(d);
             }
-            else
+            catch (BusinessException bx)
             {
-                ViewBag.Referencia = false;
+                return RedirectToAction("Index", "Home");
             }
-            return View(d);
+            
         }
 
         [HttpPost]
@@ -59,95 +69,107 @@ namespace GestorDocumentos.Controllers
             string inciso = form.Inciso;
             string texto = form.Texto;
             string pagina = Convert.ToString(form.Pagina);
+            string coleccion = form.Coleccion;
 
             bool ordenBy = false;
 
             string q = "";
-            if (ct != null)
+            try
             {
-                q += "Norma:'CODIGO TRIBUTARIO'";
-                ordenBy = true;
+                if (ct != null)
+                {
+                    q += "Norma:'CODIGO TRIBUTARIO'";
+                    ordenBy = true;
+                }
+                if (lr != null)
+                {
+                    q += (q != "" && q != null) ? " OR Norma:'LEY DE LA RENTA'" : "Norma:'LEY DE LA RENTA'";
+                    ordenBy = true;
+                }
+                if (lt != null)
+                {
+                    q += (q != "" && q != null) ? " OR Norma:'LEY DE TIMBRES Y ESTAMPILLAS'" : "Norma:'LEY DE TIMBRES Y ESTAMPILLAS'";
+                    ordenBy = true;
+                }
+                if (lzf != null)
+                {
+                    q += (q != "" && q != null) ? " OR Norma:'LEY DE ZONA FRANCA'" : "Norma:'LEY DE ZONA FRANCA'";
+                    ordenBy = true;
+                }
+                if (liva != null)
+                {
+                    q += (q != "" && q != null) ? " OR Norma:'LEY DEL IVA'" : "Norma:'LEY DEL IVA'";
+                    ordenBy = true;
+                }
+                if (circulares != null)
+                    q += (q != "" && q != null) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR'";
+                if (decretos != null)
+                    q += (q != "" && q != null) ? " OR Norma:'DECRETO'" : "Norma:'DECRETO'";
+                if (dfl != null)
+                    q += (q != "" && q != null) ? " OR Norma:'DECRETO CON FUERZA DE LEY'" : "Norma:'DECRETO CON FUERZA DE LEY'";
+                if (dl != null)
+                    q += (q != "" && q != null) ? " OR Norma:'DECRETO LEY'" : "Norma:'DECRETO LEY'";
+                if (ds != null)
+                    q += (q != "" && q != null) ? " OR Norma:'DECRETO SUPREMO'" : "Norma:'DECRETO SUPREMO'";
+                if (ley != null)
+                    q += (q != "" && q != null) ? " OR Norma:'LEY'" : "Norma:'LEY'";
+                if (resolucion != null)
+                    q += (q != "" && q != null) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
+
+                string bNorma = "";
+                if (q != "")
+                    bNorma = " AND (" + q + ")";
+
+                q = "";
+                if (fecha != null)
+                {
+                    fecha = fecha.Replace("/", "-");
+                    string[] f = fecha.Split('-');
+                    fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    q += " AND Fecha:'" + fecha + "'";
+                }
+                if (numero != null)
+                    q += " AND Numero:'" + numero + "'";
+                if (articulo != null)
+                    q += " AND Articulo:'" + articulo + "'";
+                if (inciso != null)
+                    q += " AND Inciso:'" + inciso + "'";
+                if (texto != null)
+                    q += " AND Texto:'" + texto + "'";
+
+                string bDatos = "";
+                if (q != "")
+                    bDatos = q;
+
+                string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo";
+
+                string orden = "";
+                if (ordenBy)
+                    orden = "Orden";
+                else
+                    orden = "Fecha";
+
+                string url = "select?fl=" + fl + "&q=Coleccion:'" + coleccion + "'" + bNorma + bDatos + "&sort=" + orden + " asc&start=" + pagina;
+                url = url.Replace("  ", " ");
+
+                string response = Indexador.Solr.getResponse(url);
+
+                var expConverter = new ExpandoObjectConverter();
+                dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
+
+                var doc = obj.response;
+
+                return JsonConvert.SerializeObject(doc);
             }
-            if (lr != null)
+            catch (BusinessException bx)
             {
-                q += (q != "" && q != null) ? " OR Norma:'LEY DE LA RENTA'" : "Norma:'LEY DE LA RENTA'";
-                ordenBy = true;
+                return "{\"MensajeError\":\"" + bx.Message + "\"}";
             }
-            if (lt != null)
+            catch (Exception ex)
             {
-                q += (q != "" && q != null) ? " OR Norma:'LEY DE TIMBRES Y ESTAMPILLAS'" : "Norma:'LEY DE TIMBRES Y ESTAMPILLAS'";
-                ordenBy = true;
+                new TechnicalException("Error al realizar la busqueda del documento.",ex);
+                return "{\"MensajeError\":\"No es posible cargar la página, contactarse con el administrador\"}";
             }
-            if (lzf != null)
-            {
-                q += (q != "" && q != null) ? " OR Norma:'LEY DE ZONA FRANCA'" : "Norma:'LEY DE ZONA FRANCA'";
-                ordenBy = true;
-            }
-            if (liva != null)
-            {
-                q += (q != "" && q != null) ? " OR Norma:'LEY DEL IVA'" : "Norma:'LEY DEL IVA'";
-                ordenBy = true;
-            }
-            if (circulares != null)
-                q += (q != "" && q != null) ? " OR Norma:'CIRCULARES'" : "Norma:'CIRCULARES'";
-            if (decretos != null)
-                q += (q != "" && q != null) ? " OR Norma:'DECRETOS'" : "Norma:'DECRETOS'";
-            if (dfl != null)
-                q += (q != "" && q != null) ? " OR Norma:'DECRETOS CON FUERZA DE LEY'" : "Norma:'DECRETOS CON FUERZA DE LEY'";
-            if (dl != null)
-                q += (q != "" && q != null) ? " OR Norma:'DECRETOS LEYES'" : "Norma:'DECRETOS LEYES'";
-            if (ds != null)
-                q += (q != "" && q != null) ? " OR Norma:'DECRETOS SUPREMOS'" : "Norma:'DECRETOS SUPREMOS'";
-            if (ley != null)
-                q += (q != "" && q != null) ? " OR Norma:'LEYES'" : "Norma:'LEYES'";
-            if (resolucion != null)
-                q += (q != "" && q != null) ? " OR Norma:'RESOLUCIONES'" : "Norma:'RESOLUCIONES'";
-
-            string bNorma = "";
-            if (q != "")
-                bNorma = " AND (" + q + ")";
-
-            q = "";
-            if (fecha != null)
-            {
-                fecha = fecha.Replace("/", "-");
-                string[] f = fecha.Split('-');
-                fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                q += " AND Fecha:'" + fecha + "'";
-            }
-            if (numero != null)
-                q += " AND Numero:'" + numero + "'";
-            if (articulo != null)
-                q += " AND Articulo:'" + articulo + "'";
-            if (inciso != null)
-                q += " AND Inciso:'" + inciso + "'";
-            if (texto != null)
-                q += " AND Texto:'" + texto + "'";
-
-            string bDatos = "";
-            if (q != "")
-                bDatos = q;
-
-            string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,id";
-
-            string orden = "";
-            if (ordenBy)
-                orden = "Orden";
-            else
-                orden = "Fecha";
-
-            string url = "/solr/test-1/select?fl=" + fl + "&q=Coleccion:'BITE'" + bNorma + bDatos + "&sort=" + orden + " asc&start=" + pagina;
-            url = url.Replace("  ", " ");
-
-            string response = SolrBO.SolrQuery(url);
-
-            var expConverter = new ExpandoObjectConverter();
-            dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
-
-            var doc = obj.response;
-
-            //return "{\"Success\":\"true\"}";
-            return JsonConvert.SerializeObject(doc);
         }
     }
 }

@@ -9,6 +9,7 @@ using Microsoft.AspNet.Identity;
 using Microsoft.AspNet.Identity.Owin;
 using Microsoft.Owin.Security;
 using GestorDocumentos.Models;
+using GestorDocumentosExceptions;
 
 namespace GestorDocumentos.Controllers
 {
@@ -57,6 +58,7 @@ namespace GestorDocumentos.Controllers
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
+            returnUrl = "";
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -77,7 +79,7 @@ namespace GestorDocumentos.Controllers
             // Para permitir que los errores de contraseña desencadenen el bloqueo de la cuenta, cambie a shouldLockout: true
             try
             {
-                var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, shouldLockout: false);
+                var result = await SignInManager.PasswordSignInAsync(model.Email, model.Password, true, shouldLockout: false);
                 switch (result)
                 {
                     case SignInStatus.Success:
@@ -94,7 +96,8 @@ namespace GestorDocumentos.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
+                new TechnicalException("Error en el modulo del login", ex);
+                ModelState.AddModelError("", "No es posible ingresar al sistema vuelva a intentar, si el problema persiste contactarse con el administrador");
                 return View(model);
             }
         }

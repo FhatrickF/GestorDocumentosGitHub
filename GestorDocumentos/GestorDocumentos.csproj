@@ -54,12 +54,18 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Net.Http.Formatting, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Client.5.2.7\lib\net45\System.Net.Http.Formatting.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web.DynamicData" />
     <Reference Include="System.Web.Entity" />
     <Reference Include="System.Web.ApplicationServices" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Web.Http, Version=5.2.7.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>packages\Microsoft.AspNet.WebApi.Core.5.2.7\lib\net45\System.Web.Http.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
@@ -173,6 +179,7 @@
     <Compile Include="Controllers\BusquedaController.cs" />
     <Compile Include="Controllers\DocumentController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\LogActividadController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -1042,6 +1049,7 @@
     <Content Include="Content\Dist\Plugins\timepicker\bootstrap-timepicker.js" />
     <Content Include="Content\Dist\Plugins\timepicker\bootstrap-timepicker.min.css" />
     <Content Include="Content\Dist\Plugins\timepicker\bootstrap-timepicker.min.js" />
+    <Content Include="Content\img\flecha.png" />
     <Content Include="Content\Ionicons\css\ionicons.css" />
     <Content Include="Content\Ionicons\css\ionicons.min.css" />
     <Content Include="Content\Ionicons\fonts\ionicons.svg" />
@@ -2622,6 +2630,40 @@
     <Content Include="Content\plugins\timepicker\bootstrap-timepicker.js" />
     <Content Include="Content\plugins\timepicker\bootstrap-timepicker.min.css" />
     <Content Include="Content\plugins\timepicker\bootstrap-timepicker.min.js" />
+    <Content Include="Content\site2.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.bootstrap.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.bootstrap.min.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.bootstrap4.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.bootstrap4.min.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.foundation.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.foundation.min.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.jqueryui.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.jqueryui.min.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.semanticui.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\dataTables.semanticui.min.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\jquery.dataTables.css" />
+    <Content Include="DataTables\DataTables-1.10.20\css\jquery.dataTables.min.css" />
+    <Content Include="DataTables\DataTables-1.10.20\images\sort_asc.png" />
+    <Content Include="DataTables\DataTables-1.10.20\images\sort_asc_disabled.png" />
+    <Content Include="DataTables\DataTables-1.10.20\images\sort_both.png" />
+    <Content Include="DataTables\DataTables-1.10.20\images\sort_desc.png" />
+    <Content Include="DataTables\DataTables-1.10.20\images\sort_desc_disabled.png" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.bootstrap.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.bootstrap.min.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.bootstrap4.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.bootstrap4.min.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.foundation.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.foundation.min.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.jqueryui.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.jqueryui.min.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.semanticui.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\dataTables.semanticui.min.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\jquery.dataTables.js" />
+    <Content Include="DataTables\DataTables-1.10.20\js\jquery.dataTables.min.js" />
+    <Content Include="DataTables\datatables.css" />
+    <Content Include="DataTables\datatables.js" />
+    <Content Include="DataTables\datatables.min.css" />
+    <Content Include="DataTables\datatables.min.js" />
     <Content Include="favicon.ico" />
     <Content Include="fonts\css\font-awesome.css" />
     <Content Include="fonts\css\font-awesome.min.css" />
@@ -2805,6 +2847,7 @@
     <Content Include="Content\plugins\bootstrap-datepicker\README.md" />
     <Content Include="Content\plugins\bootstrap-datepicker\tests\README.md" />
     <Content Include="Content\plugins\bootstrap-datepicker\yarn.lock" />
+    <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Scripts\jquery-3.3.1.intellisense.js" />
     <Content Include="Scripts\jquery-3.3.1.js" />
     <Content Include="Scripts\jquery-3.3.1.min.js" />
@@ -2998,6 +3041,7 @@
     <Content Include="Views\User\Index.cshtml" />
     <Content Include="Views\Busqueda\Index.cshtml" />
     <Content Include="Views\Document\Ma_NuevaReferencia.cshtml" />
+    <Content Include="Views\LogActividad\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
@@ -3021,6 +3065,10 @@
     <ProjectReference Include="..\GestorDocumentosEntities\GestorDocumentosEntities.csproj">
       <Project>{3FF4EACB-844F-4187-8CC3-08CFC505F255}</Project>
       <Name>GestorDocumentosEntities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorDocumentosExceptions\GestorDocumentosExceptions.csproj">
+      <Project>{18913304-3250-4727-8A3D-29BB7D64C5A1}</Project>
+      <Name>GestorDocumentosExceptions</Name>
     </ProjectReference>
   </ItemGroup>
   <PropertyGroup>

@@ -7,7 +7,7 @@
     }
     catch 
     {
-        Response.Redirect("~/");
+        Response.Redirect("~/Account/Login");
     }
 }
 <!DOCTYPE html>
@@ -54,6 +54,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
     <!-- bootstrap datepicker -->
     <link rel="stylesheet" href="~/Content/bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+
+    <link rel="stylesheet" href="~/Content/site2.css">
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -165,12 +167,13 @@ desired effect
                 <!-- Sidebar Menu -->
                 <ul class="sidebar-menu" data-widget="tree">
                     <li class="header">OPCIONES</li>
-                    <!-- Optionally, you can add icons to the links -->
                     <li class="active"><a href="@Url.Action("Index","Home")"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
-                    <li class="active"><a href="@Url.Action("Index","Busqueda")"><i class="fa fa-file-o"></i> <span>Busqueda avanzada</span></a></li>
-                    @if (rol == "Administrador")
+                    <li class="active"><a href="@Url.Action("Index","Document")"><i class="fa fa-file"></i> <span>Documentos</span></a></li>
+                    <li class="active"><a href="@Url.Action("Index","Busqueda")"><i class="fa fa-search"></i> <span>Busqueda</span></a></li>
+                    @if (rol == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
                     {
-                        <li class="active"><a href="@Url.Action("Index", "User")"><i class="fa fa-file-o"></i> <span>Usuarios</span></a></li>
+                        <li class="active"><a href="@Url.Action("Index", "User")"><i class="fa fa-user"></i> <span>Usuarios</span></a></li>
+                        <li class="active"><a href="@Url.Action("Index", "LogActividad")"><i class="fa fa-list-ol"></i> <span>Log de Actividades</span></a></li>
                     }
                 </ul>
                 <!-- /.sidebar-menu -->
@@ -280,6 +283,10 @@ desired effect
     <script src="~/Content/Dist/js/Varios.js"></script>
 
     <script src="~/Content/bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="~/DataTables/datatables.min.css" />
+    <script type="text/javascript" src="~/DataTables/datatables.min.js"></script>
+    
+    @RenderSection("scripts")
 
 </body>
 </html>

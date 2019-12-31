@@ -1,25 +1,238 @@
-﻿@model mvc4.Models.Documento
+﻿@using Microsoft.AspNet.Identity
+@model mvc4.Models.Documento
 @{
     ViewBag.Title = "Editar documento";
 }
 
+@{
+    string rolUs = "";
+    try
+    {
+        rolUs = Session["rol"].ToString();
+    }
+    catch
+    {
+        Response.Redirect("~/Account/Login");
+    }
+}
 <script>
-	ready(function () {
-		CKEDITOR.replace('Texto', {
-			height: 500
-		});
+    var IdNota = '@ViewBag.IdNota';
+    var idLista = "";
+    var referencias = "";
+    ready(function () {
 
-		$('#btn-publicar').click(function () {
-			$('#EsBorrador').val("false");
-			$('#btn-guardar').click();
-		});
-	});
+        CKEDITOR.replace('txtNota', {
+            height: 300,
+            toolbarGroups: [{
+                "name": "basicstyles",
+                "groups": ["basicstyles"]
+            },
+            {
+                "name": "links",
+                "groups": ["links"]
+            },
+            {
+                "name": "paragraph",
+                "groups": ["list", 'indent', "blocks", "align"]
+            },
+            {
+                "name": "document",
+                "groups": ["mode"]
+            },
+            {
+                "name": "insert",
+                "groups": ["insert"]
+            },
+            {
+                "name": "styles",
+                "groups": ["styles"]
+            },
+            {
+                "name": "about",
+                "groups": ["about"]
+            },
+            ],
+            removeButtons: 'Iframe'
+        });
 
-	$('#btn-guardar').click(function () {
-		$('#EsBorrador').val("true");
-		$('#btn-guardar').click();
-	});
+        CKEDITOR.replace('Texto', {
+            height: 500,
+            toolbarGroups: [{
+                "name": "basicstyles",
+                "groups": ["basicstyles"]
+            },
+            {
+                "name": "links",
+                "groups": ["links"]
+            },
+            {
+                "name": "paragraph",
+                "groups": ["list", "blocks", "align"]
+            },
+            {
+                "name": "document",
+                "groups": ["mode"]
+            },
+            {
+                "name": "insert",
+                "groups": ["insert"]
+            },
+            {
+                "name": "styles",
+                "groups": ["styles"]
+            },
+            {
+                "name": "about",
+                "groups": ["about"]
+            },
+            ],
+            removeButtons: 'Iframe'
+        });
+
+        $('#btn-publicar').click(function () {
+            //divTextoCambio
+            $('#divTextoCambio').modal('show');
+            //$('#EsBorrador').val("false");
+
+            //$("#setForm").submit();
+        });
+
+        $('#btnAceptarEliminarReferencia').click(function () {
+            alert(referencias);
+            location.href = "/Document/Ma_EliminaReferencias?referencias=" + referencias;
+        });
+
+        $('#btnAceptarCambio').click(function () {
+            var t = $('#txtAreaModificacion').val();
+            if (t == "") {
+                alert("Debe indicar una descripción del cambio realizado");
+                return 0;
+            }
+            $('#TextoCambio').val(t);
+            $('#EsBorrador').val("false");
+            $("#setForm").submit();
+        });
+
+        $("#btnAceptarNota").click(function () {
+            var t = CKEDITOR.instances['txtNota'].getData()
+            if (t == "") {
+                alert("Debe escribir el texto de la nota");
+                return 0;
+            }
+            var params = new Object();
+            params.Nota = new Object();
+            params.Nota.TextoNota = t;
+            params.Nota.Coleccion = "@ViewBag.Coleccion"; //segun seleccion
+            $.ajax({
+                type: "POST",
+                url: "/Document/Nota",
+                content: "application/json; charset=utf-8",
+                dataType: "json",
+                data: params,
+                success: function (d) {
+                    if (d.Result == 0) {
+                        var inserta = '<a href="#" class="linkNota" style="color:blue; cursor:pointer" id="' + d.TextoNota + '">[Nota]</a>';
+                        CKEDITOR.instances['Texto'].insertHtml(inserta);
+                    }
+                    else {
+                        alert(d.TextoNota);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Ocurrió un error al crear la nueva nota. Por favor, contáctese con el administrador.");
+                }
+            });
+
+            $('#myModal').modal('hide')
+        });
+
+        $('#btn-guardar').click(function () {
+            $('#EsBorrador').val("true");
+            $('#ColeccionGlosa').val($('#divColeccion').html());
+            $('#CategoriaGlosa').val($('#divCategoria').html());
+            $('#SeccionGlosa').val($('#divSeccion').html());
+            $('#TemaGlosa').val($('#divTema').html());
+            $("#setForm").submit();
+        });
+
+        $('#btnMyModal').click(function () {
+            $('#myModal').modal('show');
+        });
+
+        if (IdNota != "") {
+            location.href = "#" + IdNota;
+        }
+
+        $('#Coleccion, #Seccion, #Categoria, #Tema').click(function () {
+            idLista = $(this).attr("id");
+            showListas(idLista);
+        });
+
+        $('body').on('click', '.divLista', function myfunction() {
+            if ($(this).hasClass("divSelected"))
+                $(this).removeClass("divSelected");
+            else
+                $(this).addClass("divSelected");
+        });
+
+        $('#btnAceptarLista').click(function () {
+            var lista = "";
+            $(".divLista").each(function (indice, elemento) {
+                if ($(elemento).hasClass("divSelected")) {
+                    lista += $(elemento).html() + ", ";
+                }
+            });
+            if (lista == "") {
+                alert("Debe seleccionar al menos una colección");
+                return 0;
+            }
+
+            $('#div' + idLista).html(lista.substring(0, lista.length -2));
+            $('#divDetalleListado').modal('hide')
+        });
+    });
+
+    function showListas(idLista) {
+        lista = $('#div' + idLista).html();
+        var params = new Object();
+        params.lista = lista;
+        params.tipo = idLista;
+        params.coleccion = "@ViewBag.Coleccion";
+        $.ajax({
+            type: "POST",
+            url: "/Document/GetLista",
+            content: "application/json; charset=utf-8",
+            dataType: "json",
+            data: params,
+            success: function (d) {
+                if (d.Detalles != null) {
+                    var txt = "";
+                    for (var x = 0; x < d.Detalles.length; x++) {
+                        var seleccionado = "";
+                        if (d.Detalles[x].Seleccionado)
+                            seleccionado = " divSelected";
+
+                        txt += "<div id=\"l_" + (x + 1) + "\" class=\"divLista" + seleccionado + "\">" + d.Detalles[x].Nombre + "</div>";
+                    }
+                    $('#divDetalleListado').modal('show');
+                    $('#divDetalleListadoTitulo').text(idLista);
+                    $('#txtDetalleListado').html(txt);
+                } else {
+                    alert(d);
+                }
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert("Ocurrió un error al buscar listado " + idLista);
+            }
+        });
+    }
+
+    function eliminaReferencia(link, doc) {
+        referencias = link + "-" + doc;
+        $('#divEliminaReferencia').modal('show')
+    }
 </script>
+
 
 <section class="content-header">
     <h1>
@@ -28,7 +241,7 @@
 </section>
 
 <section class="content">
-    @using (Html.BeginForm("Ma_EditarDocumento", "Document", FormMethod.Post))
+    @using (Html.BeginForm("Ma_EditarDocumento", "Document", FormMethod.Post, new { id = "setForm" }))
     {
         @Html.AntiForgeryToken()
         <div class="row">
@@ -41,7 +254,7 @@
                     <div class="box-body">
                         <div class="row">
                             <div class="col-md-8">
-                                @if (ViewBag.EsBorrador)
+                                @if (Model.EsBorrador)
                                 {
                                     <div class="alert alert-danger alert-dismissable">
                                         <button class="close" type="button" data-dismiss="alert" aria-hidden="true">x</button>
@@ -58,13 +271,18 @@
                                 @Html.HiddenFor(m => m.IdDocumento)
                                 @Html.HiddenFor(m => m.id)
                                 @Html.HiddenFor(m => m.EsBorrador)
+                                @Html.HiddenFor(m => m.ColeccionGlosa)
+                                @Html.HiddenFor(m => m.SeccionGlosa)
+                                @Html.HiddenFor(m => m.CategoriaGlosa)
+                                @Html.HiddenFor(m => m.TemaGlosa)
+                                @Html.HiddenFor(m => m.TextoCambio)
                                 <br />
                                 <div class="row">
                                     <div class="col-md-8">
                                     </div>
                                     <div class="col-md-4">
-                                        <button id="btn-guardar" type="submit" class="btn btn-primary btn-block">Guardar documento</button>
-                                        @if (ViewBag.EsBorrador)
+                                        <button id="btn-guardar" type="button" class="btn btn-primary btn-block">Guardar documento</button>
+                                        @if (Model.EsBorrador)
                                         {
                                             <button id="btn-publicar" type="button" class="btn btn-success btn-block">Publicar</button>
                                         }
@@ -88,8 +306,18 @@
                                         <div id="tab_1" class="tab-pane active">
                                             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
                                             <div class="form-group">
+                                                <label>Colecciones: </label>
+                                                <div id="divColeccion">
+                                                    @Html.Raw(Model.ColeccionGlosa)
+                                                </div> <span><a href="#" id="Coleccion" style="display: inline;">[Editar]</a></span>
+                                            </div>
+                                            <div class="form-group">
                                                 @Html.LabelFor(m => m.Norma, "Norma")
                                                 @Html.TextBoxFor(m => m.Norma, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Numero, "Número")
+                                                @Html.TextBoxFor(m => m.Numero, new { @class = "form-control" })
                                             </div>
                                             <div class="form-group">
                                                 @Html.LabelFor(m => m.Organismo, "Organismo")
@@ -97,11 +325,7 @@
                                             </div>
                                             <div class="form-group">
                                                 @Html.LabelFor(m => m.Suborganismo, "Sub organismo")
-                                                @Html.TextBoxFor(m => m.Suborganismo, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Seccion, "Sección")
-                                                @Html.TextBoxFor(m => m.Seccion, new { @class = "form-control" })
+                                                @Html.TextBoxFor(m => m.Suborganismo[0], new { @class = "form-control" })
                                             </div>
                                             <div class="form-group">
                                                 @Html.LabelFor(m => m.Titulo, "Título")
@@ -116,20 +340,26 @@
                                                 @Html.TextBoxFor(m => m.Inciso, new { @class = "form-control" })
                                             </div>
                                             <div class="form-group">
-                                                @Html.LabelFor(m => m.Numero, "Número")
-                                                @Html.TextBoxFor(m => m.Numero, new { @class = "form-control" })
+                                                <label>Seccion: </label>
+                                                <div id="divSeccion">
+                                                    @Html.Raw(Model.SeccionGlosa)
+                                                </div> <span><a href="#" id="Seccion" style="display: inline;">[Editar]</a></span>
                                             </div>
                                             <div class="form-group">
-                                                @Html.LabelFor(m => m.Categoria, "Categoría")
-                                                @Html.TextBoxFor(m => m.Categoria, new { @class = "form-control" })
+                                                <label>Categoría: </label>
+                                                <div id="divCategoria">
+                                                    @Html.Raw(Model.CategoriaGlosa)
+                                                </div> <span><a href="#" id="Categoria" style="display: inline;">[Editar]</a></span>
                                             </div>
                                             <div class="form-group">
-                                                @Html.LabelFor(m => m.Tema, "Tema")
-                                                @Html.TextBoxFor(m => m.Tema, new { @class = "form-control" })
+                                                <label>Tema: </label>
+                                                <div id="divTema">
+                                                    @Html.Raw(Model.TemaGlosa)
+                                                </div> <span><a href="#" id="Tema" style="display: inline;">[Editar]</a></span>
                                             </div>
                                         </div>
                                         <div id="tab_2" class="tab-pane">
-                                            @foreach (var version in ViewBag.Versiones)
+                                            @foreach (var version in Model.Versiones)
                                             {
                                                 if (version.nombre.IndexOf("borrador") < 0)
                                                 {
@@ -141,7 +371,12 @@
                                             }
                                         </div>
                                         <div id="tab_3" class="tab-pane">
-                                            @foreach (var link in ViewBag.Links)
+                                            <button type="button" class="btn btn-block btn-primary btn-sm" id="btnMyModal">Agregar/modificar nota</button>
+                                            <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
+
+                                            <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
+                                            <br />
+                                            @foreach (var link in Model.Links)
                                             {
                                                 if (link.Tipo.IndexOf("no contiene referencias") > 0)
                                                 {
@@ -149,12 +384,19 @@
                                                 }
                                                 else
                                                 {
-                                                        @link.Tipo
+                                                    @link.Tipo
+                                                    <br />
+                                                    <a href="~/Document/Ma_EditarDocumento/@link.Url">
+                                                        @link.Texto
+                                                    </a>
+                                                    if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+                                                    {
                                                         <br />
-                                                        <a href="~/Document/Ma_EditarDocumento/@link.Url">
-                                                            @link.Texto
-                                                        </a>
-                                                        <br /><br />
+                                                        <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
+                                                            [ Eliminar ]
+                                                        </label>
+                                                    }
+                                                    <br /><br />
                                                 }
                                             }
                                         </div>
@@ -167,4 +409,90 @@
             </div>
         </div>
     }
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Agregar nueva nota</h4>
+                </div>
+                <div class="modal-body">
+                    Estimado usuario, antes de proceder, asegurese de hacer click en el lugar del texto donde
+                    va a insertar la nueva nota.<br />
+                    <label>Id nota</label>
+                    <br />
+                    <input type="text" id="idNota" class="form-control" />
+                    <br />
+                    <textarea id="txtNota" name="txtNota" class="form-control">@ViewBag.TextoNota</textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="button" id="btnAceptarNota" class="btn btn-primary">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="divDetalleListado" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="divDetalleListadoTitulo"></h4>
+                </div>
+                <div class="modal-body" id="txtDetalleListado">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" id="btnAceptarLista" class="btn btn-primary">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- texto motivo cambio -->
+    <div class="modal fade" id="divTextoCambio" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="divDetalleListadoTitulo">Descripción de la modificación</h4>
+                </div>
+                <div class="modal-body" id="txtDetalleListado">
+                    Indique una breve descripción de la modificación<br />
+                    realizada al documento.
+                    <br /><br />
+                    <textarea id="txtAreaModificacion" style="width: 100%" rows="5"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" id="btnAceptarCambio" class="btn btn-primary">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Elimina referencias -->
+    <div class="modal fade" id="divEliminaReferencia" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="divTituloEliminaReferencia">Eliminar referencia</h4>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desa eliminar la referencia indicada?
+                    <br /><br />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button type="button" id="btnAceptarEliminarReferencia" class="btn btn-primary">Sí</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+
+@section scripts{
+
+}

@@ -24,7 +24,7 @@ namespace mvc4.Business
         public static string SolrSelect(string texto, int pagina)
         {
             String urlAddress = "";
-            string urlSolr = WebConfigurationManager.AppSettings["webSolr"];
+            string urlSolr = @"http://localhost:8983";
             if (texto == "")
                 urlAddress = urlSolr + "/solr/test-1/select?hl.fl=texto&hl=on&q=*%3A*&rows=5&start=0";
             else

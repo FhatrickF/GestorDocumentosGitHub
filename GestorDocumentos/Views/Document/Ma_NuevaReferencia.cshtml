@@ -4,25 +4,55 @@
 }
 
 <script>
-	ready(function () {
-		CKEDITOR.replace('Texto', {
-			height: 500
+    ready(function () {
+        CKEDITOR.replace('Texto', {
+            height: 500,
+            toolbarGroups: [{
+                "name": "basicstyles",
+                "groups": ["basicstyles"]
+            },
+            {
+                "name": "links",
+                "groups": ["links"]
+            },
+            {
+                "name": "paragraph",
+                "groups": ["list", 'indent', "blocks", "align"]
+            },
+            {
+                "name": "document",
+                "groups": ["mode"]
+            },
+            {
+                "name": "insert",
+                "groups": ["insert"]
+            },
+            {
+                "name": "styles",
+                "groups": ["styles"]
+            },
+            {
+                "name": "about",
+                "groups": ["about"]
+            },
+            ],
+            removeButtons: 'Iframe'
         });
 
         CKEDITOR.replace('TextoReferencia', {
             height: 500
         });
 
-		$('#btn-publicar').click(function () {
-			$('#EsBorrador').val("false");
-			$('#btn-guardar').click();
-		});
-	});
+        $('#btn-publicar').click(function () {
+            $('#EsBorrador').val("false");
+            $('#btn-guardar').click();
+        });
+    });
 
-	$('#btn-guardar').click(function () {
-		$('#EsBorrador').val("true");
-		$('#btn-guardar').click();
-	});
+    $('#btn-guardar').click(function () {
+        $('#EsBorrador').val("true");
+        $('#btn-guardar').click();
+    });
 </script>
 
 <section class="content-header">
@@ -38,15 +68,15 @@
         <div class="row">
             @if (ViewBag.Error != null)
             {
-            <div class="alert alert-danger">
-                <h4>
-                    <i class="icon fa fa-ban">
+                <div class="alert alert-danger">
+                    <h4>
+                        <i class="icon fa fa-ban">
 
-                    </i>
-                    Atención !
-                </h4>
-                @ViewBag.Error
-            </div>
+                        </i>
+                        Atención !
+                    </h4>
+                    @ViewBag.Error
+                </div>
             }
             <div class="col-md-6">
                 <div class="form-group">
@@ -98,3 +128,8 @@
         </div>
     }
 </section>
+
+
+@section scripts{
+
+}

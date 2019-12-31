@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using GestorDocumentosDataAccess;
 using GestorDocumentosEntities;
+using GestorDocumentosExceptions;
 
 namespace GestorDocumentosBusiness
 {
@@ -16,9 +17,9 @@ namespace GestorDocumentosBusiness
             {
                 return usuarioDAL.getUserbyName(name);
             }
-            catch (Exception ex)
+            catch (BusinessException ex)
             {
-                throw new Exception(ex.Message);
+                throw new BusinessException(ex.Message);
             }
         }
 
@@ -29,9 +30,45 @@ namespace GestorDocumentosBusiness
                 List<usuarioTabEntity> listUser = usuarioDAL.getListUser();
                 return listUser;
             }
-            catch (Exception ex)
+            catch (BusinessException ex)
             {
-                throw new Exception(ex.Message);
+                throw new BusinessException(ex.Message);
+            }
+        }
+
+        public static void setRol(string id, string rol)
+        {
+            try
+            {
+                usuarioDAL.setRol(id, rol);
+            }
+            catch (BusinessException ex)
+            {
+                throw new BusinessException(ex.Message);
+            }
+        }
+
+        public static usuarioEntity getUserbyId(string id)
+        {
+            try
+            {
+                return usuarioDAL.getUserbyId(id);
+            }
+            catch (BusinessException ex)
+            {
+                throw new BusinessException(ex.Message);
+            }
+        }
+
+        public static void deleteById(string id)
+        {
+            try
+            {
+                usuarioDAL.deleteById(id);
+            }
+            catch (BusinessException ex)
+            {
+                throw new BusinessException(ex.Message);
             }
         }
     }

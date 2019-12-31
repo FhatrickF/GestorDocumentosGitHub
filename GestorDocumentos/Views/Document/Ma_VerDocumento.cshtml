@@ -13,6 +13,36 @@
                 $("#form-referencia").submit();
             }
         });
+
+        $('.linkNota').click(function () {
+            event.preventDefault();
+            var i = $(this).attr('id');
+            var params = new Object();
+            params.Nota = new Object();
+            params.Nota.Result = 1;
+            params.Nota.TextoNota = i;
+            params.Nota.Coleccion = "@ViewBag.Coleccion"; //segun seleccion
+            $.ajax({
+                type: "POST",
+                url: "/Document/Nota",
+                content: "application/json; charset=utf-8",
+                dataType: "json",
+                data: params,
+                success: function (d) {
+                    if (d.Result == 0) {
+                        $("#aNota").attr("href", "@Url.Action("Ma_EditarDocumento", "Document", new { id = Model.IdDocumento })" + "-" + i);
+                        $('#detalleNota').modal('show')
+                        $('#txtDetalleNota').html(d.TextoNota);
+                    }
+                    else {
+                        alert(d.TextoNota);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Ocurrió un error al crear la nueva nota. Por favor, contáctese con el administrador.");
+                }
+            });
+        });
     });
 </script>
 
@@ -30,32 +60,32 @@
                             @if (ViewBag.Referencia)
                             {
 
-                                    <div class="box box-success box-solid">
-                                        <div class="box-header with-border">
-                                            <h3>Nueva referencia para:</h3>
-                                        </div>
-                                        <div class="box-body">
-                                            <strong>@ViewBag.DocumentoR.Norma</strong><br />
-                                            @if (ViewBag.DocumentoR.Organismo != null && ViewBag.DocumentoR.Organismo != "")
-                                            {
-                                                @ViewBag.DocumentoR.Organismo
-                                            }
-                                            @if (ViewBag.DocumentoR.Numero != null && ViewBag.DocumentoR.Numero != "")
-                                            {
-                                                <label>Número @ViewBag.DocumentoR.Numero</label>
-                                            }
-                                            @if (ViewBag.DocumentoR.Articulo != null && ViewBag.DocumentoR.Articulo != "")
-                                            {
-                                                <label>Artículo @ViewBag.DocumentoR.Articulo</label>
-                                            }
-                                            @if (ViewBag.DocumentoR.Inciso != null && ViewBag.DocumentoR.Inciso != "")
-                                            {
-                                                <label>Inciso @ViewBag.DocumentoR.Inciso</label>
-                                            }
-                                            <br /><br />
-                                            @ViewBag.DocumentoR.Titulo
-                                        </div>
+                                <div class="box box-success box-solid">
+                                    <div class="box-header with-border">
+                                        <h3>Nueva referencia para:</h3>
                                     </div>
+                                    <div class="box-body">
+                                        <strong>@ViewBag.DocumentoR.Norma</strong><br />
+                                        @if (ViewBag.DocumentoR.Organismo != null && ViewBag.DocumentoR.Organismo != "")
+                                        {
+                                            @ViewBag.DocumentoR.Organismo
+                                        }
+                                        @if (ViewBag.DocumentoR.Numero != null && ViewBag.DocumentoR.Numero != "")
+                                        {
+                                            <label>Número @ViewBag.DocumentoR.Numero</label>
+                                        }
+                                        @if (ViewBag.DocumentoR.Articulo != null && ViewBag.DocumentoR.Articulo != "")
+                                        {
+                                            <label>Artículo @ViewBag.DocumentoR.Articulo</label>
+                                        }
+                                        @if (ViewBag.DocumentoR.Inciso != null && ViewBag.DocumentoR.Inciso != "")
+                                        {
+                                            <label>Inciso @ViewBag.DocumentoR.Inciso</label>
+                                        }
+                                        <br /><br />
+                                        @ViewBag.DocumentoR.Titulo
+                                    </div>
+                                </div>
 
                             }
                             <strong>@Html.Raw(Model.Norma)</strong>
@@ -68,33 +98,31 @@
                         </div>
                         @if (!ViewBag.Referencia)
                         {
-                        <div class="col-md-4" style="border-left: 1px solid gray">
-                            <div style="float: left">
-                                <h3>Referencias</h3>
-                            </div>
-                            <div style="float: right">
-                                <a href="~/Busqueda/Index/@Model.IdDocumento">Nueva referencia a partir de documento existente</a> | <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento">Nueva referencia vacía</a>
-                                <br /><br />
-                            </div>
-                            <div style="clear: both"></div>
-                            @foreach (var link in ViewBag.Links)
-                            {
-                                if (link.Tipo.IndexOf("no contiene links") > 0)
+                            <div class="col-md-4" style="border-left: 1px solid gray">
+                                <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
+                                <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
+                                <div style="float: left">
+                                    <h3>Referencias</h3>
+                                </div>
+                                <div style="clear: both"></div>
+                                @foreach (var link in Model.Links)
                                 {
-                                    @link.Tipo
-                                }
-                                else
-                                {
+                                    if (link.Tipo.IndexOf("no contiene links") > 0)
+                                    {
+                                        @link.Tipo
+                                    }
+                                    else
+                                    {
 
-                                    @link.Tipo
-                                    <br />
-                                    <a href="~/Document/Ma_VerDocumento/@link.Url">
-                                        @link.Texto
-                                    </a>
-                                    <br /><br />
+                                        @link.Tipo
+                                        <br />
+                                        <a href="~/Document/Ma_VerDocumento/@link.Url">
+                                            @link.Texto
+                                        </a>
+                                        <br /><br />
+                                    }
                                 }
-                            }
-                        </div>
+                            </div>
                         }
                         @if (ViewBag.Referencia)
                         {
@@ -117,4 +145,26 @@
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="detalleNota" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Notas</h4>
+                </div>
+                <div class="modal-body" id="txtDetalleNota">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <a id="aNota" href="#" class="btn btn-primary">.:: Editar ::.</a>
+                </div>
+            </div>
+        </div>
+    </div>
 </section>
+
+@section scripts{
+
+}

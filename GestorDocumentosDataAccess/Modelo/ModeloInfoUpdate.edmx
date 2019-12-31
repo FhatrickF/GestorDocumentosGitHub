@@ -66,7 +66,18 @@
           <Property Name="LockoutEnabled" Type="bit" Nullable="false" />
           <Property Name="AccessFailedCount" Type="int" Nullable="false" />
           <Property Name="UserName" Type="nvarchar" MaxLength="256" Nullable="false" />
-          <Property Name="Rol" Type="nchar" MaxLength="30" />
+          <Property Name="Rol" Type="nvarchar" MaxLength="150" />
+        </EntityType>
+        <EntityType Name="Log_Documento">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="idUser" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="idDocumento" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="logDocumento" Type="nvarchar(max)" />
+          <Property Name="logDescripcion" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="logFecha" Type="datetime" />
         </EntityType>
         <EntityType Name="RoleViewModels">
           <Key>
@@ -161,6 +172,7 @@
           <EntitySet Name="AspNetUserLogins" EntityType="Self.AspNetUserLogins" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="AspNetUserRoles" EntityType="Self.AspNetUserRoles" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="AspNetUsers" EntityType="Self.AspNetUsers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Log_Documento" EntityType="Self.Log_Documento" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="RoleViewModels" EntityType="Self.RoleViewModels" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sgd_documento" EntityType="Self.sgd_documento" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" Schema="dbo" store:Type="Tables" />
@@ -241,10 +253,21 @@
           <Property Name="LockoutEnabled" Type="Boolean" Nullable="false" />
           <Property Name="AccessFailedCount" Type="Int32" Nullable="false" />
           <Property Name="UserName" Type="String" MaxLength="256" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="Rol" Type="String" MaxLength="150" FixedLength="false" Unicode="true" />
           <NavigationProperty Name="AspNetUserClaims" Relationship="Self.FK_dbo_AspNetUserClaims_dbo_AspNetUsers_UserId" FromRole="AspNetUsers" ToRole="AspNetUserClaims" />
           <NavigationProperty Name="AspNetUserLogins" Relationship="Self.FK_dbo_AspNetUserLogins_dbo_AspNetUsers_UserId" FromRole="AspNetUsers" ToRole="AspNetUserLogins" />
           <NavigationProperty Name="AspNetRoles" Relationship="Self.AspNetUserRoles" FromRole="AspNetUsers" ToRole="AspNetRoles" />
-          <Property Name="Rol" Type="String" MaxLength="30" FixedLength="true" Unicode="true" />
+        </EntityType>
+        <EntityType Name="Log_Documento">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="idUser" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="idDocumento" Type="String" MaxLength="200" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="logDescripcion" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" Nullable="false" />
+          <Property Name="logFecha" Type="DateTime" Precision="3" />
+          <Property Name="logDocumento" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="RoleViewModels">
           <Key>
@@ -314,6 +337,7 @@
           <EntitySet Name="AspNetUserClaims" EntityType="Self.AspNetUserClaims" />
           <EntitySet Name="AspNetUserLogins" EntityType="Self.AspNetUserLogins" />
           <EntitySet Name="AspNetUsers" EntityType="Self.AspNetUsers" />
+          <EntitySet Name="Log_Documento" EntityType="Self.Log_Documento" />
           <EntitySet Name="RoleViewModels" EntityType="Self.RoleViewModels" />
           <EntitySet Name="sgd_documento" EntityType="Self.sgd_documento" />
           <EntitySet Name="sysdiagrams" EntityType="Self.sysdiagrams" />
@@ -377,7 +401,6 @@
           <EntitySetMapping Name="AspNetUsers">
             <EntityTypeMapping TypeName="mvc_1Model.AspNetUsers">
               <MappingFragment StoreEntitySet="AspNetUsers">
-                <ScalarProperty Name="Rol" ColumnName="Rol" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
                 <ScalarProperty Name="Email" ColumnName="Email" />
                 <ScalarProperty Name="EmailConfirmed" ColumnName="EmailConfirmed" />
@@ -390,6 +413,19 @@
                 <ScalarProperty Name="LockoutEnabled" ColumnName="LockoutEnabled" />
                 <ScalarProperty Name="AccessFailedCount" ColumnName="AccessFailedCount" />
                 <ScalarProperty Name="UserName" ColumnName="UserName" />
+                <ScalarProperty Name="Rol" ColumnName="Rol" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Log_Documento">
+            <EntityTypeMapping TypeName="mvc_1Model.Log_Documento">
+              <MappingFragment StoreEntitySet="Log_Documento">
+                <ScalarProperty Name="logDocumento" ColumnName="logDocumento" />
+                <ScalarProperty Name="logFecha" ColumnName="logFecha" />
+                <ScalarProperty Name="id" ColumnName="id" />
+                <ScalarProperty Name="idUser" ColumnName="idUser" />
+                <ScalarProperty Name="idDocumento" ColumnName="idDocumento" />
+                <ScalarProperty Name="logDescripcion" ColumnName="logDescripcion" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

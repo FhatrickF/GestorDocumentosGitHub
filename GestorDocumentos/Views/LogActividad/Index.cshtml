@@ -1,0 +1,115 @@
+﻿@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<section class="content-header">
+    <h1>
+        Listado de actividades
+    </h1>
+</section>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="box box-default">
+                <div class="box-body">
+                    <table id="tbAct" class="table table-bordered table-hover dt-responsive">
+                        <thead class="blue darken-2 text-white">
+                            <tr>
+                                <th>ID</th>
+                                <th>Nombre Usuario</th>
+                                <th>Documento</th>
+                                <th>Descripcion</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var item in ViewBag.list)
+                            {
+                                <tr>
+                                    <td>@item.id</td>
+                                    <td>@item.idUser</td>
+                                    <td>@item.documento</td>
+                                    <td>@item.descripcion</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts{
+
+    <script type="text/javascript">
+    $(document).ready(function () {
+        $('#tbAct').DataTable({
+             "destroy": true,
+            "responsive": true,
+            "searching": true,
+            'bProcessing': true,
+            "bPaginate": true,
+            "iDisplayLength": 10,
+            "bFilter": false,
+            "bLengthChange": false,
+            "bSort": false,
+            "oLanguage": {
+                    "sEmptyTable": "No se han encontrado registros.",
+                    "sZeroRecords": "No se han encontrado registros.",
+                    "sLengthMenu": "Mostrar _MENU_ registros",
+                    "sLoadingRecords": "Espere por favor - Cargando...",
+                    "sSearch": "Buscar:",
+                    "sInfo": "Mostrando _START_ de _END_ en _TOTAL_ registros",
+                    "sInfoEmpty": 'No se han encontrado registros.',
+                    "oPaginate": {
+                        "sFirst": "Primero",
+                        "sLast": "Último",
+                        "sNext": "Siguiente",
+                        "sPrevious": "Anterior"
+                    }
+                }
+            });
+        @*var urlGetPaginado = '@Url.Content("~/LogActividad/List")';
+
+        $('#tbAct').DataTable({
+            "destroy": true,
+            "responsive": true,
+            "searching": false,
+            'bProcessing': true,
+            'bServerSide': true,
+            "bPaginate": true,
+            "iDisplayLength": 10,
+            "bFilter": false,
+            "bLengthChange": false,
+            "bSort": false,
+            "oLanguage": {
+                "sEmptyTable": "No se han encontrado registros.",
+                "sZeroRecords": "No se han encontrado registros.",
+                "sLengthMenu": "Mostrar _MENU_ registros",
+                "sLoadingRecords": "Espere por favor - Cargando...",
+                "sSearch": "Buscar:",
+                "sInfo": "Mostrando _START_ de _END_ en _TOTAL_ registros",
+                "sInfoEmpty": 'No se han encontrado registros.',
+                "oPaginate": {
+                    "sFirst": "Primero",
+                    "sLast": "Último",
+                    "sNext": "Siguiente",
+                    "sPrevious": "Anterior"
+                }
+            },
+            "sServerMethod": "POST",
+            "ajax": urlGetPaginado,
+            "ordering": true,
+            "columns": [
+                { "data": "id", "width": "25%" },
+                { "data": "idUser", "width": "25%" },
+                { "data": "idDocumento", "width": "25%" },
+                { "data": "descripcion", "width": "50%" }
+            ]
+        });*@
+    });
+    </script>
+}
+

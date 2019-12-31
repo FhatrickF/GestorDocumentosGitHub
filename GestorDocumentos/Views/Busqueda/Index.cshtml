@@ -74,6 +74,8 @@
                         } catch (e) {
                             r += "";
                         }
+                        if (d.docs[i].Organismo)
+                            r += d.docs[i].Organismo + "<br />";
                         r += "<strong>" + d.docs[i].Norma + "</strong>.- ";
 
                         if (d.docs[i].Numero) {
@@ -83,22 +85,25 @@
                                 r += "Artículo número " + d.docs[i].Articulo;
                             }
                             if (d.docs[i].Inciso) {
-                                r += ", Inciso " + d.docs[i].Inciso
+                                if (d.docs[i].Articulo)
+                                    r += ", ";
+                                r += "Inciso " + d.docs[i].Inciso
                             }
                             r += ".- ";
                         }
-
-                        r += d.docs[i].Titulo;
+                        if(d.docs[i].Titulo)
+                            r += d.docs[i].Titulo;
+                        r += "<br /><strong>Link: </strong>" + d.docs[i].IdDocumento;
                         r += "</td>"
 
                         r += "<td>";
-                        r += "<a class=\"text-blue\" href=\"/Document/Ma_VerDocumento/" + d.docs[i].id + "\" >Ver</a>";
+                        r += "<a class=\"text-blue\" href=\"/Document/Ma_VerDocumento/" + d.docs[i].IdDocumento + "\" >Ver</a>";
                         r += "</td>";
                         if (referencia == "True") {
                             r += "<td></td>";
                         } else {
                             r += "<td>";
-                            r += "<a class=\"text-green\" href=\"/Document/Ma_EditarDocumento/" + d.docs[i].id + "\" target=\"_blank\">Editar</a>";
+                            r += "<a class=\"text-green\" href=\"/Document/Ma_EditarDocumento/" + d.docs[i].IdDocumento + "\" target=\"_blank\">Editar</a>";
                             r += "</td>";
                         }
 
@@ -208,7 +213,7 @@
                 <div class="box box-default">
                     <div class="box-header with-border">
                         <i class="fa fa-file-text-o"></i>
-                        <h3 class="box-title">BITE</h3>
+                        <h3 class="box-title">Base de datos</h3>
                     </div>
                     <div class="box-body">
                         <div class="row">
@@ -229,6 +234,21 @@
                                     </div>
                                     <div class="box-body">
                                         <div class="row">
+                                            <div class="col-md-12">
+                                                <label>Seleccione producto</label>
+                                                <select name="Coleccion" class="form-control">
+                                                    <option value="BITE">BITE</option>
+                                                    <option value="MA">Medio Ambiental</option>
+                                                    <option value="LA">Legislación actualizada</option>
+                                                    <option value="DOAV">Avisos</option>
+                                                    <option value="DONG">Normas Generales</option>
+                                                    <option value="DONP">Normas Particulares</option>
+                                                    <option value="DOPJ">Poder Judicial</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <br />
                                             <div class="col-md-6">
                                                 <div class="checkbox">
                                                     <label>
@@ -340,7 +360,6 @@
                     </div>
                 </div>
                 <!-- </div> -->
-                <input type="hidden" name="Coleccion" value="BITE" />
             </form>
             <!-- fin bite -->
             <!-- fin formulario -->
@@ -421,3 +440,6 @@
     </div>
 
 </section>
+@section scripts{
+
+}

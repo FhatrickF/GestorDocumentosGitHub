@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.757
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29403.142
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorDocumentos", "GestorDocumentos.csproj", "{B20C0DAF-774A-42EE-BA8C-A62FDBB071CA}"
 EndProject
@@ -10,6 +10,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GestorDocumentosEntities", "..\GestorDocumentosEntities\GestorDocumentosEntities.csproj", "{3FF4EACB-844F-4187-8CC3-08CFC505F255}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorDocumentosDataAccess", "..\GestorDocumentosDataAccess\GestorDocumentosDataAccess.csproj", "{F7126C3B-2A2B-4DF8-AD9A-79757EFFF42B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GestorDocumentosExceptions", "..\GestorDocumentosExceptions\GestorDocumentosExceptions.csproj", "{18913304-3250-4727-8A3D-29BB7D64C5A1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{F7126C3B-2A2B-4DF8-AD9A-79757EFFF42B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F7126C3B-2A2B-4DF8-AD9A-79757EFFF42B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F7126C3B-2A2B-4DF8-AD9A-79757EFFF42B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{18913304-3250-4727-8A3D-29BB7D64C5A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{18913304-3250-4727-8A3D-29BB7D64C5A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{18913304-3250-4727-8A3D-29BB7D64C5A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{18913304-3250-4727-8A3D-29BB7D64C5A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

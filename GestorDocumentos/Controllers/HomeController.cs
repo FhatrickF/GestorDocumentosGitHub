@@ -1,5 +1,9 @@
-﻿using GestorDocumentosBusiness;
+﻿using GestorDocumentos.Models;
+using GestorDocumentosBusiness;
 using GestorDocumentosEntities;
+using GestorDocumentosExceptions;
+using Microsoft.AspNet.Identity;
+using Microsoft.AspNet.Identity.EntityFramework;
 using Microsoft.AspNet.Identity.Owin;
 using System;
 using System.Collections.Generic;
@@ -16,10 +20,23 @@ namespace GestorDocumentos.Controllers
             var loggin = User.Identity.IsAuthenticated;
             if (loggin)
             {
-                usuarioEntity us = new usuarioEntity();
-                us = usuarioBO.getUserbyName(User.Identity.Name);
-                Session["rol"] = us.Rol.Trim();
-                return View();
+                try
+                {
+                    ApplicationDbContext context = new ApplicationDbContext();
+
+                    var userStore = new UserStore<ApplicationUser>(context);
+                    var userManager = new UserManager<ApplicationUser>(userStore);
+
+                    var uss = userManager.FindByName(User.Identity.Name);
+
+                    Session["rol"] = uss.Roles.FirstOrDefault().RoleId;
+                    return View();
+                }
+                catch (Exception ex)
+                {
+                    new TechnicalException("Error al recibir usuario logeado.", ex);
+                    return RedirectToAction("Login", "Account");
+                }
             }
             else
                 return RedirectToAction("Login", "Account");

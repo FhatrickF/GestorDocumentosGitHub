@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="DocumentoBO.cs" />
     <Compile Include="FileBo.cs" />
+    <Compile Include="LogBO.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SolrBO.cs" />
     <Compile Include="usuarioBO.cs" />
@@ -60,6 +61,10 @@
     <ProjectReference Include="..\GestorDocumentosEntities\GestorDocumentosEntities.csproj">
       <Project>{3ff4eacb-844f-4187-8cc3-08cfc505f255}</Project>
       <Name>GestorDocumentosEntities</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\GestorDocumentosExceptions\GestorDocumentosExceptions.csproj">
+      <Project>{18913304-3250-4727-8A3D-29BB7D64C5A1}</Project>
+      <Name>GestorDocumentosExceptions</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
