@@ -1,8 +1,20 @@
-﻿@model mvc4.Models.Documento
+﻿@using Microsoft.AspNet.Identity
+@model mvc4.Models.Documento
 @{
     ViewBag.Title = "Busqueda";
 }
 
+@{
+    string rolUs = "";
+    try
+    {
+        rolUs = Session["rol"].ToString();
+    }
+    catch
+    {
+        Response.Redirect("~/Account/Login");
+    }
+}
 <script>
     var p_ = 1;
     var referencia = "@ViewBag.Referencia";
@@ -74,9 +86,20 @@
                         } catch (e) {
                             r += "";
                         }
+                        /* borrador */
+                        if (d.docs[i].Estado == "99")
+                            r += "<span style=\"color: red\">[Borrador] </span>";
+                        if (d.docs[i].Estado == "98")
+                            r += "<span style=\"color: blue\">[Pendiente] </span>";
+
                         if (d.docs[i].Organismo)
                             r += d.docs[i].Organismo + "<br />";
-                        r += "<strong>" + d.docs[i].Norma + "</strong>.- ";
+                        if (d.docs[i].Norma)
+                            r += "<strong>" + d.docs[i].Norma + "</strong>.- ";
+                        if (d.docs[i].Tribunal)
+                            r += "<strong>" + d.docs[i].Tribunal + "</strong>.- ";
+                        if (d.docs[i].Propiedad)
+                            r +=  d.docs[i].Propiedad;
 
                         if (d.docs[i].Numero) {
                             r += "Número " + d.docs[i].Numero + ".- ";
@@ -93,6 +116,8 @@
                         }
                         if(d.docs[i].Titulo)
                             r += d.docs[i].Titulo;
+                        if (d.docs[i].Partes)
+                            r += d.docs[i].Partes;
                         r += "<br /><strong>Link: </strong>" + d.docs[i].IdDocumento;
                         r += "</td>"
 
@@ -234,19 +259,71 @@
                                     </div>
                                     <div class="box-body">
                                         <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <div class="checkbox">
+                                                        <label style="color: red;">
+                                                            <input type="checkbox" name="Borrador" />
+                                                            Borradores
+                                                        </label>
+                                                    </div>
+                                                    @if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+                                                    {
+                                                        <div class="checkbox">
+                                                            <label style="color: blue;">
+                                                                <input type="checkbox" name="Pendiente" />
+                                                                Pendientes
+                                                            </label>
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
                                             <div class="col-md-12">
                                                 <label>Seleccione producto</label>
                                                 <select name="Coleccion" class="form-control">
                                                     <option value="BITE">BITE</option>
                                                     <option value="MA">Medio Ambiental</option>
-                                                    <option value="LA">Legislación actualizada</option>
+                                                    <option value="LA">Legislación Actualizada</option>
+                                                    <option value="DOJA">Jurisprudencia Actualizada</option>
+                                                    <option value="DOBOM">Boletín Oficial de Minería</option>
                                                     <option value="DOAV">Avisos</option>
                                                     <option value="DONG">Normas Generales</option>
                                                     <option value="DONP">Normas Particulares</option>
                                                     <option value="DOPJ">Poder Judicial</option>
+                                                    <option value="RES">Registro Empresas y Sociedades</option>
                                                 </select>
                                             </div>
                                         </div>
+                                        <!--
+                                        <div class="row prod-MA">
+                                            <br />
+                                            <div class="col-md-12">
+                                                <label>Códigos de la República</label>
+                                                <select name="codigo" id="codigo" class="form-control">
+                                                    <option value="*">Seleccionar</option>
+                                                    <option value="Codigo CPE">Constitución política</option>
+                                                    <option value="Codigo CC">Código Civil</option>
+                                                    <option value="Codigo CCOM">Código de Comercio</option>
+                                                    <option value="Codigo CP">Código Penal</option>
+                                                    <option value="Codigo CPC">Código de Procedimiento Civil</option>
+                                                    <option value="Codigo CPP">Código de Procedimiento Penal</option>
+                                                    <option value="Codigo CPRO">Código Procesal Penal</option>
+                                                    <option value="Codigo COT">Código Orgánico de Tribunales</option>
+                                                    <option value="Codigo COTREF">Código Orgánico de Tribunales Reformado</option>
+                                                    <option value="Codigo CTRAB">Código del Trabajo</option>
+                                                    <option value="Codigo CMIN">Código de Minería</option>
+                                                    <option value="Codigo CTRIB">Código Tributario</option>
+                                                    <option value="Codigo CDA">Codigo de Aguas</option>
+                                                    <option value="Codigo CSAN">Código Sanitario</option>
+                                                    <option value="Codigo CAE">Código Aeronáutico</option>
+                                                    <option value="Codigo CIPR">Código de Derecho Penal Privado</option>
+                                                    <option value="Codigo CJM">Código de Justicia Militar</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        -->
                                         <div class="row">
                                             <br />
                                             <div class="col-md-6">

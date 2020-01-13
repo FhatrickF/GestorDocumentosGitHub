@@ -24,11 +24,25 @@ namespace GestorDocumentosBusiness
             }
         }
 
-        public static List<log_documentoEntity> getListLog()
+        public static List<log_documentoEntity> getHistorialDocumento(string Id)
+        {
+            List<log_documentoEntity> historial = new List<log_documentoEntity>();
+            try
+            {
+                historial = LogDAL.getHistorialDocumento(Id);
+            }
+            catch (TechnicalException tex)
+            {
+                throw new BusinessException("Ocurrió un error al recuperar historial del documento.");
+            }
+            return historial;
+        }
+
+        public static List<log_documentoEntity> getListLog(string fecha)
         {
             try
             {
-                return LogDAL.getListLog();
+                return LogDAL.getListLog(fecha);
             }
             catch (BusinessException bx)
             {

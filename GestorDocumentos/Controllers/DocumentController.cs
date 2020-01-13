@@ -17,6 +17,7 @@ using System.Text.RegularExpressions;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Mvc;
+using Microsoft.AspNet.Identity;
 
 namespace GestorDocumentos.Controllers
 {
@@ -34,6 +35,21 @@ namespace GestorDocumentos.Controllers
                 return RedirectToAction("Login", "Account");
 
             return View();
+        }
+
+        [HttpGet]
+        public ActionResult ImagenesDoe(string imagen)
+        {
+            //20180102AEAB1C1AA5356B551760805CE8686A7C
+            string a = imagen.Substring(0, 4);
+            string m = imagen.Substring(4, 2);
+            string d = imagen.Substring(6, 2);
+            string i = imagen.Substring(8, imagen.Length - 8);
+            string extension = (i.Substring(i.LastIndexOf("_"), i.Length - i.LastIndexOf("_"))).Replace("_", "");
+
+            var dir = @"D:\INFO\DATA\_img\" + a + "\\" + m + "\\" + d + "\\" + i.Replace("_", ".");
+            //var path = Path.Combine(dir, imagen + ".gif");
+            return base.File(dir, "image/" + extension);
         }
 
         public ActionResult Nuevo(string id)
@@ -476,6 +492,19 @@ namespace GestorDocumentos.Controllers
             return JsonConvert.SerializeObject(notaResult);
         }
 
+        [HttpPost]
+        public string Ma_Historial(string Id)
+        {
+            try
+            {
+                List<log_documentoEntity> historial = LogBO.getHistorialDocumento(Id);
+                return JsonConvert.SerializeObject(historial);
+            }
+            catch (BusinessException bex)
+            {
+                return "{\"Error\":\"" + bex.Message + "\"}";
+            }           
+        }
 
         public ActionResult Ma_VerVersion(string id)
         {
@@ -546,18 +575,26 @@ namespace GestorDocumentos.Controllers
                 if (docOriginal != null)
                 {
                     #region documento original
-                    string textoReferenciaDestino = "";
-                    if (docOriginal.Numero != null && docOriginal.Numero != "")
-                    {
-                        textoReferenciaDestino = "Número " + docOriginal.Numero + ".- " + docOriginal.Titulo;
-                    }
-                    else
-                    {
-                        if (docOriginal.Articulo != null && docOriginal.Articulo != "")
-                            textoReferenciaDestino += "Artículo N° " + docOriginal.Articulo;
-                        if (docOriginal.Inciso != null && docOriginal.Inciso != "")
-                            textoReferenciaDestino += ", Inciso " + docOriginal.Inciso;
-                    }
+
+                    //string textoReferenciaDestino = "";
+                    //if (docOriginal.Organismo != "")
+                    //    textoReferenciaDestino = docOriginal.Organismo + "<br />";
+
+                    // textoReferenciaDestino += docOriginal.Norma + " ";
+                    //if (docOriginal.Numero != null && docOriginal.Numero != "")
+                    //{
+                    //    textoReferenciaDestino += "Número " + docOriginal.Numero;
+                    //}
+                    //else
+                    //{
+                    //    if (docOriginal.Articulo != null && docOriginal.Articulo != "")
+                    //        textoReferenciaDestino += "Artículo N° " + docOriginal.Articulo;
+                    //    if (docOriginal.Inciso != null && docOriginal.Inciso != "")
+                    //        textoReferenciaDestino += ", Inciso " + docOriginal.Inciso;
+                    //}
+                    //if (docOriginal.Titulo != "")
+                    //    textoReferenciaDestino += ".- " + docOriginal.Titulo;
+
 
                     if (docOriginal.Links == null)
                         docOriginal.Links = new List<Link>();
@@ -577,31 +614,35 @@ namespace GestorDocumentos.Controllers
                     docOriginal.Links = links;
 
                     string versionFinal = FileBo.SerializeXML(docOriginal);
-                    FileBo.setXmlStringToFile(docOriginal.Version, versionFinal);
+
+                    if(docOriginal.Version.IndexOf("_borrador") < 0)
+                        FileBo.setXmlStringToFile(docOriginal.Version.Replace(".xml", "_borrador.xml"), versionFinal);
+                    else
+                        FileBo.setXmlStringToFile(docOriginal.Version, versionFinal);
                     #endregion
                     #region documento destino                   
-                    if (docDestino.Links == null)
-                        docDestino.Links = new List<Link>();
+                    //if (docDestino.Links == null)
+                    //    docDestino.Links = new List<Link>();
 
-                    links = new List<Link>();
-                    l = new Link();
-                    l.Texto = textoReferenciaDestino;
-                    l.Tipo = docOriginal.Norma;
-                    l.Url = idDocOriginal;
-                    links.Add(l);
+                    //links = new List<Link>();
+                    //l = new Link();
+                    //l.Texto = textoReferenciaDestino;
+                    //l.Tipo = docOriginal.Norma;
+                    //l.Url = idDocOriginal;
+                    //links.Add(l);
 
-                    foreach (Link link in docDestino.Links)
-                    {
-                        links.Add(link);
-                    }
-                    docDestino.Links = links;
-                    norma = docDestino.Norma.Replace(" ", "_") + "\\";
-                    versionFinal = FileBo.SerializeXML(docDestino);
-                    FileBo.setXmlStringToFile(docDestino.Version, versionFinal);
+                    //foreach (Link link in docDestino.Links)
+                    //{
+                    //    links.Add(link);
+                    //}
+                    //docDestino.Links = links;
+                    //norma = docDestino.Norma.Replace(" ", "_") + "\\";
+                    //versionFinal = FileBo.SerializeXML(docDestino);
+                    //FileBo.setXmlStringToFile(docDestino.Version, versionFinal);
                     #endregion
                 }
 
-                setLog(docOriginal, "Agrega referencia documento existente: " + textoReferencia);
+                //setLog(docOriginal, "Agrega referencia documento existente: " + textoReferencia);
                 //log_documentoEntity log_ = new log_documentoEntity();
                 //log_.idUser = User.Identity.Name;
                 //log_.idDocumento = idDocumento;
@@ -609,6 +650,12 @@ namespace GestorDocumentos.Controllers
 
                 //LogBO.setLogCreateDoc(log_);
 
+                Historial historial = new Historial();
+                historial.Tipo = 2; // agrega referencia doc existente
+                historial.Estado = 0; // pendiente
+                historial.IdOriginal = docOriginal.IdDocumento;
+                historial.IdReferencia = docDestino.IdDocumento;
+                Indexador.Solr.sendXmlHistoria(historial);
                 System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
 
             }
@@ -623,7 +670,7 @@ namespace GestorDocumentos.Controllers
                 return View();
             }
 
-            return Redirect("~/Document/Ma_VerDocumento/" + idDocOriginal);
+            return Redirect("~/Document/Ma_EditarDocumento/" + idDocOriginal);
         }
 
         public ActionResult Ma_VerDocumento(string id)
@@ -686,11 +733,10 @@ namespace GestorDocumentos.Controllers
             
             try
             {
-
                 d = Indexador.Solr.getDocumentoById(id, true);
 
                 #region notas
-                if(idNota != null && idNota != "")
+                if (idNota != null && idNota != "")
                 {
                     string html = "";
                     string rNota = directorio + d.Coleccion + "\\Notas\\" + idNota + ".html";
@@ -710,13 +756,23 @@ namespace GestorDocumentos.Controllers
                     ViewBag.Coleccion = "DOE";
                 #endregion
 
-                //log_documentoEntity log_ = new log_documentoEntity();
-                //log_.idUser = User.Identity.Name;
-                //log_.idDocumento = id;
-                //log_.descripcion = "Se edita el documento " + id;
+                bool administrador = false;
+                string rol = Session["rol"].ToString();
+                if (rol == Sys_RolEntity.ADMINISTRADOR)
+                    administrador = true;
 
-                //LogBO.setLogCreateDoc(log_);
+                if (d.Estado == 98 && !administrador)
+                    ViewBag.Estado = "Pendiente";
+                else
+                    ViewBag.Estado = "Borrador";
 
+                if (d.Estado == 0)
+                    ViewBag.Estado = "";
+
+                if (d.Usuario != null)
+                    ViewBag.Usuario = d.Usuario;
+                else
+                    ViewBag.Usuario = "";
 
                 return View(d);
             }
@@ -733,28 +789,68 @@ namespace GestorDocumentos.Controllers
         }
 
         [HttpPost]
-        public string GetLista(string lista, string tipo)
+        public string GetLista(string lista, string tipo, string coleccion)
         {
             try
             {
+                coleccion = (coleccion.Replace("\n", "").Replace("\r", "")).Replace(", ", ",").Trim();
                 lista = "," + (lista.Replace("\n", "").Replace("\r", "")).Replace(", ", ",").Trim() + ",";
                 string ruta = WebConfigurationManager.AppSettings["MVC-DIRECTORIO"] + "Configuracion\\";
-                if (tipo != "Coleccion")
+                if (tipo == "Seccion" || tipo == "Categoria")
                     ruta = ruta + "MA_";
+                if (tipo == "Tema")
+                    tipo = "temas";
+
                 string[] txt = (System.IO.File.ReadAllText(ruta + tipo + ".txt")).Replace("\r", "").Replace("\n", "").Split(',');
 
                 Listado listado = new Listado();
                 listado.Detalles = new List<Detalle>();
+                bool lee = false;
                 for (int x = 0; x < txt.Length; x++)
                 {
                     Detalle detalle = new Detalle();
                     detalle.Nombre = txt[x];
 
-                    if (lista.IndexOf("," + txt[x] + ",") > -1)
-                        detalle.Seleccionado = true;
+                    if (tipo == "temas")
+                    {
+                        if (detalle.Nombre.IndexOf("##MA") > -1)
+                        {
+                            if (coleccion.IndexOf("MA") > -1)
+                            {
+                                lee = true;
+                                detalle.Nombre = ".:: MEDIO AMBIENTAL ::.";
+                            }
+                            else
+                            {
+                                lee = false;
+                            }
+                        }
+                        else if (detalle.Nombre.IndexOf("##LA") > -1)
+                        {
+                            if (coleccion.IndexOf("LA") > -1)
+                            {
+                                lee = true;
+                                detalle.Nombre = ".:: LEGISLACION ACTUALIZADA ::.";
+                            }
+                            else
+                            {
+                                lee = false;
+                            }
+                        }
+                    }
                     else
-                        detalle.Seleccionado = false;
-                    listado.Detalles.Add(detalle);
+                    {
+                        lee = true;
+                    }
+
+                    if (lee)
+                    {
+                        if (lista.IndexOf("," + txt[x] + ",") > -1)
+                            detalle.Seleccionado = true;
+                        else
+                            detalle.Seleccionado = false;
+                        listado.Detalles.Add(detalle);
+                    }
                 }
                 return JsonConvert.SerializeObject(listado);
             }
@@ -789,14 +885,18 @@ namespace GestorDocumentos.Controllers
                 doc.Links = links;
 
                 string versionFinal = FileBo.SerializeXML(doc);
-                FileBo.setXmlStringToFile(d.Version.Replace(".xml", "_borrador.xml"), versionFinal);
+                if(d.Version.IndexOf("_borrador") > -1)
+                    FileBo.setXmlStringToFile(d.Version, versionFinal);
+                else
+                    FileBo.setXmlStringToFile(d.Version.Replace(".xml", "_borrador.xml"), versionFinal);
 
                 Historial historial = new Historial();
                 historial.Tipo = 1; // elimina referencia
+                historial.Estado = 0; // pendiente
                 historial.IdOriginal = idDocumento;
                 historial.IdReferencia = idReferencia;
                 Indexador.Solr.sendXmlHistoria(historial);
-                setLog(d, "Guarda borrador ELIMINA REFERENCIA.- " + textoReferencia);
+                //setLog(d, "Guarda borrador ELIMINA REFERENCIA.- " + textoReferencia);
 
             }
             catch (Exception)
@@ -807,10 +907,39 @@ namespace GestorDocumentos.Controllers
             return Redirect("~/Document/Ma_EditarDocumento/" + r[1]);
         }
 
+        [HttpGet]
+        public ActionResult Ma_EliminaBorrador(string id)
+        {
+            Documento d = new Documento();
+            try
+            {
+                d = Indexador.Solr.getDocumentoById(id, true);
+                string ruta = d.Version;
+                if (System.IO.File.Exists(ruta))
+                {
+                    System.IO.File.Delete(ruta);
+                    Indexador.Solr.cambiaEstadoDocumento(d.id, 0, "");
+                }
+            }
+            catch (BusinessException)
+            {
+
+            }
+            return Redirect("~/Document/Ma_EditarDocumento/" + id);
+        }
+
         [HttpPost]
         public ActionResult Ma_EditarDocumento(Documento ma)
         {
-            ma.ColeccionGlosa = (ma.ColeccionGlosa.Replace("\r", "").Replace("\n", "")).Trim();
+            string usuario = User.Identity.GetUserName();
+            bool administrador = false;
+            string rol = Session["rol"].ToString();
+            if (rol == Sys_RolEntity.ADMINISTRADOR)
+                administrador = true;
+            else
+                ma.EsBorrador = true;
+
+                ma.ColeccionGlosa = (ma.ColeccionGlosa.Replace("\r", "").Replace("\n", "")).Trim();
             if(ma.CategoriaGlosa != null)
                 ma.CategoriaGlosa = (ma.CategoriaGlosa.Replace("\r", "").Replace("\n", "")).Trim();
             if(ma.SeccionGlosa != null)
@@ -844,11 +973,28 @@ namespace GestorDocumentos.Controllers
 
                 ma.Origen = d.Origen;
                 ma.Links = docBorrador.Links;
-                string xml = FileBo.SerializeXML(ma);
+                
+                int estado = 0;
                 if (ma.EsBorrador)
                 {
-                    ma.Versiones = null;                    
-                    FileBo.setXmlStringToFile(rutaBorrador, xml);
+                    if (d.Estado != 98)
+                    {
+                        ma.Versiones = null;
+                        if (ma.Publicar)
+                        {
+                            estado = 98; // queda pendiente revision
+                            setLog(ma, "(Pendiente publicación) " + ma.TextoCambio);
+                        }
+                        else
+                        {
+                            estado = 99; // estado borrador                                                        
+                        }
+                        ma.Estado = estado;
+                        ma.Usuario = usuario;
+                        string xml = FileBo.SerializeXML(ma);
+                        FileBo.setXmlStringToFile(rutaBorrador, xml);
+                        Indexador.Solr.cambiaEstadoDocumento(d.id, estado, usuario); //borrador
+                    }
                 }
                 else
                 {
@@ -895,6 +1041,8 @@ namespace GestorDocumentos.Controllers
                     VersionOriginalMa.Titulo = ma.Titulo;
                     VersionOriginalMa.Texto = ma.Texto;
                     VersionOriginalMa.id = d.id;
+                    VersionOriginalMa.Estado = estado;
+                    VersionOriginalMa.Usuario = usuario;
                     VersionOriginalMa.Links = docBorrador.Links;
 
                     string versionFinal = FileBo.SerializeXML(VersionOriginalMa);
@@ -903,12 +1051,18 @@ namespace GestorDocumentos.Controllers
                     Indexador.Solr.sendXmlDocumento(VersionOriginalMa, false);
 
                     #region actualiza links segun historial
-                    if(historial != null)
+                    if(historial != null && historial.Count > 0)
                     {
                         foreach(Historial h in historial)
                         {
                             Documento docHistorial = Indexador.Solr.getDocumentoById(h.IdReferencia, true);
-                            string xmlReferencia = System.IO.File.ReadAllText(docHistorial.Version.Replace("_borrador.xml", ".xml"));
+                            string rutaHistorial = "";
+                            if (System.IO.File.Exists(docHistorial.Version))
+                                rutaHistorial = docHistorial.Version;
+                            else
+                                rutaHistorial = docHistorial.Version.Replace("_borrador.xml", ".xml");
+
+                            string xmlReferencia = System.IO.File.ReadAllText(rutaHistorial);
                             Documento docBorradorHistorial = (Documento)FileBo.DeserializeXML(docHistorial.GetType(), xmlReferencia);
                             if (h.Tipo == 1) // elimina referencia doc destino
                             {
@@ -922,12 +1076,43 @@ namespace GestorDocumentos.Controllers
                                 string versionFinalReferencia = FileBo.SerializeXML(docBorradorHistorial);
                                 FileBo.setXmlStringToFile(docHistorial.Version.Replace("_borrador.xml", ".xml"), versionFinalReferencia);
                             }
-                            
+                            if (h.Tipo == 2) // agrega ref doc existente
+                            {
+                                string txtLink = "";
+                                if (VersionOriginalMa.Organismo != null && VersionOriginalMa.Organismo != "")
+                                    txtLink += VersionOriginalMa.Organismo + ".- ";
+                                if (VersionOriginalMa.Norma != null && VersionOriginalMa.Norma != "")
+                                    txtLink += VersionOriginalMa.Norma;
+                                if (VersionOriginalMa.Numero != null && VersionOriginalMa.Numero != "")
+                                    txtLink += " Número " + VersionOriginalMa.Numero;
+                                if (VersionOriginalMa.Articulo != null && VersionOriginalMa.Articulo != "")
+                                    txtLink += " Artículo " + VersionOriginalMa.Articulo;
+                                if (VersionOriginalMa.Inciso != null && VersionOriginalMa.Inciso != "")
+                                    txtLink += ", Inciso " + VersionOriginalMa.Inciso;
+                                if (VersionOriginalMa.Titulo != null && VersionOriginalMa.Titulo != "")
+                                    txtLink += ".- " + VersionOriginalMa.Titulo;
+                                if (docBorradorHistorial.Links == null)
+                                    docBorradorHistorial.Links = new List<Link>();
+
+                                Link l = new Link();
+                                l.Texto = txtLink;
+                                l.Tipo = VersionOriginalMa.Norma;
+                                l.Url = VersionOriginalMa.IdDocumento;
+                                docBorradorHistorial.Links.Add(l);
+
+                                string versionFinalReferencia = FileBo.SerializeXML(docBorradorHistorial);
+                                FileBo.setXmlStringToFile(docHistorial.Version.Replace("_borrador.xml", ".xml"), versionFinalReferencia);
+
+                            }
+                            Indexador.Solr.cambiaEstadoHistorial(h.id, 1); // finaliza cambio
                         }
 
                     }
                     #endregion
+                    Indexador.Solr.cambiaEstadoDocumento(d.id, 0, ""); // saca estado borrador
 
+                    if (d.Estado == 98)
+                        ma.TextoCambio = "(Acepta publicación) " + ma.TextoCambio;
                     setLog(VersionOriginalMa, ma.TextoCambio);
 
                 }

@@ -18,7 +18,7 @@ namespace GestorDocumentosDataAccess.Modelo
         public string idUser { get; set; }
         public string idDocumento { get; set; }
         public string logDescripcion { get; set; }
-        public Nullable<System.DateTime> logFecha { get; set; }
+        public DateTime logFecha { get; set; }
         public string logDocumento { get; set; }
     }
 }

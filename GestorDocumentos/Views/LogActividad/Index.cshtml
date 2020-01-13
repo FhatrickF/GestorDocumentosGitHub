@@ -2,7 +2,14 @@
     ViewBag.Title = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
-
+<script>
+    ready(function () {
+        $('#Fecha').datepicker({
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        })
+    });
+</script>
 
 <section class="content-header">
     <h1>
@@ -14,10 +21,30 @@
         <div class="col-md-12">
             <div class="box box-default">
                 <div class="box-body">
+                    <div class="row">
+                        <form action="~/LogActividad/GetLista" method="post" id="formBite" name="formBite">
+                            <div class="col-md-4">
+                                <!-- fecha de busqueda -->
+
+                                <div class="form-group">
+                                    <div class="input-group date">
+                                        <div class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </div>
+                                        <input id="Fecha" value="@ViewBag.Fecha" name="Fecha" class="form-control pull-right" placeholder="Indique la fecha de búsqueda" type="text" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button class="btn btn-info" type="submit">Aceptar</button>
+                            </div>
+                        </form>
+                    </div>
+                    <!-- fin fecha de busqueda -->
                     <table id="tbAct" class="table table-bordered table-hover dt-responsive">
                         <thead class="blue darken-2 text-white">
                             <tr>
-                                <th>ID</th>
+                                <th>Hora</th>
                                 <th>Nombre Usuario</th>
                                 <th>Documento</th>
                                 <th>Descripcion</th>
@@ -27,7 +54,7 @@
                             @foreach (var item in ViewBag.list)
                             {
                                 <tr>
-                                    <td>@item.id</td>
+                                    <td>@item.hora</td>
                                     <td>@item.idUser</td>
                                     <td>@item.documento</td>
                                     <td>@item.descripcion</td>
@@ -48,13 +75,12 @@
         $('#tbAct').DataTable({
              "destroy": true,
             "responsive": true,
-            "searching": true,
             'bProcessing': true,
-            "bPaginate": true,
+            "bPaginate": false,
             "iDisplayLength": 10,
             "bFilter": false,
             "bLengthChange": false,
-            "bSort": false,
+            "bSort": true,
             "oLanguage": {
                     "sEmptyTable": "No se han encontrado registros.",
                     "sZeroRecords": "No se han encontrado registros.",
@@ -71,44 +97,6 @@
                     }
                 }
             });
-        @*var urlGetPaginado = '@Url.Content("~/LogActividad/List")';
-
-        $('#tbAct').DataTable({
-            "destroy": true,
-            "responsive": true,
-            "searching": false,
-            'bProcessing': true,
-            'bServerSide': true,
-            "bPaginate": true,
-            "iDisplayLength": 10,
-            "bFilter": false,
-            "bLengthChange": false,
-            "bSort": false,
-            "oLanguage": {
-                "sEmptyTable": "No se han encontrado registros.",
-                "sZeroRecords": "No se han encontrado registros.",
-                "sLengthMenu": "Mostrar _MENU_ registros",
-                "sLoadingRecords": "Espere por favor - Cargando...",
-                "sSearch": "Buscar:",
-                "sInfo": "Mostrando _START_ de _END_ en _TOTAL_ registros",
-                "sInfoEmpty": 'No se han encontrado registros.',
-                "oPaginate": {
-                    "sFirst": "Primero",
-                    "sLast": "Último",
-                    "sNext": "Siguiente",
-                    "sPrevious": "Anterior"
-                }
-            },
-            "sServerMethod": "POST",
-            "ajax": urlGetPaginado,
-            "ordering": true,
-            "columns": [
-                { "data": "id", "width": "25%" },
-                { "data": "idUser", "width": "25%" },
-                { "data": "idDocumento", "width": "25%" },
-                { "data": "descripcion", "width": "50%" }
-            ]
-        });*@
     });
     </script>
 }

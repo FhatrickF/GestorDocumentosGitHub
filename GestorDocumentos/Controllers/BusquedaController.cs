@@ -1,4 +1,5 @@
 ﻿using GestorDocumentosExceptions;
+using Microsoft.AspNet.Identity;
 using mvc4.Business;
 using mvc4.Models;
 using Newtonsoft.Json;
@@ -21,6 +22,7 @@ namespace GestorDocumentos.Controllers
         // GET: Busqueda
         public ActionResult Index(string id)
         {
+            Session["estado"] = 0;
             Documento d = new Documento();
             try
             {
@@ -50,6 +52,8 @@ namespace GestorDocumentos.Controllers
         [HttpPost]
         public string Index(FormularioBusqueda form)
         {
+            string borrador = form.Borrador;
+            string pendiente = form.Pendiente;
             string ct = form.Ct;
             string lr = form.Lr;
             string lt = form.Lt;
@@ -71,77 +75,108 @@ namespace GestorDocumentos.Controllers
             string pagina = Convert.ToString(form.Pagina);
             string coleccion = form.Coleccion;
 
+            coleccion = "&q=Coleccion:'" + coleccion + "'";
             bool ordenBy = false;
+
+            string usuario = User.Identity.GetUserName();
+            string rolUs = "";
+            try
+            {
+                rolUs = Session["rol"].ToString();
+            }
+            catch { }
+
+            string filtroUsuario = "";
+            if (rolUs != GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+            {
+                filtroUsuario = " AND Usuario:'" + usuario + "'";
+            }
 
             string q = "";
             try
             {
-                if (ct != null)
-                {
-                    q += "Norma:'CODIGO TRIBUTARIO'";
-                    ordenBy = true;
-                }
-                if (lr != null)
-                {
-                    q += (q != "" && q != null) ? " OR Norma:'LEY DE LA RENTA'" : "Norma:'LEY DE LA RENTA'";
-                    ordenBy = true;
-                }
-                if (lt != null)
-                {
-                    q += (q != "" && q != null) ? " OR Norma:'LEY DE TIMBRES Y ESTAMPILLAS'" : "Norma:'LEY DE TIMBRES Y ESTAMPILLAS'";
-                    ordenBy = true;
-                }
-                if (lzf != null)
-                {
-                    q += (q != "" && q != null) ? " OR Norma:'LEY DE ZONA FRANCA'" : "Norma:'LEY DE ZONA FRANCA'";
-                    ordenBy = true;
-                }
-                if (liva != null)
-                {
-                    q += (q != "" && q != null) ? " OR Norma:'LEY DEL IVA'" : "Norma:'LEY DEL IVA'";
-                    ordenBy = true;
-                }
-                if (circulares != null)
-                    q += (q != "" && q != null) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR'";
-                if (decretos != null)
-                    q += (q != "" && q != null) ? " OR Norma:'DECRETO'" : "Norma:'DECRETO'";
-                if (dfl != null)
-                    q += (q != "" && q != null) ? " OR Norma:'DECRETO CON FUERZA DE LEY'" : "Norma:'DECRETO CON FUERZA DE LEY'";
-                if (dl != null)
-                    q += (q != "" && q != null) ? " OR Norma:'DECRETO LEY'" : "Norma:'DECRETO LEY'";
-                if (ds != null)
-                    q += (q != "" && q != null) ? " OR Norma:'DECRETO SUPREMO'" : "Norma:'DECRETO SUPREMO'";
-                if (ley != null)
-                    q += (q != "" && q != null) ? " OR Norma:'LEY'" : "Norma:'LEY'";
-                if (resolucion != null)
-                    q += (q != "" && q != null) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
-
                 string bNorma = "";
-                if (q != "")
-                    bNorma = " AND (" + q + ")";
-
-                q = "";
-                if (fecha != null)
-                {
-                    fecha = fecha.Replace("/", "-");
-                    string[] f = fecha.Split('-');
-                    fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + "'";
-                }
-                if (numero != null)
-                    q += " AND Numero:'" + numero + "'";
-                if (articulo != null)
-                    q += " AND Articulo:'" + articulo + "'";
-                if (inciso != null)
-                    q += " AND Inciso:'" + inciso + "'";
-                if (texto != null)
-                    q += " AND Texto:'" + texto + "'";
-
                 string bDatos = "";
-                if (q != "")
-                    bDatos = q;
+                if (borrador != null)
+                {
+                    coleccion = "";
+                    bDatos = "&q=Estado:'99'" + filtroUsuario; // borrador
+                }else if (pendiente != null)
+                {
+                    coleccion = "";
+                    bDatos = "&q=Estado:'98'"; // pendiente
+                }
+                else
+                {
+                    #region filtros
+                    if (ct != null)
+                    {
+                        q += "Norma:'CODIGO TRIBUTARIO'";
+                        ordenBy = true;
+                    }
+                    if (lr != null)
+                    {
+                        q += (q != "" && q != null) ? " OR Norma:'LEY DE LA RENTA'" : "Norma:'LEY DE LA RENTA'";
+                        ordenBy = true;
+                    }
+                    if (lt != null)
+                    {
+                        q += (q != "" && q != null) ? " OR Norma:'LEY DE TIMBRES Y ESTAMPILLAS'" : "Norma:'LEY DE TIMBRES Y ESTAMPILLAS'";
+                        ordenBy = true;
+                    }
+                    if (lzf != null)
+                    {
+                        q += (q != "" && q != null) ? " OR Norma:'LEY DE ZONA FRANCA'" : "Norma:'LEY DE ZONA FRANCA'";
+                        ordenBy = true;
+                    }
+                    if (liva != null)
+                    {
+                        q += (q != "" && q != null) ? " OR Norma:'LEY DEL IVA'" : "Norma:'LEY DEL IVA'";
+                        ordenBy = true;
+                    }
+                    if (circulares != null)
+                        q += (q != "" && q != null) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR'";
+                    if (decretos != null)
+                        q += (q != "" && q != null) ? " OR Norma:'DECRETO'" : "Norma:'DECRETO'";
+                    if (dfl != null)
+                        q += (q != "" && q != null) ? " OR Norma:'DECRETO CON FUERZA DE LEY'" : "Norma:'DECRETO CON FUERZA DE LEY'";
+                    if (dl != null)
+                        q += (q != "" && q != null) ? " OR Norma:'DECRETO LEY'" : "Norma:'DECRETO LEY'";
+                    if (ds != null)
+                        q += (q != "" && q != null) ? " OR Norma:'DECRETO SUPREMO'" : "Norma:'DECRETO SUPREMO'";
+                    if (ley != null)
+                        q += (q != "" && q != null) ? " OR Norma:'LEY'" : "Norma:'LEY'";
+                    if (resolucion != null)
+                        q += (q != "" && q != null) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
 
-                string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo";
+                    bNorma = "";
+                    if (q != "")
+                        bNorma = " AND (" + q + ")";
+
+                    q = "";
+                    if (fecha != null)
+                    {
+                        fecha = fecha.Replace("/", "-");
+                        string[] f = fecha.Split('-');
+                        fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                        q += " AND Fecha:'" + fecha + "'";
+                    }
+                    if (numero != null)
+                        q += " AND Numero:'" + numero + "'";
+                    if (articulo != null)
+                        q += " AND Articulo:'" + articulo + "'";
+                    if (inciso != null)
+                        q += " AND Inciso:'" + inciso + "'";
+                    if (texto != null)
+                        q += " AND Texto:'" + texto + "'";
+
+                    bDatos = "";
+                    if (q != "")
+                        bDatos = q;
+                }
+                #endregion
+
+                string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
                 string orden = "";
                 if (ordenBy)
@@ -149,7 +184,7 @@ namespace GestorDocumentos.Controllers
                 else
                     orden = "Fecha";
 
-                string url = "select?fl=" + fl + "&q=Coleccion:'" + coleccion + "'" + bNorma + bDatos + "&sort=" + orden + " asc&start=" + pagina;
+                string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&sort=" + orden + " asc&start=" + pagina;
                 url = url.Replace("  ", " ");
 
                 string response = Indexador.Solr.getResponse(url);

@@ -11,5 +11,6 @@ namespace GestorDocumentosEntities
         public string idDocumento { get; set; }
         public string documento { get; set; }
         public string descripcion { get; set; }
+        public string hora { get; set; }
     }
 }

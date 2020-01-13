@@ -58,7 +58,7 @@ namespace GestorDocumentos.Controllers
         [AllowAnonymous]
         public ActionResult Login(string returnUrl)
         {
-            returnUrl = "";
+            //returnUrl = "";
             ViewBag.ReturnUrl = returnUrl;
             return View();
         }
@@ -74,7 +74,7 @@ namespace GestorDocumentos.Controllers
             {
                 return View(model);
             }
-
+            //returnUrl = "";
             // No cuenta los errores de inicio de sesión para el bloqueo de la cuenta
             // Para permitir que los errores de contraseña desencadenen el bloqueo de la cuenta, cambie a shouldLockout: true
             try
@@ -83,7 +83,7 @@ namespace GestorDocumentos.Controllers
                 switch (result)
                 {
                     case SignInStatus.Success:
-                        return RedirectToLocal(returnUrl);
+                        return RedirectToAction("Index", "Home");
                     case SignInStatus.LockedOut:
                         return View("Lockout");
                     case SignInStatus.RequiresVerification:
@@ -112,7 +112,7 @@ namespace GestorDocumentos.Controllers
             {
                 return View("Error");
             }
-            return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = returnUrl, RememberMe = rememberMe });
+            return View(new VerifyCodeViewModel { Provider = provider, ReturnUrl = "", RememberMe = rememberMe });
         }
 
         //

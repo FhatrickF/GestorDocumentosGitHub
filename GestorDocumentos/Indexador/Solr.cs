@@ -43,7 +43,8 @@ namespace GestorDocumentos.Indexador
             List<Historial> historial = new List<Historial>();
             try
             {
-                string query = "select?q=IdOriginal%3A" + idDocumento;
+                //string query = "select?q=IdOriginal%3A" + idDocumento;
+                string query = "select?q=IdOriginal%3A" + idDocumento + "%20AND%20Estado%3A0";
                 string response = getHistorialQuery(query);
                 if (response == "")
                     throw new Exception();
@@ -53,6 +54,7 @@ namespace GestorDocumentos.Indexador
                 foreach (var d in obj.response.docs)
                 {
                     Historial h = new Historial();
+                    h.id = d.id;
                     h.Tipo = Convert.ToInt32(d.Tipo);
                     h.IdOriginal = d.IdOriginal;
                     h.IdReferencia = d.IdReferencia;
@@ -202,6 +204,33 @@ namespace GestorDocumentos.Indexador
             }
         }
 
+        public static bool cambiaEstadoDocumento(string id, int estado, string usuario)
+        {
+            string xml = "";
+            xml += "<add>";
+            xml += "<doc>";
+            xml += "<field name=\"id\">" + id + "</field>";
+            xml += "<field name=\"Estado\" update=\"set\">" + Convert.ToString(estado) + "</field>";
+            xml += "<field name=\"Usuario\" update=\"set\">" + usuario + "</field>";
+            xml += "</doc>";
+            xml += "</add>";
+            sendDocument(xml);
+            return true;
+        }
+
+        public static bool cambiaEstadoHistorial(string id, int estado)
+        {
+            string xml = "";
+            xml += "<add>";
+            xml += "<doc>";
+            xml += "<field name=\"id\">" + id + "</field>";
+            xml += "<field name=\"Estado\" update=\"set\">" + Convert.ToString(estado) + "</field>";
+            xml += "</doc>";
+            xml += "</add>";
+            sendHistorial(xml);
+            return true;
+        }
+
         public static bool sendXmlHistoria(Historial historial)
         {
             string xml = "";
@@ -209,6 +238,7 @@ namespace GestorDocumentos.Indexador
             xml += "<field name=\"Tipo\">" + historial.Tipo + "</field>";
             xml += "<field name=\"IdOriginal\">" + historial.IdOriginal + "</field>";
             xml += "<field name=\"IdReferencia\">" + historial.IdReferencia + "</field>";
+            xml += "<field name=\"Estado\">" + historial.Estado + "</field>";
             xml += "</doc></add>";
             sendHistorial(xml);
             return true;

@@ -89,17 +89,54 @@
             removeButtons: 'Iframe'
         });
 
-        $('#btn-publicar').click(function () {
-            //divTextoCambio
-            $('#divTextoCambio').modal('show');
-            //$('#EsBorrador').val("false");
+        $('#aTab4').click(function () {
+            var params = new Object();
+            $('#dvCargandoHistorial').html("Buscando historial ...");
+            $('#dvCargandoHistorial').show();
+            params.Id = "@Model.IdDocumento";
+            $.ajax({
+                type: "POST",
+                url: "/Document/Ma_Historial",
+                content: "application/json; charset=utf-8",
+                dataType: "json",
+                data: params,
+                success: function (d) {
+                    if (d.Error == null) {
+                        $('#dvCargandoHistorial').hide();
+                        var historial = "";
+                        for (var x = 0; x < d.length; x++) {
+                            historial += d[x].idUser + ".- " + d[x].hora + "<br />";
+                            historial += d[x].descripcion + "<br />";
+                            historial += "<br />";                           
+                        }
+                        $('#divHistorial').html(historial);
+                    } else {
+                        $('#dvCargandoHistorial').show();
+                        $('#dvCargandoHistorial').html(d.Error);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    $('#dvCargandoHistorial').show();
+                    $('#dvCargandoHistorial').html("Ocurrió un error al buscar historial del documento");
+                }
+            });
+        });
 
-            //$("#setForm").submit();
+        $('#btn-publicar').click(function () {
+            $('#divTextoCambio').modal('show');
         });
 
         $('#btnAceptarEliminarReferencia').click(function () {
             alert(referencias);
             location.href = "/Document/Ma_EliminaReferencias?referencias=" + referencias;
+        });
+
+        $('#btn-eliminarBorrador').click(function () {
+            $('#divEliminaBorrador').modal('show');
+        });
+
+        $('#btnAceptarEliminarBorrador').click(function () {
+            location.href = "../Ma_EliminaBorrador?id=@Model.IdDocumento";
         });
 
         $('#btnAceptarCambio').click(function () {
@@ -110,6 +147,7 @@
             }
             $('#TextoCambio').val(t);
             $('#EsBorrador').val("false");
+            $('#Publicar').val("true");
             $("#setForm").submit();
         });
 
@@ -148,6 +186,7 @@
 
         $('#btn-guardar').click(function () {
             $('#EsBorrador').val("true");
+            $('#Publicar').val("false");
             $('#ColeccionGlosa').val($('#divColeccion').html());
             $('#CategoriaGlosa').val($('#divCategoria').html());
             $('#SeccionGlosa').val($('#divSeccion').html());
@@ -197,7 +236,7 @@
         var params = new Object();
         params.lista = lista;
         params.tipo = idLista;
-        params.coleccion = "@ViewBag.Coleccion";
+        params.coleccion = $('#divColeccion').html();
         $.ajax({
             type: "POST",
             url: "/Document/GetLista",
@@ -209,10 +248,15 @@
                     var txt = "";
                     for (var x = 0; x < d.Detalles.length; x++) {
                         var seleccionado = "";
-                        if (d.Detalles[x].Seleccionado)
-                            seleccionado = " divSelected";
+                        var n = d.Detalles[x].Nombre;
+                        if (n.indexOf(".::") > -1) {
+                            txt += "<div style=\"text-align:center\"><strong>" + d.Detalles[x].Nombre + "</strong></div>";
+                        } else {
+                            if (d.Detalles[x].Seleccionado)
+                                seleccionado = " divSelected";
 
-                        txt += "<div id=\"l_" + (x + 1) + "\" class=\"divLista" + seleccionado + "\">" + d.Detalles[x].Nombre + "</div>";
+                            txt += "<div id=\"l_" + (x + 1) + "\" class=\"divLista" + seleccionado + "\">" + d.Detalles[x].Nombre + "</div>";
+                        }
                     }
                     $('#divDetalleListado').modal('show');
                     $('#divDetalleListadoTitulo').text(idLista);
@@ -254,7 +298,7 @@
                     <div class="box-body">
                         <div class="row">
                             <div class="col-md-8">
-                                @if (Model.EsBorrador)
+                                @if (ViewBag.Estado == "Borrador")
                                 {
                                     <div class="alert alert-danger alert-dismissable">
                                         <button class="close" type="button" data-dismiss="alert" aria-hidden="true">x</button>
@@ -263,6 +307,22 @@
                                             Atención!
                                         </h4>
                                         Este es un borrador de la versión original
+                                        @if (User.Identity.GetUserName() != ViewBag.Usuario)
+                                        {
+                                            <br />
+                                            <strong>Este borrador fue iniciado por otro usuario</strong>
+                                        }
+                                    </div>
+                                }
+                                else if (ViewBag.Estado == "Pendiente")
+                                {
+                                    <div class="alert alert-info alert-dismissable">
+                                        <button class="close" type="button" data-dismiss="alert" aria-hidden="true">x</button>
+                                        <h4>
+                                            <i class="icon fa fa-ban"></i>
+                                            Atención!
+                                        </h4>
+                                        El documento se encuentra en proceso de revisión. No se pueden realizar cambios.
                                     </div>
                                 }
                                 <label>Texto del documento</label>
@@ -271,6 +331,7 @@
                                 @Html.HiddenFor(m => m.IdDocumento)
                                 @Html.HiddenFor(m => m.id)
                                 @Html.HiddenFor(m => m.EsBorrador)
+                                @Html.HiddenFor(m => m.Publicar)
                                 @Html.HiddenFor(m => m.ColeccionGlosa)
                                 @Html.HiddenFor(m => m.SeccionGlosa)
                                 @Html.HiddenFor(m => m.CategoriaGlosa)
@@ -280,13 +341,18 @@
                                 <div class="row">
                                     <div class="col-md-8">
                                     </div>
-                                    <div class="col-md-4">
-                                        <button id="btn-guardar" type="button" class="btn btn-primary btn-block">Guardar documento</button>
-                                        @if (Model.EsBorrador)
-                                        {
-                                            <button id="btn-publicar" type="button" class="btn btn-success btn-block">Publicar</button>
-                                        }
-                                    </div>
+                                    @if (ViewBag.Estado != "Pendiente")
+                                    {
+                                        <div class="col-md-4">
+                                            <button id="btn-guardar" type="button" class="btn btn-primary btn-block">Guardar documento</button>
+                                            @if (Model.EsBorrador)
+                                            {
+                                                <button id="btn-publicar" type="button" class="btn btn-success btn-block">Publicar</button>
+                                                <br />
+                                                <button id="btn-eliminarBorrador" type="button" class="btn btn-danger btn-block">Eliminar borrador</button>
+                                            }
+                                        </div>
+                                    }
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -300,6 +366,9 @@
                                         </li>
                                         <li>
                                             <a href="#tab_3" data-toggle="tab">Referencias</a>
+                                        </li>
+                                        <li>
+                                            <a id="aTab4" href="#tab_4" data-toggle="tab">Historial</a>
                                         </li>
                                     </ul>
                                     <div class="tab-content">
@@ -371,11 +440,14 @@
                                             }
                                         </div>
                                         <div id="tab_3" class="tab-pane">
-                                            <button type="button" class="btn btn-block btn-primary btn-sm" id="btnMyModal">Agregar/modificar nota</button>
-                                            <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
+                                            @if (ViewBag.Estado != "Pendiente")
+                                            {
+                                                <button type="button" class="btn btn-block btn-primary btn-sm" id="btnMyModal">Agregar/modificar nota</button>
+                                                <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
 
-                                            <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
-                                            <br />
+                                                <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
+                                                <br />
+                                            }
                                             @foreach (var link in Model.Links)
                                             {
                                                 if (link.Tipo.IndexOf("no contiene referencias") > 0)
@@ -399,6 +471,10 @@
                                                     <br /><br />
                                                 }
                                             }
+                                        </div>
+                                        <div id="tab_4" class="tab-pane">
+                                            <div style="color: red" id="dvCargandoHistorial"></div>
+                                            <div id="divHistorial"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -487,6 +563,25 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
                     <button type="button" id="btnAceptarEliminarReferencia" class="btn btn-primary">Sí</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Elimina borrador -->
+    <div class="modal fade" id="divEliminaBorrador" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="divTituloEliminaBorrador">Eliminar Borrador</h4>
+                </div>
+                <div class="modal-body">
+                    ¿Está seguro que desa eliminar el borrador?
+                    <br /><br />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
+                    <button type="button" id="btnAceptarEliminarBorrador" class="btn btn-primary">Sí</button>
                 </div>
             </div>
         </div>

@@ -219,6 +219,9 @@ namespace mvc4.Models
         public string Version { get; set; }
         public bool VersionFinal { get; set; }
         public bool EsBorrador { get; set; }
+        public bool Publicar { get; set; }
+        public int Estado { get; set; }
+        public string Usuario { get; set; }
         public string TextoCambio { get; set; }
         [AllowHtml]
         [Required]
@@ -236,6 +239,8 @@ namespace mvc4.Models
 
     public class FormularioBusqueda
     {
+        public string Borrador { get; set; }
+        public string Pendiente { get; set; }
         public string Ct { get; set; }
         public string Lr { get; set; }
         public string Lt { get; set; }
@@ -267,8 +272,10 @@ namespace mvc4.Models
 
     public class Historial
     {
+        public string id { get; set; }
         public int Tipo { get; set; }
         public string IdOriginal { get; set; }
         public string IdReferencia { get; set; }
+        public int Estado { get; set; }
     }
 }
