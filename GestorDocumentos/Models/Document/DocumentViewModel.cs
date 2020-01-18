@@ -81,12 +81,20 @@ namespace mvc4.Models
         public bool Seleccionado { get; set; }
     }
 
+    public class DetalleReasignacion
+    {
+        public string usuarioReasignacion { get; set; }
+        public string textoReasignacion { get; set; }
+        public string documentoReasignacion { get; set; }
+    }
+
     public class Documento
     {
         private string _Coleccion = "";
         private string _Categoria = "";
         private string _Seccion = "";
         private string _Tema = "";
+        private string _Fecha = "";
 
         public string id { get; set; }
         public string IdDocumento { get; set; }
@@ -163,6 +171,8 @@ namespace mvc4.Models
         public string Regco { get; set; }
         public string Resuel { get; set; }
         public string Rol { get; set; }
+        public string Tribunal { get; set; }
+        public string Partes { get; set; }
         public string[] Seccion { get; set; }
         [XmlIgnoreAttribute]
         public string SeccionGlosa

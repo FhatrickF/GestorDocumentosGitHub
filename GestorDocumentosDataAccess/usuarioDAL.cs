@@ -11,6 +11,29 @@ namespace GestorDocumentosDataAccess
 {
     public class usuarioDAL
     {
+        public static List<usuarioEntity> getListaUsuarios()
+        {
+            List<usuarioEntity> usuarios = new List<usuarioEntity>();
+            try
+            {
+                using (infoEntities db = new infoEntities())
+                {
+                    List<AspNetUsers> users = db.AspNetUsers.Where(x => x.Id != "").OrderBy(x => x.UserName).ToList();
+                    foreach(AspNetUsers user in users)
+                    {
+                        usuarioEntity usuario = new usuarioEntity();
+                        usuario.UserName = user.UserName;
+                        usuarios.Add(usuario);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new TechnicalException("No se pudo recuperar lista de usuarios", ex);
+            }
+            return usuarios;
+        }
+
         public static usuarioEntity getUserbyName(string name)
         {
             try

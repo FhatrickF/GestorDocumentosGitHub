@@ -88,12 +88,8 @@
                                 </div>
 
                             }
-                            <strong>@Html.Raw(Model.Norma)</strong>
-                            <br /><br />
-                            @Html.Raw(Model.Organismo)
-                            <br /><br />
-                            <strong>@Html.Raw(Model.Titulo)</strong>
-                            <br /><br />
+
+                            <a href="~/Document/Ma_EditarDocumento/@Model.IdDocumento" id="btn-vista-previa" class="btn btn-success btn-block">Ir a edición del documento</a>
                             @Html.Raw(Model.Texto)
                         </div>
                         @if (!ViewBag.Referencia)
@@ -131,6 +127,11 @@
                                 <form method="post" action="~/Document/SetReferencia" id="form-referencia">
                                     <label for="nuevaReferencia">Descripción</label>
                                     <textarea rows="5" class="form-control" id="textoReferencia" name="textoReferencia"></textarea>
+                                    <label for="tipo">Tipo referencia</label>
+                                    <select name="tipo" class="form-control" id="tipo">
+                                        <option value="NORMATIVA">Normativa</option>
+                                        <option value="JURISPRUDENCIA">Jurisprudencia</option>
+                                    </select>
                                     <input type="hidden" name="tipoReferencia" value="@Model.Norma" />
                                     <input type="hidden" name="idDocumento" value="@Model.IdDocumento" />
                                     <input type="hidden" name="tipoReferenciaDoc" value="@ViewBag.DocumentoR.Norma" />

@@ -101,6 +101,22 @@ namespace GestorDocumentos.Indexador
                         id_ = doc_.id;
                         idDocumento = doc_.IdDocumento;
                         Fecha = Convert.ToString(doc_.Fecha);
+                        Fecha = Fecha.Replace("/", "-");
+                        string[] f = Fecha.Split('-');
+                        string o = f[0];
+                        if (o.Length == 1)
+                        {
+                            o = "0" + o;
+                            f[0] = o;
+                        }
+                        o = f[1];
+                        if (o.Length == 1)
+                        {
+                            o = "0" + o;
+                            f[1] = o;
+                        }
+
+                        Fecha = f[0] + "-" + f[1] + "-" + f[2];
                         //Norma = (doc_.Norma).Replace(" ", "_") + "\\";
                     }
                     if (Origen == "")

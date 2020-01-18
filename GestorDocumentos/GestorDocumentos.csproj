@@ -3044,6 +3044,8 @@
     <Content Include="Views\Busqueda\Index.cshtml" />
     <Content Include="Views\Document\Ma_NuevaReferencia.cshtml" />
     <Content Include="Views\LogActividad\Index.cshtml" />
+    <Content Include="Views\Document\Ma_Error.cshtml" />
+    <Content Include="Views\Document\Ma_DocumentoReasignado.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

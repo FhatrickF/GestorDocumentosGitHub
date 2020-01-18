@@ -11,6 +11,20 @@ namespace GestorDocumentosBusiness
 {
     public class usuarioBO
     {
+        public static List<usuarioEntity> getListaUsuarios()
+        {
+            List<usuarioEntity> usuarios = new List<usuarioEntity>();
+            try
+            {
+                usuarios = usuarioDAL.getListaUsuarios();
+            }
+            catch (TechnicalException ex)
+            {
+                usuarios = null;
+            }
+            return usuarios;
+        }
+
         public static usuarioEntity getUserbyName(string name)
         {
             try

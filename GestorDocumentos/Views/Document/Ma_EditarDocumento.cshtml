@@ -127,7 +127,6 @@
         });
 
         $('#btnAceptarEliminarReferencia').click(function () {
-            alert(referencias);
             location.href = "/Document/Ma_EliminaReferencias?referencias=" + referencias;
         });
 
@@ -137,6 +136,21 @@
 
         $('#btnAceptarEliminarBorrador').click(function () {
             location.href = "../Ma_EliminaBorrador?id=@Model.IdDocumento";
+        });
+
+        $('#btn-reasignarBorrador').click(function () {
+            $('#divTextoDevolverUsuario').modal('show');
+        });
+
+        $('#btnRechazarCambio').click(function () {
+            var t = $('#txtAreaMotivoRechazo').val();
+            if (t == "") {
+                alert("Debe indicar el motivo de devolución de los cambios realizados");
+                return 0;
+            }
+            $('#textoReasignacion').val(t);
+            $('#usuarioReasignacion').val($('#selecUsuarioReasignacion').val());           
+            $("#setFormRechaza").submit();           
         });
 
         $('#btnAceptarCambio').click(function () {
@@ -310,7 +324,7 @@
                                         @if (User.Identity.GetUserName() != ViewBag.Usuario)
                                         {
                                             <br />
-                                            <strong>Este borrador fue iniciado por otro usuario</strong>
+                                            <strong>Este borrador fue iniciado el usuario @ViewBag.Usuario</strong>
                                         }
                                     </div>
                                 }
@@ -326,6 +340,10 @@
                                     </div>
                                 }
                                 <label>Texto del documento</label>
+
+                                <a href="~/Document/Ma_VerDocumento/@Model.IdDocumento" id="btn-vista-previa" class="btn btn-warning btn-block">Vista previa</a>
+                                <br />
+
                                 @Html.TextAreaFor(m => m.Texto, new { @class = "form-control", row = "10", cols = "80" })
 
                                 @Html.HiddenFor(m => m.IdDocumento)
@@ -339,17 +357,28 @@
                                 @Html.HiddenFor(m => m.TextoCambio)
                                 <br />
                                 <div class="row">
-                                    <div class="col-md-8">
+                                    <div class="col-md-6">
+                                        @if (ViewBag.Estado != "Pendiente")
+                                        {
+                                            if (Model.EsBorrador)
+                                            {
+                                                <button id="btn-eliminarBorrador" type="button" class="btn btn-danger btn-block">Eliminar borrador</button>
+                                                if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+                                                {
+                                                    <button id="btn-reasignarBorrador" type="button" class="btn btn-info btn-block">Asignar borrador @ViewBag.Usuario</button>
+                                                }
+                                            }
+                                        }
                                     </div>
                                     @if (ViewBag.Estado != "Pendiente")
                                     {
-                                        <div class="col-md-4">
+                                        <div class="col-md-6" style="text-align: right">
                                             <button id="btn-guardar" type="button" class="btn btn-primary btn-block">Guardar documento</button>
                                             @if (Model.EsBorrador)
                                             {
                                                 <button id="btn-publicar" type="button" class="btn btn-success btn-block">Publicar</button>
                                                 <br />
-                                                <button id="btn-eliminarBorrador" type="button" class="btn btn-danger btn-block">Eliminar borrador</button>
+
                                             }
                                         </div>
                                     }
@@ -409,6 +438,14 @@
                                                 @Html.TextBoxFor(m => m.Inciso, new { @class = "form-control" })
                                             </div>
                                             <div class="form-group">
+                                                @Html.LabelFor(m => m.Tribunal, "Tribunal")
+                                                @Html.TextBoxFor(m => m.Tribunal, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.Partes, "Partes")
+                                                @Html.TextBoxFor(m => m.Partes, new { @class = "form-control" })
+                                            </div>
+                                            <div class="form-group">
                                                 <label>Seccion: </label>
                                                 <div id="divSeccion">
                                                     @Html.Raw(Model.SeccionGlosa)
@@ -428,14 +465,17 @@
                                             </div>
                                         </div>
                                         <div id="tab_2" class="tab-pane">
-                                            @foreach (var version in Model.Versiones)
+                                            @if (Model.Versiones != null)
                                             {
-                                                if (version.nombre.IndexOf("borrador") < 0)
+                                                foreach (var version in Model.Versiones)
                                                 {
-                                                    <a target="_blank" href="~/Document/Ma_VerVersion/@version.nombre" class="text-blue">
-                                                        Versión @version.id
-                                                    </a>
-                                                    <br />
+                                                    if (version.nombre.IndexOf("borrador") < 0)
+                                                    {
+                                                        <a target="_blank" href="~/Document/Ma_VerVersion/@version.nombre" class="text-blue">
+                                                            Versión @version.id
+                                                        </a>
+                                                        <br />
+                                                    }
                                                 }
                                             }
                                         </div>
@@ -448,27 +488,30 @@
                                                 <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
                                                 <br />
                                             }
-                                            @foreach (var link in Model.Links)
+                                            @if (Model.Links != null)
                                             {
-                                                if (link.Tipo.IndexOf("no contiene referencias") > 0)
+                                                foreach (var link in Model.Links)
                                                 {
-                                                    @link.Tipo
-                                                }
-                                                else
-                                                {
-                                                    @link.Tipo
-                                                    <br />
-                                                    <a href="~/Document/Ma_EditarDocumento/@link.Url">
-                                                        @link.Texto
-                                                    </a>
-                                                    if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+                                                    if (link.Tipo.IndexOf("no contiene referencias") > 0)
                                                     {
-                                                        <br />
-                                                        <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
-                                                            [ Eliminar ]
-                                                        </label>
+                                                        @link.Tipo
                                                     }
-                                                    <br /><br />
+                                                    else
+                                                    {
+                                                        @link.Tipo
+                                                        <br />
+                                                        <a href="~/Document/Ma_EditarDocumento/@link.Url">
+                                                            @link.Texto
+                                                        </a>
+                                                        if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+                                                        {
+                                                            <br />
+                                                            <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
+                                                                [ Eliminar ]
+                                                            </label>
+                                                        }
+                                                        <br /><br />
+                                                    }
                                                 }
                                             }
                                         </div>
@@ -484,6 +527,14 @@
                 </div>
             </div>
         </div>
+    }
+    <!-- form rechaza borrador -->
+    @using (Html.BeginForm("Ma_RechazarBorrador", "Document", FormMethod.Post, new { id = "setFormRechaza" }))
+    {
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="textoReasignacion" id="textoReasignacion" value="" />
+        <input type="hidden" name="usuarioReasignacion" id="usuarioReasignacion" value="@ViewBag.Usuario" />
+        <input type="hidden" name="documentoReasignacion" id="documentoReasignacion" value="@Model.IdDocumento" />
     }
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -582,6 +633,44 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
                     <button type="button" id="btnAceptarEliminarBorrador" class="btn btn-primary">Sí</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- texto motivo devolucion usuario -->
+    <div class="modal fade" id="divTextoDevolverUsuario" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="divDetalleListadoTitulo">Motivo para rechazar cambios</h4>
+                </div>
+                <div class="modal-body" id="txtDetalleListado">
+                    Indique una breve descripción del motivo para reasignar cambios<br />
+                    al borrador y el usuario indicado.
+                    <br /><br />
+                          <select id="selecUsuarioReasignacion" class="form-control">
+                              @if (ViewBag.listadoUsuarios != null)
+                              {
+                                  foreach (var us in ViewBag.listadoUsuarios)
+                                  {
+                                      if (us.UserName == ViewBag.Usuario)
+                                      {
+                                          <option value="@us.UserName" selected="selected">@us.UserName</option>
+                                      }
+                                      else
+                                      {
+                                          <option value="@us.UserName">@us.UserName</option>
+                                      }
+                                  }
+                              }
+                          </select>
+                    <br />
+                    <textarea id="txtAreaMotivoRechazo" class="form-control" style="width: 100%" rows="5"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" id="btnRechazarCambio" class="btn btn-primary">Aceptar</button>
                 </div>
             </div>
         </div>

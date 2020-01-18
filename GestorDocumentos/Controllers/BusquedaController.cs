@@ -87,10 +87,10 @@ namespace GestorDocumentos.Controllers
             catch { }
 
             string filtroUsuario = "";
-            if (rolUs != GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
-            {
+            //if (rolUs != GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+            //{
                 filtroUsuario = " AND Usuario:'" + usuario + "'";
-            }
+            //}
 
             string q = "";
             try

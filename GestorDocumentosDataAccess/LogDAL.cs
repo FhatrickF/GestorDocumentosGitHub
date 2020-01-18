@@ -41,7 +41,7 @@ namespace GestorDocumentosDataAccess
             {
                 using (infoEntities db = new infoEntities())
                 {
-                    List<Log_Documento> log = db.Log_Documento.Where(x => x.idDocumento == Id).OrderBy(x => x.logFecha).ToList();
+                    List<Log_Documento> log = db.Log_Documento.Where(x => x.idDocumento == Id).OrderByDescending(x => x.id).ToList();
                     foreach (var log_ in log)
                     {
                         log_documentoEntity _Documento = new log_documentoEntity();
@@ -78,7 +78,7 @@ namespace GestorDocumentosDataAccess
                 List<log_documentoEntity> logs = new List<log_documentoEntity>();
                 using (infoEntities db = new infoEntities())
                 {
-                    List<Log_Documento> log = db.Log_Documento.Where(x => x.logFecha >= inicio && x.logFecha <= final).OrderBy(x => x.logFecha).ToList();
+                    List<Log_Documento> log = db.Log_Documento.Where(x => x.logFecha >= inicio && x.logFecha <= final).OrderByDescending(x => x.id).ToList();
                     foreach (var log_ in log)
                     {
                         log_documentoEntity _Documento = new log_documentoEntity();
