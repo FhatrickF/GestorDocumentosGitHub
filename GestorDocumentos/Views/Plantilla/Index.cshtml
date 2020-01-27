@@ -1,0 +1,73 @@
+﻿@using Microsoft.AspNet.Identity
+@model mvc4.Models.Documento
+@{
+    ViewBag.Title = "Index";
+}
+
+
+<section class="content-header">
+    <h1>
+        Búsqueda por Plantillas
+    </h1>
+</section>
+
+<section class="content">
+    <div class="row" id="inicio">
+        <div class="col-md-5">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <i class="fa fa-file-text-o"></i>
+                    <h3 class="box-title">Base de datos</h3>
+                </div>
+                <div class="box-body">
+                    <div class="col-md-12">
+                        <div class="box box-default">
+                            <div class="box-header with-border">
+                                <h3 class="box-title">Criterios de búsqueda</h3>
+                            </div>
+                            <div class="box-body">
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <label>Seleccione Plantilla</label>
+                                        <select name="plantilla" id="plantilla" class="form-control">
+                                            <option value="S">Seleccionar</option>
+                                            <option value="NG">Normas Generales</option>
+                                            <option value="NP">Normas Particulares</option>
+                                            <option value="PJ">Publicaciones Judiciales</option>
+                                            <option value="AV">Avisos</option>
+                                            <option value="LEA">Legislación Actualizada</option>
+                                            <option value="NM">Normativa Medioambiental</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <hr />
+                                <div id="dvNG" style="display:none;">
+                                    @Html.Partial("~/Views/Plantilla/formNG.cshtml")
+                                </div>
+                                <div id="dvNP" style="display:none;">
+                                    @Html.Partial("~/Views/Plantilla/formNP.cshtml")
+                                </div>
+                                <div id="dvPJ" style="display:none;">
+                                    Publicaciones Judiciales
+                                </div>
+                                <div id="dvAV" style="display:none;">
+                                    Avisos
+                                </div>
+                                <div id="dvLEA" style="display:none;">
+                                    Legislación Actualizada
+                                </div>
+                                <div id="dvNM" style="display:none;">
+                                    Normativa Medioambiental
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- fin formulario -->
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script src="~/Scripts/Pages/Plantillas.js"></script>
+}

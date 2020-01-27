@@ -1,0 +1,179 @@
+﻿
+@{
+    ViewBag.Title = "BuscarPJ";
+}
+
+<section class="content-header">
+    <h1>
+        Búsqueda por Plantillas
+    </h1>
+</section>
+
+<section class="content">
+    <div class="row" id="inicio">
+        <div class="col-md-5">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <i class="fa fa-file-text-o"></i>
+                    <h3 class="box-title">Base de datos</h3>
+                </div>
+                <div class="box-body">
+                    <div class="col-md-12">
+                        <div class="box box-default">
+                            <div class="box-header with-border">
+                                <h1 class="box-title "><strong>Publicaciones Judiciales</strong> </h1> -
+                                <h3 class="box-title">Criterios de búsqueda</h3>
+                            </div>
+                            <div class="box-body">
+                                <form action="~/Plantilla/BuscarPJ" name="BuscarPJ" id="BuscarPJ" method="post">
+                                    <div class="form-group">
+                                        <label for="focusedInput">Con todas estas palabras:</label>
+                                        <input class="form-control" name="todas" type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="focusedInput">Sin ninguna de estas palabras:</label>
+                                        <input class="form-control" name="ninguna" type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="focusedInput">Con una o más de las palabras</label>
+                                        <input class="form-control" name="plus" type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="focusedInput">Con la frase exacta:</label>
+                                        <input class="form-control" name="exacta" type="text">
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <div class="checkbox">
+                                            <label><input type="checkbox" id="chxt" name="chxt" value="ok">Seleccione todos</label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="qu" class="chx" value="OK">Quiebras</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" class="chx" name="cm" value="ok">Cambios de Nombre</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" class="chx" name="rd" value="ok">Reconstitución de Dominio</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" class="chx" name="mp" value="ok">Muertes Presunta</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" class="chx" name="n" value="ok">Notificaciones</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" class="chx" name="ed" value="ok">Extravio de Documentos</label>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Fecha publicación</label><br />
+                                        <label>desde:</label>
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input id="FechaD" name="FechaD" class="form-control pull-right" type="text" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Hasta:</label>
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input id="FechaH" name="FechaH" class="form-control pull-right" type="text" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <button type="button" id="btn-PJ" class="btn btn-primary btn-block">Buscar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- fin formulario -->
+        </div>
+        <div class="col-md-7">
+            <div class="row">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <i class="fa fa-file-text-o"></i>
+                        <h3 class="box-title">Resultados</h3>
+                    </div>
+                    <div class="box-body">
+                        @if (ViewBag.Referencia)
+                        {
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="box box-success box-solid">
+                                        <div class="box-header with-border">
+                                            <h3>Nueva referencia</h3>
+                                        </div>
+                                        <div class="box-body">
+                                            <strong>@Model.Norma</strong><br />
+                                            @if (Model.Organismo != null && Model.Organismo != "")
+                                            {
+                                                @Model.Organismo
+                                            }
+                                            @if (Model.Numero != null && Model.Numero != "")
+                                            {
+                                                <label>Número @Model.Numero</label>
+                                            }
+                                            @if (Model.Articulo != null && Model.Articulo != "")
+                                            {
+                                                <label>Artículo @Model.Articulo</label>
+                                            }
+                                            @if (Model.Inciso != null && Model.Inciso != "")
+                                            {
+                                                <label>Inciso @Model.Inciso</label>
+                                            }
+                                            <br /><br />
+                                            @Model.Titulo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label id="lblTotal"></label>
+                                <div id="tblResultado">
+                                    <table id="resultado" class="table table-bordered">
+                                        <tbody id="tablaBody"></tbody>
+                                    </table>
+                                </div>
+                                <div id="msgError" style="display:none;">
+                                    <div class="alert alert-warning">
+                                        <h4>
+                                            <i class="icon fa fa-warning"></i>
+                                            Atención !!
+                                        </h4>
+                                        No se encontraron registros para la búsqueda indicada.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12" style="text-align: right" id="paginacion">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script src="~/Scripts/Pages/Plantillas.js"></script>
+    <script src="~/Scripts/Pages/BuscarPlantillas.js"></script>
+}
+
