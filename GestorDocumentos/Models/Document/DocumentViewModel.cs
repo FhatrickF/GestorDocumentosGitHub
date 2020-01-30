@@ -242,6 +242,7 @@ namespace mvc4.Models
 
     public class Link
     {
+        public string Colecciones { get; set; }
         public string Tipo { get; set; }
         public string Texto { get; set; }
         public string Url { get; set; }

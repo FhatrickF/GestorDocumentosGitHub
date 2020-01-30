@@ -6,6 +6,11 @@
 <script type="text/javascript">
     ready(function () {
         $('#btn-referencia').click(function () {
+            var col = $("#colecciones").val();
+            if (col == "") {
+                alert("Debe seleccionar las colecciones para las que será visible la referencia.");
+                return;
+            }
             var texto = $("#textoReferencia").val();
             if (texto == "") {
                 alert("Debe indicar la descripción de la nueva referencia");
@@ -17,6 +22,14 @@
         $('.linkNota').click(function () {
             event.preventDefault();
             var i = $(this).attr('id');
+            var cols = i.split('_');
+            var colecciones = "";
+            for (var x = 0; x < cols.length - 1; x++) {
+                if (colecciones != "")
+                    colecciones += ", ";
+                colecciones += cols[x];
+            }
+            colecciones = "Nota visible para " + colecciones;
             var params = new Object();
             params.Nota = new Object();
             params.Nota.Result = 1;
@@ -32,7 +45,7 @@
                     if (d.Result == 0) {
                         $("#aNota").attr("href", "@Url.Action("Ma_EditarDocumento", "Document", new { id = Model.IdDocumento })" + "-" + i);
                         $('#detalleNota').modal('show')
-                        $('#txtDetalleNota').html(d.TextoNota);
+                        $('#txtDetalleNota').html(colecciones + "<br /><br />" + d.TextoNota);
                     }
                     else {
                         alert(d.TextoNota);
@@ -94,31 +107,31 @@
                         </div>
                         @if (!ViewBag.Referencia)
                         {
-                            <div class="col-md-4" style="border-left: 1px solid gray">
-                                <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
-                                <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
-                                <div style="float: left">
-                                    <h3>Referencias</h3>
-                                </div>
-                                <div style="clear: both"></div>
-                                @foreach (var link in Model.Links)
-                                {
-                                    if (link.Tipo.IndexOf("no contiene links") > 0)
-                                    {
-                                        @link.Tipo
-                                    }
-                                    else
-                                    {
-
-                                        @link.Tipo
-                                        <br />
-                                        <a href="~/Document/Ma_VerDocumento/@link.Url">
-                                            @link.Texto
-                                        </a>
-                                        <br /><br />
-                                    }
-                                }
+                        <div class="col-md-4" style="border-left: 1px solid gray">
+                            <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
+                            <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
+                            <div style="float: left">
+                                <h3>Referencias</h3>
                             </div>
+                            <div style="clear: both"></div>
+                            @foreach (var link in Model.Links)
+                            {
+                                if (link.Tipo.IndexOf("no contiene links") > 0)
+                                {
+                                    @link.Tipo
+                                }
+                                else
+                                {
+                                    <label>Visible para</label> @link.Colecciones <br />
+                                    @link.Tipo
+                                    <br />
+                                    <a href="~/Document/Ma_VerDocumento/@link.Url">
+                                        @link.Texto
+                                    </a>
+                                    <br /><br />
+                                }
+                            }
+                        </div>
                         }
                         @if (ViewBag.Referencia)
                         {
@@ -127,11 +140,21 @@
                                 <form method="post" action="~/Document/SetReferencia" id="form-referencia">
                                     <label for="nuevaReferencia">Descripción</label>
                                     <textarea rows="5" class="form-control" id="textoReferencia" name="textoReferencia"></textarea>
+                                    <br />
                                     <label for="tipo">Tipo referencia</label>
                                     <select name="tipo" class="form-control" id="tipo">
                                         <option value="NORMATIVA">Normativa</option>
                                         <option value="JURISPRUDENCIA">Jurisprudencia</option>
                                     </select>
+                                    <br />
+                                    <label for="colecciones">Visible para:</label>
+                                    <select id="colecciones" name="colecciones" class="form-control" multiple>
+                                        @for (var x = 0; x < ViewBag.DocumentoR.Coleccion.Length; x++)
+                                        {
+                                            <option value="@ViewBag.DocumentoR.Coleccion[x]">@ViewBag.DocumentoR.Coleccion[x]</option>
+                                        }
+                                    </select>
+
                                     <input type="hidden" name="tipoReferencia" value="@Model.Norma" />
                                     <input type="hidden" name="idDocumento" value="@Model.IdDocumento" />
                                     <input type="hidden" name="tipoReferenciaDoc" value="@ViewBag.DocumentoR.Norma" />
@@ -159,7 +182,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                    <a id="aNota" href="#" class="btn btn-primary">.:: Editar ::.</a>
                 </div>
             </div>
         </div>

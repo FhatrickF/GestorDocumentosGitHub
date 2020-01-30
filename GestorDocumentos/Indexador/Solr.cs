@@ -234,6 +234,36 @@ namespace GestorDocumentos.Indexador
             return true;
         }
 
+        public static bool EliminaDocumento(string id)
+        {
+            string xml = "<delete><query>IdDocumento:" + id + "</query></delete>";
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(SOLR_URL + SOLR_CORE + "update?commitWithin=1000&overwrite=true&wt=json");
+                byte[] bytes;
+                bytes = System.Text.Encoding.UTF8.GetBytes(xml);
+                request.ContentType = "text/xml; encoding='utf-8'";
+                request.ContentLength = bytes.Length;
+                request.Method = "POST";
+                Stream requestStream = request.GetRequestStream();
+                requestStream.Write(bytes, 0, bytes.Length);
+                requestStream.Close();
+                HttpWebResponse response;
+                response = (HttpWebResponse)request.GetResponse();
+                if (response.StatusCode == HttpStatusCode.OK)
+                {
+                    Stream responseStream = response.GetResponseStream();
+                    string responseStr = new StreamReader(responseStream).ReadToEnd();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public static bool cambiaEstadoHistorial(string id, int estado)
         {
             string xml = "";

@@ -174,7 +174,16 @@
             var params = new Object();
             params.Nota = new Object();
             params.Nota.TextoNota = t;
-            params.Nota.Coleccion = "@ViewBag.Coleccion"; //segun seleccion
+            var n = $("#coleccionNota").val();
+            var cn = "";
+            if (n.length == 0) {
+                alert("Debe seleccionar al menos una colección");
+                return 0;
+            }
+            for (var x = 0; x < n.length; x++) {
+                cn += n[x] + "_";
+            }
+            params.Nota.Coleccion = cn;
             $.ajax({
                 type: "POST",
                 url: "/Document/Nota",
@@ -183,7 +192,8 @@
                 data: params,
                 success: function (d) {
                     if (d.Result == 0) {
-                        var inserta = '<a href="#" class="linkNota" style="color:blue; cursor:pointer" id="' + d.TextoNota + '">[Nota]</a>';
+                        //var inserta = '<a href="#" class="linkNota" style="color:blue; cursor:pointer" id="' + d.TextoNota + '">[Nota]</a>';
+                        var inserta = "<img class=\"linkNota\" id=\"" + d.TextoNota + "\" src=\"/Content/img/flecha.png\" style=\"cursor:pointer; display:inline; height:12px; width:15px\" />";
                         CKEDITOR.instances['Texto'].insertHtml(inserta);
                     }
                     else {
@@ -209,6 +219,7 @@
         });
 
         $('#btnMyModal').click(function () {
+            CKEDITOR.instances['txtNota'].setData('');
             $('#myModal').modal('show');
         });
 
@@ -241,9 +252,53 @@
             }
 
             $('#div' + idLista).html(lista.substring(0, lista.length -2));
-            $('#divDetalleListado').modal('hide')
+            $('#divDetalleListado').modal('hide');
+        });
+
+        $('#btnDialogImagen').click(function () {
+            $('#divUploadImagen').modal('show');
+        });
+
+        var _URL = window.URL || window.webkitURL;
+        $("#f_UploadImage").on('change', function () {
+            var file, img;
+            if ((file = this.files[0])) {
+                img = new Image();
+                img.onload = function () {
+                    sendFile(file);
+                };
+                img.onerror = function () {
+                    alert("Tipo de archivo no válido:" + file.type);
+                };
+                img.src = _URL.createObjectURL(file);
+            }
         });
     });
+
+    function sendFile(file) {
+
+        var formData = new FormData();
+        formData.append('file', $('#f_UploadImage')[0].files[0]);
+        $.ajax({
+            type: 'post',
+            url: '/upImageDoe.ashx?Fecha=@Model.Fecha',
+            data: formData,
+            success: function (status) {
+                if (status != 'error') {
+                    var rutaImg = "../ImagenesDoe?imagen=" + status;
+                    var imgHtml = "<img src=\"" + rutaImg + "\" /><br />";
+                    imgHtml = "<a href=\"" + rutaImg + "\" target=\"_blank\">" + imgHtml + "</a>";
+                    CKEDITOR.instances['Texto'].insertHtml(imgHtml);
+                    $('#divUploadImagen').modal('hide');
+                }
+            },
+            processData: false,
+            contentType: false,
+            error: function () {
+                alert("Ocurrió un error al subir la imagen. Por favor, inténtelo nuevamente.");
+            }
+        });
+    }
 
     function showListas(idLista) {
         lista = $('#div' + idLista).html();
@@ -355,6 +410,7 @@
                                 @Html.HiddenFor(m => m.CategoriaGlosa)
                                 @Html.HiddenFor(m => m.TemaGlosa)
                                 @Html.HiddenFor(m => m.TextoCambio)
+                                @Html.HiddenFor(m => m.Fecha)
                                 <br />
                                 <div class="row">
                                     <div class="col-md-6">
@@ -486,6 +542,8 @@
                                                 <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
 
                                                 <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
+
+                                                <button type="button" class="btn btn-block btn-success btn-sm" id="btnDialogImagen">Insertar imagen</button>
                                                 <br />
                                             }
                                             @if (Model.Links != null)
@@ -498,6 +556,7 @@
                                                     }
                                                     else
                                                     {
+                                                        <label>Visible para</label> @link.Colecciones <br />
                                                         @link.Tipo
                                                         <br />
                                                         <a href="~/Document/Ma_EditarDocumento/@link.Url">
@@ -545,11 +604,17 @@
                     <h4 class="modal-title" id="myModalLabel">Agregar nueva nota</h4>
                 </div>
                 <div class="modal-body">
-                    Estimado usuario, antes de proceder, asegurese de hacer click en el lugar del texto donde
+                    Estimado usuario, antes de proceder, asegúrese de hacer click en el lugar del texto donde
                     va a insertar la nueva nota.<br />
-                    <label>Id nota</label>
+
                     <br />
-                    <input type="text" id="idNota" class="form-control" />
+                    <!-- <input type="text" id="idNota" class="form-control" /> -->
+                    <select id="coleccionNota" class="form-control" multiple>
+                        @for (var x = 0; x < Model.Coleccion.Length; x++)
+                        {
+                            <option value="@Model.Coleccion[x]">@Model.Coleccion[x]</option>
+                        }
+                    </select>
                     <br />
                     <textarea id="txtNota" name="txtNota" class="form-control">@ViewBag.TextoNota</textarea>
                 </div>
@@ -649,22 +714,22 @@
                     Indique una breve descripción del motivo para reasignar cambios<br />
                     al borrador y el usuario indicado.
                     <br /><br />
-                          <select id="selecUsuarioReasignacion" class="form-control">
-                              @if (ViewBag.listadoUsuarios != null)
-                              {
-                                  foreach (var us in ViewBag.listadoUsuarios)
-                                  {
-                                      if (us.UserName == ViewBag.Usuario)
-                                      {
-                                          <option value="@us.UserName" selected="selected">@us.UserName</option>
-                                      }
-                                      else
-                                      {
-                                          <option value="@us.UserName">@us.UserName</option>
-                                      }
-                                  }
-                              }
-                          </select>
+                    <select id="selecUsuarioReasignacion" class="form-control">
+                        @if (ViewBag.listadoUsuarios != null)
+                        {
+                            foreach (var us in ViewBag.listadoUsuarios)
+                            {
+                                if (us.UserName == ViewBag.Usuario)
+                                {
+                                    <option value="@us.UserName" selected="selected">@us.UserName</option>
+                                }
+                                else
+                                {
+                                    <option value="@us.UserName">@us.UserName</option>
+                                }
+                            }
+                        }
+                    </select>
                     <br />
                     <textarea id="txtAreaMotivoRechazo" class="form-control" style="width: 100%" rows="5"></textarea>
                 </div>
@@ -675,6 +740,33 @@
             </div>
         </div>
     </div>
+    <!-- upload imagenes -->
+    <div class="modal fade" id="divUploadImagen" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="divDetalleUploadImagen">Subir imágenes</h4>
+                </div>
+                <div class="modal-body" id="txtDetalleListado">
+                    <div class="alert alert-warning">
+                        <h4>
+                            <i class="icon fa fa-warning"></i>
+                            Atención!
+                        </h4>
+                        Estimado usuario, asegúrese de hacer click en el lugar del texto donde quiera que aparezca la imagen antes de seleccionarla.
+                    </div>
+                    <br /><br />
+                    <input type="file" class="upload" id="f_UploadImage"><br />
+                    <br />
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </section>
 
 @section scripts{

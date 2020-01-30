@@ -26,6 +26,7 @@ namespace GestorDocumentos.Controllers
         private string directorio = WebConfigurationManager.AppSettings["MVC-DATA"];
         private string directorio_ma = WebConfigurationManager.AppSettings["MVC-DATA-MA"];
         private string directorio_imagenes = WebConfigurationManager.AppSettings["MVC-IMAGENES"];
+        private string directorio_notas = WebConfigurationManager.AppSettings["MVC-NOTAS"];
         private static string URL_SOLR = WebConfigurationManager.AppSettings["webSolr"] + @"/solr/test-1/update?commitWithin=1000&overwrite=true&wt=json";
 
         // GET: Document
@@ -280,6 +281,7 @@ namespace GestorDocumentos.Controllers
             Documento doc = new Documento();
             doc = Indexador.Solr.getDocumentoById(id, false);
             ViewBag.TextoOriginal = doc.Texto;
+            ViewBag.Coleccion = doc.Coleccion;
             Documento referencia = new Documento();
             referencia.IdDocumento = id;
 
@@ -306,16 +308,17 @@ namespace GestorDocumentos.Controllers
                 else
                     rutaBorrador = docOriginal.Version;
 
-                if (doc.Norma == "0" || doc.Titulo == null || doc.Texto == null)
+                if (doc.Norma == "0" || doc.Titulo == null || doc.Texto == null || doc.Coleccion == null)
                 {
-                    ViewBag.Error = "Estimado usuario, todos los campos son obligatorios,<br />por favor complete el formulario para continuar.";
+                    ViewBag.Error = "Estimado usuario, todos los campos son obligatorios, por favor complete el formulario para continuar.";
                     ViewBag.TextoOriginal = docOriginal.Texto;
+                    ViewBag.Coleccion = docOriginal.Coleccion;
                     return View(doc);
                 }
                 else
                 {
                     //doc.Fecha = DateTime.Now;
-                    doc.Coleccion = docOriginal.Coleccion;
+                    //doc.Coleccion = docOriginal.Coleccion;
                     doc.Origen = docOriginal.Origen;
                     #region links documento nuevo
                     doc.Links = new List<Link>();
@@ -340,6 +343,7 @@ namespace GestorDocumentos.Controllers
                     }
                     textoReferenciaDestino += ".- " + docOriginal.Titulo;
                     l.Texto = textoReferenciaDestino;
+                    l.Colecciones = string.Join(", ", docOriginal.Coleccion);
                     doc.Links.Add(l);
                     #endregion
 
@@ -352,6 +356,8 @@ namespace GestorDocumentos.Controllers
                     //IFormatProvider culture = new CultureInfo("en-US", true);
                     //doc.Fecha = DateTime.ParseExact(f, "yyyy-MM-dd", CultureInfo.InvariantCulture);
 
+                    string usuario = User.Identity.GetUserName();
+
                     #region links documento original
 
                     if (docOriginal.Links == null)
@@ -362,6 +368,7 @@ namespace GestorDocumentos.Controllers
                     l.Texto = doc.Titulo;
                     l.Tipo = doc.Norma;
                     l.Url = doc.IdDocumento;
+                    l.Colecciones =  string.Join(", ", doc.Coleccion);
                     links.Add(l);
 
                     foreach (Link link in docOriginal.Links)
@@ -370,6 +377,7 @@ namespace GestorDocumentos.Controllers
                     }
                     docOriginal.Links = links;
                     docOriginal.Estado = 99;
+                    docOriginal.Usuario = usuario;
                     #endregion
 
                     versionFinal = FileBo.SerializeXML(doc);
@@ -381,7 +389,7 @@ namespace GestorDocumentos.Controllers
                     versionFinal = FileBo.SerializeXML(docOriginal);
                     FileBo.setXmlStringToFile(rutaBorrador, versionFinal);
 
-                    string usuario = User.Identity.GetUserName();
+                    
                     Indexador.Solr.cambiaEstadoDocumento(docOriginal.id, 99, usuario);
 
 
@@ -464,7 +472,7 @@ namespace GestorDocumentos.Controllers
             Nota notaResult = new Nota();
             try
             {
-                string r = directorio + nota.Coleccion + "\\Notas\\";
+                string r = directorio_notas; // directorio + nota.Coleccion + "\\Notas\\";
                 if (nota.Result == 1)
                 {
                     string txt = System.IO.File.ReadAllText(r + nota.TextoNota + ".html", Encoding.UTF8);
@@ -480,7 +488,7 @@ namespace GestorDocumentos.Controllers
 
                     string h = UtilesBO.getMd5(nota.TextoNota);
 
-                    StreamWriter sw_ = new StreamWriter(r + "\\" + h + ".html", false);
+                    StreamWriter sw_ = new StreamWriter(r + "\\" + nota.Coleccion + h + ".html", false);
                     sw_.Write(nota.TextoNota);
                     sw_.Close();
 
@@ -491,7 +499,7 @@ namespace GestorDocumentos.Controllers
 
                     LogBO.setLogCreateDoc(log_);
 
-                    notaResult.TextoNota = h;
+                    notaResult.TextoNota = nota.Coleccion + h;
                     notaResult.Coleccion = null;
                     notaResult.Result = 0;
                 }
@@ -574,7 +582,7 @@ namespace GestorDocumentos.Controllers
             }
         }
 
-        public ActionResult SetReferencia(string textoReferencia, string idDocumento, string tipo)
+        public ActionResult SetReferencia(string textoReferencia, string idDocumento, string tipo, string[] colecciones)
         {
             string idDocOriginal = "";
             try
@@ -618,6 +626,7 @@ namespace GestorDocumentos.Controllers
                     l.Texto = textoReferencia;
                     l.Tipo = tipo + ".- " + docDestino.Norma;
                     l.Url = idDocumento;
+                    l.Colecciones = string.Join(", ", colecciones);
                     links.Add(l);
 
                     foreach (Link link in docOriginal.Links)
@@ -890,6 +899,7 @@ namespace GestorDocumentos.Controllers
         [HttpGet]
         public ActionResult Ma_EliminaReferencias(string referencias)
         {
+            string usuario = User.Identity.GetUserName();
             string[] r = null;
             try
             {
@@ -911,6 +921,8 @@ namespace GestorDocumentos.Controllers
                 }
                 doc.Links = links;
 
+                doc.Usuario = usuario;
+                doc.Estado = 99;
                 string versionFinal = FileBo.SerializeXML(doc);
                 if(d.Version.IndexOf("_borrador") > -1)
                     FileBo.setXmlStringToFile(d.Version, versionFinal);
@@ -923,6 +935,7 @@ namespace GestorDocumentos.Controllers
                 historial.IdOriginal = idDocumento;
                 historial.IdReferencia = idReferencia;
                 Indexador.Solr.sendXmlHistoria(historial);
+                Indexador.Solr.cambiaEstadoDocumento(d.id, 99, usuario);
                 //setLog(d, "Guarda borrador ELIMINA REFERENCIA.- " + textoReferencia);
 
             }
@@ -1130,8 +1143,14 @@ namespace GestorDocumentos.Controllers
                                 {
                                     if (l.Url != h.IdOriginal)
                                         links.Add(l);
-                                }
+                                }                              
                                 docBorradorHistorial.Links = links;
+                                if (docBorradorHistorial.Norma == "COMENTARIO" || docBorradorHistorial.Norma == "EJEMPLO"
+                                    || (docBorradorHistorial.Norma).Replace("_", " ") == "JURISPRUDENCIA JUDICIAL")
+                                {
+                                    if (docBorradorHistorial.Links.Count == 0)
+                                        EliminaNorma(docBorradorHistorial.IdDocumento);
+                                }
                                 string versionFinalReferencia = FileBo.SerializeXML(docBorradorHistorial);
                                 FileBo.setXmlStringToFile(docHistorial.Version.Replace("_borrador.xml", ".xml"), versionFinalReferencia);
                             }
@@ -1187,6 +1206,12 @@ namespace GestorDocumentos.Controllers
                 return View(ma);
             }
             return Redirect("~/Document/Ma_EditarDocumento/" + ma.id);
+        }
+
+        private bool EliminaNorma(string id)
+        {
+            Indexador.Solr.EliminaDocumento(id);
+            return true;
         }
 
         [HttpPost]

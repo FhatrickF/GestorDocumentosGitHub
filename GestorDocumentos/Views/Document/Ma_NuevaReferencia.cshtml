@@ -85,12 +85,23 @@
                         <option value="0">Seleccionar</option>
                         <option value="COMENTARIOS">Comentario</option>
                         <option value="EJEMPLOS">Ejemplo</option>
-                        <option value="JURISPRUDENCIA_JUDICIAL">Jurisprudencia Judicial</option>
+                        <option value="JURISPRUDENCIA JUDICIAL">Jurisprudencia Judicial</option>
                     </select>
                 </div>
                 <div class="form-group">
                     @Html.LabelFor(m => m.Titulo, "Título")
                     @Html.TextAreaFor(m => m.Titulo, new { @class = "form-control", row = "10", cols = "80" })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label for="colecciones">Visible para:</label>
+                    <select id="Coleccion" name="Coleccion" class="form-control" multiple>
+                        @for (var x = 0; x < ViewBag.Coleccion.Length; x++)
+                        {
+                            <option value="@ViewBag.Coleccion[x]">@ViewBag.Coleccion[x]</option>
+                        }
+                    </select>
                 </div>
             </div>
         </div>
