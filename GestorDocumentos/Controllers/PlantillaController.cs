@@ -45,6 +45,7 @@ namespace GestorDocumentos.Controllers
                 string bNorma = string.Empty;
                 string bDatos = string.Empty;
                 string fecha = string.Empty;
+                string fecha2 = string.Empty;
                 string coleccion = "&q=Coleccion:'DONG'";
                 string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
@@ -55,9 +56,19 @@ namespace GestorDocumentos.Controllers
                 if (!String.IsNullOrEmpty(nor.CI))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR'";
                 if (!String.IsNullOrEmpty(nor.DF))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO CON FUERZA DE LEY'" : "Norma:'DECRETO CON FUERZA DE LEY'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DFL'" : "Norma:'DFL'";
+                if (!String.IsNullOrEmpty(nor.PJ))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'NOMINA'" : "Norma:'NOMINA'";
+                if (!String.IsNullOrEmpty(nor.AA))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'AAC'" : "Norma:'AAC'";
+                if (!String.IsNullOrEmpty(nor.ACBC))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ACUERDO&CERTIFICADO'" : "Norma:'ACUERDO&CERTIFICADO'";
+                if (!String.IsNullOrEmpty(nor.DO))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DCTO&ORDENANZA'" : "Norma:'DCTO&ORDENANZA'";
+                if (!String.IsNullOrEmpty(nor.IG))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'INFORMACION&COREDE&INSTRUCTIVO&NORMA&ORDEN&SENTENCIA&RECTIFICACION&REGLAMENTO'" : "Norma:'INFORMACION&COREDE&INSTRUCTIVO&NORMA&ORDEN&SENTENCIA&RECTIFICACION&REGLAMENTO'";
 
-                if(!String.IsNullOrEmpty(q))
+                if (!String.IsNullOrEmpty(q))
                     bNorma = " AND (" + q + ")";
 
                 q = string.Empty;
@@ -67,15 +78,22 @@ namespace GestorDocumentos.Controllers
                     fecha = nor.FechaD.Replace("/", "-");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + "'";
+                    fecha2 = nor.FechaH.Replace("/", "-");
+                    f = fecha2.Split('-');
+                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
                 }
 
                 if (nor.num != null)
                     q += " AND Numero:'" + nor.num + "'";
 
                 if (!string.IsNullOrEmpty(nor.todas))
-                    q += " AND Texto:'" + nor.todas + "'";
-
+                {
+                    if (!string.IsNullOrEmpty(nor.ninguna))
+                        q += " AND Texto:'" + nor.todas + " NOT " + nor.ninguna + "'";
+                    else
+                        q += " AND Texto:'" + nor.todas + "'";
+                }
 
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.Pagina;
                 url = url.Replace("  ", " ");
@@ -124,15 +142,38 @@ namespace GestorDocumentos.Controllers
                 string bNorma = string.Empty;
                 string bDatos = string.Empty;
                 string fecha = string.Empty;
+                string fecha2 = string.Empty;
                 string coleccion = "&q=Coleccion:'DONP'";
                 string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
                 if (!String.IsNullOrEmpty(nor.dc))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO'" : "Norma:'DECRETO'";
+                if (!String.IsNullOrEmpty(nor.soc))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'SOCIEDAD*'" : "Norma:'SOCIEDAD*'";
+                if (!String.IsNullOrEmpty(nor.pre))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PRENDA'" : "Norma:'PRENDA'";
+                if (!String.IsNullOrEmpty(nor.da))
+                {
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'SOLICITUD EXPLORACION' OR Norma:'SOLICITUD INSCRIPCION' OR Norma:'SOLICITUD REGULARIZACION'" : "Norma:'RESOLUCION' OR Norma:'SOLICITUD INSCRIPCION' OR Norma:'SOLICITUD REGULARIZACION'";
+                }
+                if (!String.IsNullOrEmpty(nor.dc))
+                {
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DCTO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'" : "Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DCTO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'";
+                }
                 if (!String.IsNullOrEmpty(nor.res))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
-
-
+                if (!String.IsNullOrEmpty(nor.eirl))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'Empresa Individual*'" : "Norma:'Empresa Individual*'";
+                if (!String.IsNullOrEmpty(nor.mc))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'MARCA'" : "Norma:'MARCA'";
+                if (!String.IsNullOrEmpty(nor.spo))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'SOLICITUD TELECOMUNICACIONE' OR Norma:'OTRAS SOLICITUDES' OR Norma:'SOLICITUD TRANSPORTES' OR Norma:'SOLICITUD CONCESION' OR Norma:'SOLICITUD CONCESION TELEVISIVA' OR Norma:'SOLICITUD ELECTRICIDAD'" : "Norma:'SOLICITUD TELECOMUNICACIONE' OR Norma:'OTRAS SOLICITUDES' OR Norma:'SOLICITUD TRANSPORTES' OR Norma:'SOLICITUD CONCESION' OR Norma:'SOLICITUD CONCESION TELEVISIVA' OR Norma:'SOLICITUD ELECTRICIDAD'";
+                if (!String.IsNullOrEmpty(nor.ag))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ASOCIACION GREMIAL'" : "Norma:'ASOCIACION GREMIAL'";
+                if (!String.IsNullOrEmpty(nor.pmd))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PATENTE' OR Norma:'MODELO' OR Norma:'DISEÑO'" : "Norma:'DECRETO' OR Norma:'MODELO' OR Norma:'DISEÑO'";
+                if (!String.IsNullOrEmpty(nor.pm))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ART 83' OR Norma:'PEDIMENTOS MINEROS' OR Norma:'MANIFESTACIONES MINERAS' OR Norma:'SOLICITUDES DE MENSURA' OR Norma:'SENTENCIA EXPLORACION' OR Norma:'SENTENCIA EXPLOTACION' OR Norma:'VIGENCIA MENSURA' OR Norma:'RENUNCIA CONCESION' OR Norma:'PRORROGA EXPLORACION' OR Norma:'NOMINA REMATE' OR Norma:'ACUERDO JUNTA' OR Norma:'CITACION JUNTA' OR Norma:'NOMINA PATENTE' OR Norma:'ACUERDO CONCESION'" : "Norma:'ART 83' OR Norma:'PEDIMENTOS MINEROS' OR Norma:'MANIFESTACIONES MINERAS' OR Norma:'SOLICITUDES DE MENSURA' OR Norma:'SENTENCIA EXPLORACION' OR Norma:'SENTENCIA EXPLOTACION' OR Norma:'VIGENCIA MENSURA' OR Norma:'RENUNCIA CONCESION' OR Norma:'PRORROGA EXPLORACION' OR Norma:'NOMINA REMATE' OR Norma:'ACUERDO JUNTA' OR Norma:'CITACION JUNTA' OR Norma:'NOMINA PATENTE' OR Norma:'ACUERDO CONCESION'";
 
                 if (!String.IsNullOrEmpty(q))
                     bNorma = " AND (" + q + ")";
@@ -144,16 +185,23 @@ namespace GestorDocumentos.Controllers
                     fecha = nor.FechaD.Replace("/", "-");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + "'";
+                    fecha2 = nor.FechaH.Replace("/", "-");
+                    f = fecha2.Split('-');
+                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
                 }
 
                 if (!string.IsNullOrEmpty(nor.n))
                     q += " AND Numero:'" + nor.n + "'";
 
                 if (!string.IsNullOrEmpty(nor.Todas))
-                    q += " AND Texto:'" + nor.Todas + "'";
-
-
+                {
+                    if (!string.IsNullOrEmpty(nor.ninguna))
+                        q += " AND Texto:'" + nor.Todas + " NOT " + nor.ninguna + "'";
+                    else
+                        q += " AND Texto:'" + nor.Todas + "'";
+                }
+                
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.Pagina;
                 url = url.Replace("  ", " ");
 
@@ -201,21 +249,22 @@ namespace GestorDocumentos.Controllers
                 string bNorma = string.Empty;
                 string bDatos = string.Empty;
                 string fecha = string.Empty;
+                string fecha2 = string.Empty;
                 string coleccion = "&q=Coleccion:'DOPJ'";
                 string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
                 if (!String.IsNullOrEmpty(nor.qu))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'QUIEBRAS'" : "Norma:'QUIEBRAS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'QUIEBRA'" : "Norma:'QUIEBRA'";
                 if (!String.IsNullOrEmpty(nor.cm))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CAMBIO DE NOMBRE'" : "Norma:'CAMBIO DE NOMBRE'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CAMBIO NOMBRE'" : "Norma:'CAMBIO NOMBRE'";
                 if (!String.IsNullOrEmpty(nor.mp))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'MUERTE PRESUNTA'" : "Norma:'MUERTE PRESUNTA'";
                 if (!String.IsNullOrEmpty(nor.n))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'NOTIFICACION'" : "Norma:'NOTIFICACION'";
                 if (!String.IsNullOrEmpty(nor.ed))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'EXTRAVIOS DE DOCUMENTOS'" : "Norma:'EXTRAVIOS DE DOCUMENTOS'";
-                if (!String.IsNullOrEmpty(nor.n))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RECONSTITUCION DE DOMICILIO'" : "Norma:'RECONSTITUCION DE DOMICILIO'";
+                if (!String.IsNullOrEmpty(nor.rd))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DOMINIO'" : "Norma:'DOMINIO'";
 
 
 
@@ -229,12 +278,19 @@ namespace GestorDocumentos.Controllers
                     fecha = nor.FechaD.Replace("/", "-");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + "'";
+                    fecha2 = nor.FechaH.Replace("/", "-");
+                    f = fecha2.Split('-');
+                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
                 }
 
                 if (!string.IsNullOrEmpty(nor.Todas))
-                    q += " AND Texto:'" + nor.Todas + "'";
-
+                {
+                    if (!string.IsNullOrEmpty(nor.ninguna))
+                        q += " AND Texto:'" + nor.Todas + " NOT " + nor.ninguna + "'";
+                    else
+                        q += " AND Texto:'" + nor.Todas + "'";
+                }
 
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
                 url = url.Replace("  ", " ");
@@ -283,19 +339,20 @@ namespace GestorDocumentos.Controllers
                 string bNorma = string.Empty;
                 string bDatos = string.Empty;
                 string fecha = string.Empty;
+                string fecha2 = string.Empty;
                 string coleccion = "&q=Coleccion:'DOAV'";
-                string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
+                string fl = "";
 
                 if (!String.IsNullOrEmpty(nor.b))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'BALANCES'" : "Norma:'BALANCES'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'BALANCE'" : "Norma:'BALANCE'";
                 if (!String.IsNullOrEmpty(nor.ca))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CITACION A ACCIONISTAS'" : "Norma:'CITACION A ACCIONISTAS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CITACION' OR Norma:'REPARTO'" : "Norma:'CITACION' OR Norma:'REPARTO'";
                 if (!String.IsNullOrEmpty(nor.cp))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CONCURSOS PUBLICOS'" : "Norma:'CONCURSOS PUBLICOS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CONCURSO'" : "Norma:'CONCURSO'";
                 if (!String.IsNullOrEmpty(nor.l))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'LICITACION'" : "Norma:'LICITACION'";
                 if (!String.IsNullOrEmpty(nor.oa))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'OTROS AVISOS'" : "Norma:'OTROS AVISOS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'SUBASTA' OR Norma:'REPARTO' OR Norma:'PAGO' OR Norma:'POSTULANTES' OR Norma:'INFORMACION' OR Norma:'SORTEO' OR Norma:'RIESGO' OR Norma:'EMISION' OR Norma:'ADJUDICACION'" : "Norma:'SUBASTA' OR Norma:'REPARTO' OR Norma:'PAGO' OR Norma:'POSTULANTES' OR Norma:'INFORMACION' OR Norma:'SORTEO' OR Norma:'RIESGO' OR Norma:'EMISION' OR Norma:'ADJUDICACION'";
                 if (!String.IsNullOrEmpty(nor.p))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROPUESTA'" : "Norma:'PROPUESTA'";
 
@@ -309,14 +366,19 @@ namespace GestorDocumentos.Controllers
                     fecha = nor.FechaD.Replace("/", "-");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + "'";
+                    fecha2 = nor.FechaH.Replace("/", "-");
+                    f = fecha2.Split('-');
+                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
                 }
 
-
-
                 if (!string.IsNullOrEmpty(nor.Todas))
-                    q += " AND Texto:'" + nor.Todas + "'";
-
+                {
+                    if(!string.IsNullOrEmpty(nor.ninguna))
+                        q += " AND Texto:'" + nor.Todas + " NOT " + nor.ninguna + "'";
+                    else
+                        q += " AND Texto:'" + nor.Todas + "'";
+                }
 
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
                 url = url.Replace("  ", " ");
@@ -365,31 +427,30 @@ namespace GestorDocumentos.Controllers
                 string bNorma = string.Empty;
                 string bDatos = string.Empty;
                 string fecha = string.Empty;
+                string fecha2 = string.Empty;
                 string coleccion = "&q=Coleccion:'LA'";
                 string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
                 if (!String.IsNullOrEmpty(nor.dl))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO LEY'" : "Norma:'DECRETO LEY'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DL'" : "Norma:'DL'";
                 if (!String.IsNullOrEmpty(nor.dfl))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO CON FUERZA DE LEY'" : "Norma:'DECRETO CON FUERZA DE LEY'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DFL'" : "Norma:'DFL'";
                 if (!String.IsNullOrEmpty(nor.dec))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETOS'" : "Norma:'DECRETOS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO'" : "Norma:'DECRETO'";
                 if (!String.IsNullOrEmpty(nor.rg))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'REGLAMENTO'" : "Norma:'REGLAMENTO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'REGLAMENTO*'" : "Norma:'REGLAMENTO*'";
                 if (!String.IsNullOrEmpty(nor.res))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
                 if (!String.IsNullOrEmpty(nor.ti))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'TRATADOS INTERNACIONALES'" : "Norma:'TRATADOS INTERNACIONALES'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'convencion*'" : "Norma:'convencion*'";
                 if (!String.IsNullOrEmpty(nor.ly))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'LEY'" : "Norma:'LEY'";
                 if (!String.IsNullOrEmpty(nor.aac))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'AUTO ACUERDO'" : "Norma:'AUTO ACUERDO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'aac'" : "Norma:'aac'";
                 if (!String.IsNullOrEmpty(nor.ac))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ACUERDOS'" : "Norma:'ACUERDOS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ACUERDO'" : "Norma:'ACUERDO'";
                 if (!String.IsNullOrEmpty(nor.ci))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR'";
-
-
 
                 if (!String.IsNullOrEmpty(q))
                     bNorma = " AND (" + q + ")";
@@ -401,7 +462,10 @@ namespace GestorDocumentos.Controllers
                     fecha = nor.FechaD.Replace("/", "-");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + "'";
+                    fecha2 = nor.FechaH.Replace("/", "-");
+                    f = fecha2.Split('-');
+                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
                 }
 
                 if (!string.IsNullOrEmpty(nor.norma))
