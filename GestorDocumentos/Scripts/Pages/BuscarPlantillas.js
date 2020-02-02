@@ -1,4 +1,5 @@
 ﻿var p_ = 1;
+var referencia = "false";
 $(document).ready(function () {
     $('#btn-NG').click(function () {
         p_ = 1;

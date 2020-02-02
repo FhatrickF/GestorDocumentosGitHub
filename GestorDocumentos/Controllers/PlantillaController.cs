@@ -1,5 +1,6 @@
 ﻿using GestorDocumentos.Models.Plantillas;
 using GestorDocumentosExceptions;
+using mvc4.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
@@ -14,13 +15,36 @@ namespace GestorDocumentos.Controllers
     public class PlantillaController : Controller
     {
         // GET: Plantilla
-        public ActionResult Index()
+        public ActionResult Index(string id)
         {
-            var login = User.Identity.IsAuthenticated;
-            if (!login)
-                return RedirectToAction("Login", "Account");
+            Session["estado"] = 0;
+            Documento d = new Documento();
+            try
+            {
+                var login = User.Identity.IsAuthenticated;
+                if (!login)
+                    return RedirectToAction("Login", "Account");
 
-            return View();
+                System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
+
+                if (id != null)
+                {
+                    System.Web.HttpContext.Current.Session["id-doc-referencia"] = id;
+
+                    d = Indexador.Solr.getDocumentoById(id, false);
+
+                    ViewBag.Referencia = true;
+                }
+                else
+                {
+                    ViewBag.Referencia = false;
+                }
+                return View(d);
+            }
+            catch (BusinessException bx)
+            {
+                return RedirectToAction("Index", "Home");
+            }
         }
         public ActionResult BuscarNG()
         {
