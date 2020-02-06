@@ -14,7 +14,9 @@ namespace GestorDocumentos.Models.Plantillas
         public string al { get; set; }
         public string ap { get; set; }
         public string arq  { get; set; }
+        public string bio  { get; set; }
         public string capelaciones  { get; set; }
+        public string cde { get; set; }
         public string cir { get; set; }
         public string com  { get; set; }
         public string con { get; set; }
@@ -28,6 +30,9 @@ namespace GestorDocumentos.Models.Plantillas
         public string ds { get; set; }
         public string ene { get; set; }
         public string exacta { get; set; }
+        public string ft { get; set; }
+        public string ffm { get; set; }
+        public string fyv { get; set; }
         public string FechaD { get; set; }
         public string FechaH { get; set; }
         public string ind { get; set; }
