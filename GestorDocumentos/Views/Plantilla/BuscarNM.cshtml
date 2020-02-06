@@ -1,0 +1,352 @@
+﻿@using Microsoft.AspNet.Identity
+@model mvc4.Models.Documento
+@{
+    ViewBag.Title = "BuscarNM";
+}
+
+
+<section class="content-header">
+    <h1>
+        Búsqueda por Plantillas
+    </h1>
+</section>
+<section class="content">
+    <div class="row" id="inicio">
+        <div class="col-md-5">
+            <div class="box box-default">
+                <div class="box-header with-border">
+                    <i class="fa fa-file-text-o"></i>
+                    <h3 class="box-title">Base de datos</h3>
+                </div>
+                <div class="box-body">
+                    <div class="col-md-12">
+                        <div class="box box-default">
+                            <div class="box-header with-border">
+                                <h1 class="box-title "><strong>Base de Datos Medio Ambiental</strong> </h1> -
+                                <h3 class="box-title">Criterios de búsqueda</h3>
+                            </div>
+                            <div class="box-body">
+                                <form action="~/Plantilla/BuscarNM" name="BuscarNM" id="BuscarNM" method="post">
+                                    <div class="form-group">
+                                        <label for="focusedInput">Con todas estas palabras:</label>
+                                        <input class="form-control" name="todas" type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="focusedInput">Sin ninguna de estas palabras:</label>
+                                        <input class="form-control" name="ninguna" type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="focusedInput">Con una o más de las palabras</label>
+                                        <input class="form-control" name="plus" type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="focusedInput">Con la frase exacta:</label>
+                                        <input class="form-control" name="exacta" type="text">
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <div class="checkbox">
+                                            <label><input type="checkbox" id="chxt" name="chxt" value="ok">Seleccione todos</label>
+                                        </div>
+                                        <div class="checkbox">
+                                            <label><input type="checkbox" id="chxATN" class="chxATN" name="chxATN" value="ok">Tipo Normativa</label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ley" class="chxATN-T" value="ok">LEY</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="dfl" class="chxATN-T" value="ok">DFL</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="dl" class="chxATN-T" value="ok">DL</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ds" class="chxATN-T" value="ok">DS</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="dcto" class="chxATN-T" value="ok">DCTO</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="res" class="chxATN-T" value="ok">RES</label>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="focusedInput">N° Norma:</label>
+                                                <input class="form-control" name="numNorma" type="text">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="cir" class="chxATN-T" value="ok">Circular</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="con" class="chxATN-T" value="ok">Convenio</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="acu" class="chxATN-T" value="ok">Acuerdo</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="tra" class="chxATN-T" value="ok">Tratado</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="reg" class="chxATN-T" value="ok">Reglamento</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="pro" class="chxATN-T" value="ok">Protocolo</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <div class="checkbox">
+                                            <label><input type="checkbox" id="chxtAM" name="chxt" value="ok">Materias</label>
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" id="chxAB" class="chxtAM" name="chxAB" value="ok"><u>BIÓTICO</u></label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ap" class="chxAB" value="ok">Áreas Protegidas</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="dfl" class="chxAB" value="ok">Clasificación de Especies</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="dl" class="chxAB" value="ok">Fauna Terrestre</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ds" class="chxAB" value="ok">Flora y Fauna Marina</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="dcto" class="chxAB" value="ok">Flora y Vegetacion</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" id="chxASC" class="chxtAM" name="chxATN" value="ok"><u>S. CONSTRUIDO</u></label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="al" class="chxASC" value="ok">Ambiente Laboral</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="arq" class="chxASC" value="ok">Arqueología</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="com" class="chxASC" value="ok">Combustible</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ind" class="chxASC" value="ok">Indígena</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="inf" class="chxASC" value="ok">Infraestructura</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="pte" class="chxASC" value="ok">Planificación Territorial</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="pcu" class="chxASC" value="ok">Patrimonio Cultural</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="pla" class="chxASC" value="ok">Plaguicidas</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="resi" class="chxASC" value="ok">Residuos</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" id="chxAF" class="chxtAM" name="chxATN" value="ok"><u>FÍSICO</u></label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="agu" class="chxAF" value="ok">Agua</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="air" class="chxAF" value="ok">Aire</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="adr" class="chxAF" value="ok">Áreas de Riesgos</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="cyp" class="chxAF" value="ok">Clima y Paisaje</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ene" class="chxAF" value="ok">Energía</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="lum" class="chxAF" value="ok">Lumínica</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ryv" class="chxAF" value="ok">Ruido y Vibraciones</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="sue" class="chxAF" value="ok">Suelo</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <div class="checkbox">
+                                            <label><input type="checkbox" id="chxAFALLO" class="chxATN" name="chxAFALLO" value="ok">FALLOS</label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="tribunal" class="chxAFALLO" value="ok">Tribunal Constitucional</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="csuprema" class="chxAFALLO" value="ok">Corte Suprema</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="capelaciones" class="chxAFALLO" value="ok">Corte de Apelaciones</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="pta" class="chxAFALLO" value="ok">Primer Tribunal Ambiental</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="stp" class="chxAFALLO" value="ok">Segundo Tribunal Ambiental</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="ttp" class="chxAFALLO" value="ok">ercer Tribunal Ambiental</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <div class="checkbox">
+                                            <label><input type="checkbox" id="chxAcontraloria" class="chxATN" name="chxAcontraloria" value="ok">CONTRALORÍA</label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="dict" class="chxAcontraloria" value="ok">Dictámenes</label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="info" class="chxAcontraloria" value="ok">Informes</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-12 form-group">
+                                        <div class="checkbox">
+                                            <label><input type="checkbox" id="chxrya" class="chxATN" name="chxAcontraloria" value="ok">RESOLUCIONES Y ACUERDOS</label>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="sanit" class="chxrya" value="ok">Res. Sancionatorias Superintendencia
+                                                    del Medio Ambiente
+                                                </label>
+                                            </div>
+                                            <div class="checkbox">
+                                                <label>
+                                                    <input type="checkbox" name="conmin" class="chxrya" value="ok">Acuerdos Consejo de Ministros
+                                                    para la Sustentabilidad
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="focusedInput">N° ROL o N° Documento:</label>
+                                        <input class="form-control" id="NRD" name="num" type="text">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Fecha publicación</label><br />
+                                        <label>desde:</label>
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input id="FechaD" name="FechaD" class="form-control pull-right" type="text" />
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label>Hasta:</label>
+                                        <div class="input-group date">
+                                            <div class="input-group-addon">
+                                                <i class="fa fa-calendar"></i>
+                                            </div>
+                                            <input id="FechaH" name="FechaH" class="form-control pull-right" type="text" />
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <button type="button" id="btn-NM" class="btn btn-primary btn-block">Buscar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- fin formulario -->
+        </div>
+        <div class="col-md-7">
+            <div class="row">
+                <div class="box box-default">
+                    <div class="box-header with-border">
+                        <i class="fa fa-file-text-o"></i>
+                        <h3 class="box-title">Resultados</h3>
+                    </div>
+                    <div class="box-body">
+                        @if (ViewBag.Referencia)
+                        {
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="box box-success box-solid">
+                                        <div class="box-header with-border">
+                                            <h3>Nueva referencia</h3>
+                                        </div>
+                                        <div class="box-body">
+                                            <strong>@Model.Norma</strong><br />
+                                            @if (Model.Organismo != null && Model.Organismo != "")
+                                            {
+                                                @Model.Organismo
+                                            }
+                                            @if (Model.Numero != null && Model.Numero != "")
+                                            {
+                                                <label>Número @Model.Numero</label>
+                                            }
+                                            @if (Model.Articulo != null && Model.Articulo != "")
+                                            {
+                                                <label>Artículo @Model.Articulo</label>
+                                            }
+                                            @if (Model.Inciso != null && Model.Inciso != "")
+                                            {
+                                                <label>Inciso @Model.Inciso</label>
+                                            }
+                                            <br /><br />
+                                            @Model.Titulo
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        }
+                        <div class="row">
+                            <div class="col-md-12">
+                                <label id="lblTotal"></label>
+                                <div id="tblResultado">
+                                    <table id="resultado" class="table table-bordered">
+                                        <tbody id="tablaBody"></tbody>
+                                    </table>
+                                </div>
+                                <div id="msgError" style="display:none;">
+                                    <div class="alert alert-warning">
+                                        <h4>
+                                            <i class="icon fa fa-warning"></i>
+                                            Atención !!
+                                        </h4>
+                                        No se encontraron registros para la búsqueda indicada.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12" style="text-align: right" id="paginacion">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+@section scripts{
+    <script src="~/Scripts/Pages/BuscarPlantillasNM.js"></script>
+}

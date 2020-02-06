@@ -1,5 +1,6 @@
 ﻿using GestorDocumentos.Models.Plantillas;
 using GestorDocumentosExceptions;
+using Microsoft.AspNet.Identity;
 using mvc4.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -534,6 +535,169 @@ namespace GestorDocumentos.Controllers
             ViewBag.Referencia = false;
 
             return View();
+        }
+
+        [HttpPost]
+        public string BuscarNM(DatosAmbiental nor)
+        {
+            try
+            {
+                var login = User.Identity.IsAuthenticated;
+                if (!login)
+                    return "{\"MensajeError\":\"Usuario no logeado\"}";
+
+                string q = string.Empty;
+                string bNorma = string.Empty;
+                string bDatos = string.Empty;
+                string fecha = string.Empty;
+                string fecha2 = string.Empty;
+                string coleccion = "&q=Coleccion:'MA'";
+                string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
+
+                if (!String.IsNullOrEmpty(nor.ley))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'LEY'" : "Tema:'LEY'";
+                if (!String.IsNullOrEmpty(nor.cir))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'CIRCULAR'" : "Tema:'CIRCULAR'";
+                if (!String.IsNullOrEmpty(nor.dfl))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'DFL'" : "Tema:'DFL'";
+                if (!String.IsNullOrEmpty(nor.con))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'CONVENIO'" : "Tema:'CONVENIO'";
+                if (!String.IsNullOrEmpty(nor.dl))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'DL'" : "Tema:'DL'";
+                if (!String.IsNullOrEmpty(nor.acu))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'ACUERDO'" : "Tema:'ACUERDO'";
+                if (!String.IsNullOrEmpty(nor.ds))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'DS'" : "Tema:'DS'";
+                if (!String.IsNullOrEmpty(nor.tra))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'TRATADO'" : "Tema:'TRATADO'";
+                if (!String.IsNullOrEmpty(nor.dcto))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'DCTO'" : "Tema:'DCTO'";
+                if (!String.IsNullOrEmpty(nor.reg))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'REGLAMENTO'" : "Tema:'REGLAMENTO'";
+                if (!String.IsNullOrEmpty(nor.res))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'RES'" : "Tema:'RES'";
+                if(!String.IsNullOrEmpty(nor.pro))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'PROTOCOLO'" : "Tema:'PROTOCOLO'";
+
+
+
+                if (!String.IsNullOrEmpty(q))
+                    bNorma = " AND (" + q + ")";
+
+                q = string.Empty;
+
+                if (nor.FechaD != null)
+                {
+                    fecha = nor.FechaD.Replace("/", "-");
+                    string[] f = fecha.Split('-');
+                    fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    fecha2 = nor.FechaH.Replace("/", "-");
+                    f = fecha2.Split('-');
+                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
+                }
+
+                if (!string.IsNullOrEmpty(nor.numNorma))
+                    q += " AND Numero:'" + nor.numNorma + "'";
+                if (!string.IsNullOrEmpty(nor.todas))
+                {
+                    if (!string.IsNullOrEmpty(nor.ninguna))
+                        q += " AND Texto:'" + nor.todas + " NOT " + nor.ninguna + "'";
+                    else
+                        q += " AND Texto:'" + nor.todas + "'";
+                }
+
+
+                string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
+                url = url.Replace("  ", " ");
+
+                string response = Indexador.Solr.getResponse(url);
+
+                var expConverter = new ExpandoObjectConverter();
+                dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
+
+                var doc = obj.response;
+
+                return JsonConvert.SerializeObject(doc);
+            }
+            catch (BusinessException bx)
+            {
+                return "{\"MensajeError\":\"" + bx.Message + "\"}";
+            }
+            catch (Exception ex)
+            {
+                new TechnicalException("Error al realizar la busqueda del documento.", ex);
+                return "{\"MensajeError\":\"No es posible cargar la página, contactarse con el administrador\"}";
+            }
+        }
+
+        public ActionResult BuscarBorradorOrPendiente()
+        {
+            var login = User.Identity.IsAuthenticated;
+            if (!login)
+                return RedirectToAction("Login", "Account");
+
+            ViewBag.Referencia = false;
+
+            return View();
+        }
+
+        [HttpPost]
+        public string BuscarBorradorOrPendiente(bool Pendiente, bool Borrador, string pagina)
+        {
+            string usuario = User.Identity.GetUserName();
+            string rolUs = "";
+            try
+            {
+                rolUs = Session["rol"].ToString();
+            }
+            catch { }
+
+            string filtroUsuario = "";
+            if (rolUs != GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+            {
+                filtroUsuario = " AND Usuario:'" + usuario + "'";
+            }
+
+            string q = "";
+            try
+            {
+                string bNorma = "";
+                string bDatos = "";
+                if (Borrador)
+                {
+                    bDatos = "&q=Estado:'99'" + filtroUsuario; // borrador
+                }
+                else if (Borrador)
+                {
+                    bDatos = "&q=Estado:'98'"; // pendiente
+                }
+
+                string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
+
+                string orden = "Orden";
+
+                string url = "select?fl=" + fl + bNorma + bDatos + "&sort=" + orden + " asc&start=" + pagina;
+                url = url.Replace("  ", " ");
+
+                string response = Indexador.Solr.getResponse(url);
+
+                var expConverter = new ExpandoObjectConverter();
+                dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
+
+                var doc = obj.response;
+
+                return JsonConvert.SerializeObject(doc);
+            }
+            catch (BusinessException bx)
+            {
+                return "{\"MensajeError\":\"" + bx.Message + "\"}";
+            }
+            catch (Exception ex)
+            {
+                new TechnicalException("Error al realizar la busqueda del documento.", ex);
+                return "{\"MensajeError\":\"No es posible cargar la página, contactarse con el administrador\"}";
+            }
         }
     }
 }
