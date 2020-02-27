@@ -748,6 +748,24 @@ namespace GestorDocumentos.Controllers
         }
 
         [HttpGet]
+        public ActionResult Ma_NuevoDocumento()
+        {
+            ViewBag.ListaNormas = getNormas();
+            Documento d = new Documento();
+            d.Fecha = DateTime.Now.ToShortDateString();
+            d.Links = new List<Link>();
+            d.Versiones = new List<VersionesDocumento>();
+            return View(d);
+        }
+
+        private string[] getNormas()
+        {
+            string ruta = WebConfigurationManager.AppSettings["MVC-DIRECTORIO"] + "Configuracion\\Normas.txt";
+            string[] txt = (System.IO.File.ReadAllText(ruta)).Replace("\r", "").Replace("\n", "").Split(',');
+            return txt;
+        }
+
+        [HttpGet]
         public ActionResult Ma_EditarDocumento(string id)
         {
             Documento d = new Documento();
@@ -993,6 +1011,186 @@ namespace GestorDocumentos.Controllers
         }
 
         [HttpPost]
+        public ActionResult Ma_NuevoDocumento(Documento ma)
+        {
+            string error = "";
+            try
+            {
+                string usuario = User.Identity.GetUserName();
+
+                ma.ColeccionGlosa = (ma.ColeccionGlosa.Replace("\r", "").Replace("\n", "")).Trim();
+                if (ma.CategoriaGlosa != null)
+                    ma.CategoriaGlosa = (ma.CategoriaGlosa.Replace("\r", "").Replace("\n", "")).Trim();
+                if (ma.SeccionGlosa != null)
+                    ma.SeccionGlosa = (ma.SeccionGlosa.Replace("\r", "").Replace("\n", "")).Trim();
+                if (ma.TemaGlosa != null)
+                    ma.TemaGlosa = (ma.TemaGlosa.Replace("\r", "").Replace("\n", "")).Trim();
+
+                if (ma.ColeccionGlosa != null && ma.ColeccionGlosa != "")
+                    ma.Coleccion = (ma.ColeccionGlosa.Replace(", ", ",")).Split(',');
+                if (ma.CategoriaGlosa != null && ma.CategoriaGlosa != "")
+                    ma.Categoria = (ma.CategoriaGlosa.Replace(", ", ",")).Split(',');
+                if (ma.SeccionGlosa != null && ma.SeccionGlosa != "")
+                    ma.Seccion = (ma.SeccionGlosa.Replace(", ", ",")).Split(',');
+                if (ma.TemaGlosa != null && ma.TemaGlosa != "")
+                    ma.Tema = (ma.TemaGlosa.Replace(", ", ",")).Split(',');
+
+                if (ma.ColeccionGlosa == null || ma.ColeccionGlosa == "")
+                    error += "Debe indicar la colección a la que pertenece el documento.- ";
+                if (ma.Norma == null || ma.Norma == "0")
+                    error += "Debe indicar el tipo de norma del documento.- ";
+                if (ma.Fecha == null || ma.Fecha == "")
+                    error += "Debe indicar la fecha del documento.- ";
+
+                if (error != "")
+                    throw new Exception(error);
+
+
+
+                if (ma.EsBorrador)
+                {
+                    string fecha = ma.Fecha.Replace("/", "-");
+                    string[] f = fecha.Split('-');
+
+                    ma.Fecha = f[2] + "-" + f[1] + "-" + f[0];
+                    ma.Estado = 99; // borrador
+                    ma.Usuario = usuario;
+                    ma.EsBorrador = true;
+                    ma.Origen = ma.Coleccion[0];
+
+
+                    ma.IdDocumento = UtilesBO.getMd5(FileBo.SerializeXML(ma));
+                    string xml = FileBo.SerializeXML(ma);                    
+
+                    string rutaBorrador = WebConfigurationManager.AppSettings["MVC-DATA"];
+                    if (ma.Origen != "BITE" && ma.Origen != "MA" && ma.Origen != "LA")
+                        rutaBorrador += "DOE\\" + f[2] + "\\" + f[1] + "\\" + f[0] + "\\";
+                    else
+                        rutaBorrador += ma.Coleccion[0] + "\\";
+                    if (!Directory.Exists(rutaBorrador))
+                        Directory.CreateDirectory(rutaBorrador);
+                    FileBo.setXmlStringToFile(rutaBorrador + ma.IdDocumento + "_borrador.xml", xml);
+                    FileBo.setXmlStringToFile(rutaBorrador + ma.IdDocumento + ".xml", xml);
+                    Indexador.Solr.sendXmlDocumento(ma, true);
+                    //Indexador.Solr.cambiaEstadoDocumento(d.id, estado, usuario); //borrador
+                }
+                return Redirect("~/Document/Ma_EditarDocumento/" + ma.IdDocumento);
+
+            }
+            catch (Exception ex)
+            {
+                ViewBag.SelectNorma = ma.Norma;
+                ViewBag.ListaNormas = getNormas();
+                ma.EsBorrador = false;
+                ModelState.AddModelError("", ex.Message);
+                return View(ma);
+            }
+        }
+
+        [HttpGet]
+        public ActionResult Ma_EliminarVersion(string id)
+        {
+            string idDocumento = "";
+            string idv = "";
+            try
+            {
+                string[] d = (id.Replace("btnEliminarVersion_", "")).Split('_');
+                idDocumento = d[0];
+                Documento ma = Indexador.Solr.getDocumentoById(d[0], true);
+                foreach(VersionesDocumento v in ma.Versiones)
+                {
+                    if (v.nombre == d[0] + "_" + d[1])
+                    {
+                        v.estado = 1;
+                        idv = v.id;
+                    }
+                }
+                string xml = FileBo.SerializeXML(ma);
+                string rutaBorrador = ma.Version; //.Replace(".xml", "_" + d[1] + ".xml");
+                FileBo.setXmlStringToFile(rutaBorrador, xml);
+                setLog(ma, "Elimina versión número " + idv);
+            }
+            catch { };
+            return Redirect("~/Document/Ma_EditarDocumento/" + idDocumento);
+        }
+
+        [HttpPost]
+        public ActionResult Ma_EditarVersion(Documento doc)
+        {
+            string idDocumento = "";
+            try
+            {
+                if (doc.Texto == "")
+                    throw new Exception("Debe indicar el texto del documento");
+                if (doc.TextoDescripcionVersion == "")
+                    throw new Exception("Debe indicar la descripción de la versión");
+
+                // lee doc original
+                Documento ma = new Documento();
+                string[] d = doc.IdDocumento.Split('_');
+                ma = Indexador.Solr.getDocumentoById(d[0], true);
+
+                // lee doc version
+                Documento maV = new Documento();
+                string xmlV = System.IO.File.ReadAllText(ma.Version.Replace(".xml", "_" + d[1] + ".xml"));
+                maV = (Documento)FileBo.DeserializeXML(doc.GetType(), xmlV);
+
+                // actualiza y guarda version
+                maV.Texto = doc.Texto;
+                string idv = "";
+                idDocumento = d[0];
+                foreach(VersionesDocumento v in maV.Versiones)
+                {
+                    if(v.nombre == doc.IdDocumento)
+                    {
+                        v.descripcion = doc.TextoDescripcionVersion;
+                    }
+                }
+                // actualiza y guarda doc original
+                foreach (VersionesDocumento v in ma.Versiones)
+                {
+                    if (v.nombre == doc.IdDocumento)
+                    {
+                        v.descripcion = doc.TextoDescripcionVersion;
+                        idv = v.id;
+                    }
+                }
+                string xml = FileBo.SerializeXML(ma);
+                FileBo.setXmlStringToFile(ma.Version, xml);
+
+                xmlV = FileBo.SerializeXML(maV);
+                string rutaBorrador = ma.Version.Replace(".xml", "_" + d[1] + ".xml");
+                FileBo.setXmlStringToFile(rutaBorrador, xmlV);
+                setLog(ma, "Modifica versión número " + idv);
+
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                return View(doc);
+            }
+            return Redirect("~/Document/Ma_EditarDocumento/" + idDocumento);
+        }
+
+        [HttpGet]
+        public ActionResult Ma_EditarVersion(string id)
+        {
+            string[] d = id.Split('_');
+            Documento doc = Indexador.Solr.getDocumentoById(d[0], true);
+            string xml = System.IO.File.ReadAllText(doc.Version.Replace(".xml", "_" + d[1] + ".xml"));
+            Documento _doc = (Documento)FileBo.DeserializeXML(doc.GetType(), xml);
+
+            int t = Convert.ToInt32(d[1].TrimStart('0'));
+            VersionesDocumento version = _doc.Versiones[t - 1];
+            ViewBag.Version = t;
+            doc.Texto = _doc.Texto;
+            doc.TextoDescripcionVersion = version.descripcion;
+            doc.IdDocumento = id;
+            ViewBag.IdOriginal = d[0];
+            return View(doc);
+        }
+
+        [HttpPost]
         public ActionResult Ma_EditarDocumento(Documento ma)
         {
             string usuario = User.Identity.GetUserName();
@@ -1077,25 +1275,30 @@ namespace GestorDocumentos.Controllers
                     Documento VersionOriginalMa = (Documento)FileBo.DeserializeXML(ma.GetType(), versionXmlOriginal);
 
                     int totalVersiones = 0;
-                    VersionesDocumento v = new VersionesDocumento();
-                    List<VersionesDocumento> versiones = new List<VersionesDocumento>();
-                    if (VersionOriginalMa.Versiones == null)
+                    if (ma.VersionFinal)
                     {
-                        totalVersiones = 1;
-                        v.nombre = d.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones);
-                        v.id = "1";
-                    }
-                    else
-                    {
-                        totalVersiones = VersionOriginalMa.Versiones.Count + 1;
-                        v.nombre = d.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones);
-                        v.id = Convert.ToString(totalVersiones);
-                    }
-                    VersionOriginalMa.Versiones.Add(v);
+                        VersionesDocumento v = new VersionesDocumento();
+                        List<VersionesDocumento> versiones = new List<VersionesDocumento>();
+                        if (VersionOriginalMa.Versiones == null)
+                        {
+                            totalVersiones = 1;
+                            v.nombre = d.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones);
+                            v.id = "1";
+                            v.descripcion = ma.TextoDescripcionVersion;
+                        }
+                        else
+                        {
+                            totalVersiones = VersionOriginalMa.Versiones.Count + 1;
+                            v.nombre = d.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones);
+                            v.id = Convert.ToString(totalVersiones);
+                            v.descripcion = ma.TextoDescripcionVersion;
+                        }
+                        VersionOriginalMa.Versiones.Add(v);
 
-                    versionXmlOriginal = FileBo.SerializeXML(VersionOriginalMa);
-                    FileBo.setXmlStringToFile(d.Version.Replace("_borrador.xml", "").Replace(".xml", "") + "_" + string.Format("{0:0000000000}", totalVersiones) + ".xml", versionXmlOriginal);
 
+                        versionXmlOriginal = FileBo.SerializeXML(VersionOriginalMa);
+                        FileBo.setXmlStringToFile(d.Version.Replace("_borrador.xml", "").Replace(".xml", "") + "_" + string.Format("{0:0000000000}", totalVersiones) + ".xml", versionXmlOriginal);
+                    }
                     //ma.Versiones = VersionOriginalMa.Versiones;
                     //ma.Links = VersionOriginalMa.Links;
 
@@ -1191,6 +1394,8 @@ namespace GestorDocumentos.Controllers
 
                     if (d.Estado == 98)
                         ma.TextoCambio = "(Acepta publicación) " + ma.TextoCambio;
+                    if(!ma.VersionFinal)
+                        ma.TextoCambio = "(Guardado sin versión) " + ma.TextoCambio;
                     setLog(VersionOriginalMa, ma.TextoCambio);
 
                 }

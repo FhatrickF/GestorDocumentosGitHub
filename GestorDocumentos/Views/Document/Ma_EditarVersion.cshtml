@@ -1,0 +1,86 @@
+﻿@model mvc4.Models.Documento
+@{
+    ViewBag.Title = "Editar versión";
+
+}
+
+<script type="text/javascript">
+    ready(function () {
+        CKEDITOR.replace('Texto', {
+            height: 300,
+            toolbarGroups: [{
+                "name": "basicstyles",
+                "groups": ["basicstyles"]
+            },
+            {
+                "name": "links",
+                "groups": ["links"]
+            },
+            {
+                "name": "paragraph",
+                "groups": ["list", 'indent', "blocks", "align"]
+            },
+            {
+                "name": "document",
+                "groups": ["mode"]
+            },
+            {
+                "name": "insert",
+                "groups": ["insert"]
+            },
+            {
+                "name": "styles",
+                "groups": ["styles"]
+            },
+            {
+                "name": "about",
+                "groups": ["about"]
+            },
+            ],
+            removeButtons: 'Iframe'
+        });
+    });
+</script>
+
+<section class="content-header">
+    <h1>
+        @ViewBag.Title
+    </h1>
+</section>
+
+<section class="content">
+    @using (Html.BeginForm("Ma_EditarVersion", "Document", FormMethod.Post, new { id = "setForm" }))
+    {
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="form-group">
+                    <strong>Versión N°: </strong><span>@ViewBag.Version</span>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8">
+                <label>Descripción</label>
+                <div class="form-group">
+                    @Html.TextAreaFor(m => m.TextoDescripcionVersion, new { @class = "form-control", rows = "2", cols = "80" })
+                </div>
+                <div class="form-group">
+                    @Html.TextAreaFor(m => m.Texto, new { @class = "form-control", rows = "30", cols = "80" })
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-lg-8" style="text-align: right">
+                <a href="~/Document/Ma_EditarDocumento/@ViewBag.IdOriginal" class="btn btn-info btn-sm" id="btnCancelar">Cancelar</a>
+                <button type="submit" class="btn btn-primary btn-sm" id="btnAceptar">Guardar versión</button>
+            </div>
+        </div>
+        @Html.HiddenFor(m => m.IdDocumento)
+    }
+</section>
+
+@section scripts{
+
+}
+

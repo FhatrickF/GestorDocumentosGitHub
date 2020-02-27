@@ -1,7 +1,7 @@
 ﻿@using Microsoft.AspNet.Identity
 @model mvc4.Models.Documento
 @{
-    ViewBag.Title = "Editar documento";
+    ViewBag.Title = "Nuevo documento";
 }
 
 @{
@@ -19,9 +19,12 @@
     var IdNota = '@ViewBag.IdNota';
     var idLista = "";
     var referencias = "";
-    var idVersion = "";
-
     ready(function () {
+
+        $('#Fecha').datepicker({
+            autoclose: true,
+            format: 'dd/mm/yyyy'
+        })
 
         CKEDITOR.replace('txtNota', {
             height: 300,
@@ -109,7 +112,7 @@
                         for (var x = 0; x < d.length; x++) {
                             historial += d[x].idUser + ".- " + d[x].hora + "<br />";
                             historial += d[x].descripcion + "<br />";
-                            historial += "<br />";                           
+                            historial += "<br />";
                         }
                         $('#divHistorial').html(historial);
                     } else {
@@ -151,29 +154,17 @@
                 return 0;
             }
             $('#textoReasignacion').val(t);
-            $('#usuarioReasignacion').val($('#selecUsuarioReasignacion').val());           
-            $("#setFormRechaza").submit();           
+            $('#usuarioReasignacion').val($('#selecUsuarioReasignacion').val());
+            $("#setFormRechaza").submit();
         });
 
         $('#btnAceptarCambio').click(function () {
-            var versionFinal = true;
             var t = $('#txtAreaModificacion').val();
-            var u = $('#txtAreaTituloModificacion').val();
-            if (!$('#chkCrearVersion').prop('checked')) {
-                versionFinal = false;
-                if (t == "") {
-                    alert("Debe indicar una descripción del cambio realizado.");
-                    return 0;
-                }
-            } else {
-                if (t == "" || u == "") {
-                    alert("Debe indicar todas las descripciones solicitadas !!");
-                    return 0;
-                }
+            if (t == "") {
+                alert("Debe indicar una descripción del cambio realizado");
+                return 0;
             }
-            $('#VersionFinal').val(versionFinal);
             $('#TextoCambio').val(t);
-            $('#TextoDescripcionVersion').val(u);
             $('#EsBorrador').val("false");
             $('#Publicar').val("true");
             $("#setForm").submit();
@@ -287,29 +278,6 @@
                 img.src = _URL.createObjectURL(file);
             }
         });
-
-        $('.btnEliminarVersion').click(function (event) {
-            event.preventDefault();
-            idVersion = $(this).prop('id');
-            $('#divEliminaVersion').modal('show');
-        });
-
-        $('#btnAceptarEliminarVersion').click(function () {
-            location.href = "../Ma_EliminarVersion?id=" + idVersion;
-        });
-
-        $('#chkCrearVersion').change(function () {
-            if ($('#chkCrearVersion').prop('checked')) 
-                $('#dvDatosNuevaVersion').show();
-            else
-                $('#dvDatosNuevaVersion').hide();
-        });
-
-        $('#btnCerrarCambio').click(function () {
-            $('#divTextoCambio').modal('hide');
-            $('#dvDatosNuevaVersion').show();
-            $('#chkCrearVersion').prop('checked', true);
-        });
     });
 
     function sendFile(file) {
@@ -391,7 +359,7 @@
 </section>
 
 <section class="content">
-    @using (Html.BeginForm("Ma_EditarDocumento", "Document", FormMethod.Post, new { id = "setForm" }))
+    @using (Html.BeginForm("Ma_NuevoDocumento", "Document", FormMethod.Post, new { id = "setForm" }))
     {
         @Html.AntiForgeryToken()
         <div class="row">
@@ -399,7 +367,7 @@
                 <div class="box box-default">
                     <div class="box-header with-border">
                         <i class="fa fa-file-text-o"></i>
-                        <h3 class="box-title">Editar documento</h3>
+                        <h3 class="box-title">Nuevo documento</h3>
                     </div>
                     <div class="box-body">
                         <div class="row">
@@ -433,8 +401,14 @@
                                 }
                                 <label>Texto del documento</label>
 
-                                <a href="~/Document/Ma_VerDocumento/@Model.IdDocumento" id="btn-vista-previa" class="btn btn-warning btn-block">Vista previa</a>
-                                <br />
+                                <div class="alert alert-info">
+                                    <h4>
+                                        <i class="icon fa fa-info">
+                                        </i>
+                                        Atención!
+                                    </h4>
+                                    Este es un documento nuevo
+                                </div>                              
 
                                 @Html.TextAreaFor(m => m.Texto, new { @class = "form-control", row = "10", cols = "80" })
 
@@ -447,9 +421,7 @@
                                 @Html.HiddenFor(m => m.CategoriaGlosa)
                                 @Html.HiddenFor(m => m.TemaGlosa)
                                 @Html.HiddenFor(m => m.TextoCambio)
-                                @Html.HiddenFor(m => m.TextoDescripcionVersion)
                                 @Html.HiddenFor(m => m.Fecha)
-                                @Html.HiddenFor(m => m.VersionFinal)
                                 <br />
                                 <div class="row">
                                     <div class="col-md-6">
@@ -485,15 +457,6 @@
                                         <li class="active">
                                             <a href="#tab_1" data-toggle="tab">Metadatos</a>
                                         </li>
-                                        <li>
-                                            <a href="#tab_2" data-toggle="tab">Versiones</a>
-                                        </li>
-                                        <li>
-                                            <a href="#tab_3" data-toggle="tab">Referencias</a>
-                                        </li>
-                                        <li>
-                                            <a id="aTab4" href="#tab_4" data-toggle="tab">Historial</a>
-                                        </li>
                                     </ul>
                                     <div class="tab-content">
                                         <div id="tab_1" class="tab-pane active">
@@ -505,8 +468,33 @@
                                                 </div> <span><a href="#" id="Coleccion" style="display: inline;">[Editar]</a></span>
                                             </div>
                                             <div class="form-group">
-                                                @Html.LabelFor(m => m.Norma, "Norma")
-                                                @Html.TextBoxFor(m => m.Norma, new { @class = "form-control" })
+                                                <div class="form-group">
+                                                    <label>Fecha publicación:</label>
+                                                    <div class="input-group date">
+                                                        <div class="input-group-addon">
+                                                            <i class="fa fa-calendar"></i>
+                                                        </div>
+                                                        <input id="Fecha" value="@Model.Fecha" name="Fecha" class="form-control pull-right" type="text" />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="Norma">Norma</label>
+                                                <select id="Norma" name="Norma" class="form-control">
+                                                    <option value="0">Seleccionar</option>
+                                                    @for (var n = 0; n < @ViewBag.ListaNormas.Length; n++)
+                                                    {
+                                                        if (ViewBag.SelectNorma == @ViewBag.ListaNormas[n])
+                                                        {
+                                                            <option selected value="@ViewBag.ListaNormas[n]">@ViewBag.ListaNormas[n]</option>
+                                                        }
+                                                        else
+                                                        {
+                                                            <option value="@ViewBag.ListaNormas[n]">@ViewBag.ListaNormas[n]</option>
+                                                        }
+                                                    }
+                                                    </select>
+
                                             </div>
                                             <div class="form-group">
                                                 @Html.LabelFor(m => m.Numero, "Número")
@@ -559,84 +547,6 @@
                                                 </div> <span><a href="#" id="Tema" style="display: inline;">[Editar]</a></span>
                                             </div>
                                         </div>
-                                        <div id="tab_2" class="tab-pane">
-                                            @if (Model.Versiones.Count > 0)
-                                            {
-                                                foreach (var version in Model.Versiones)
-                                                {
-                                                    if (version.nombre.IndexOf("borrador") < 0 && version.id != "original")
-                                                    {
-                                                        <a target="_blank" href="~/Document/Ma_VerVersion/@version.nombre" class="text-blue">
-                                                            @if (version.descripcion == null)
-                                                            {
-                                                                <label>Versión</label> @version.id
-                                                            }
-                                                            else
-                                                            {
-                                                                <label>Versión @version.id.- </label> @version.descripcion<br />
-                                                            }
-                                                        </a>
-                                                        if (ViewBag.Estado != "Pendiente" && ViewBag.Estado != "Borrador")
-                                                        {
-                                                            if (version.estado == 0)
-                                                            {
-                                                                <a href="~/Document/Ma_EditarVersion/@version.nombre" class="text-blue">Editar</a>
-                                                                <span> | </span>
-                                                                <a href="#" id="btnEliminarVersion_@version.nombre" class="text-red btnEliminarVersion">Eliminar</a>
-                                                            }
-                                                            else
-                                                            {
-                                                                <label class="text-red">---- Eliminada ----</label>
-                                                            }
-                                                        }
-                                                        <br /><br />
-                                                    }
-                                                }
-                                            }
-                                        </div>
-                                        <div id="tab_3" class="tab-pane">
-                                            @if (ViewBag.Estado != "Pendiente")
-                                            {
-                                                <button type="button" class="btn btn-block btn-primary btn-sm" id="btnMyModal">Agregar/modificar nota</button>
-                                                <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
-
-                                                <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
-
-                                                <button type="button" class="btn btn-block btn-success btn-sm" id="btnDialogImagen">Insertar imagen</button>
-                                                <br />
-                                            }
-                                            @if (Model.Links != null)
-                                            {
-                                                foreach (var link in Model.Links)
-                                                {
-                                                    if (link.Tipo.IndexOf("no contiene referencias") > 0)
-                                                    {
-                                                        @link.Tipo
-                                                    }
-                                                    else
-                                                    {
-                                                        <label>Visible para</label> @link.Colecciones <br />
-                                                        @link.Tipo
-                                                        <br />
-                                                        <a href="~/Document/Ma_EditarDocumento/@link.Url">
-                                                            @link.Texto
-                                                        </a>
-                                                        if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
-                                                        {
-                                                            <br />
-                                                            <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
-                                                                [ Eliminar ]
-                                                            </label>
-                                                        }
-                                                        <br /><br />
-                                                    }
-                                                }
-                                            }
-                                        </div>
-                                        <div id="tab_4" class="tab-pane">
-                                            <div style="color: red" id="dvCargandoHistorial"></div>
-                                            <div id="divHistorial"></div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -654,36 +564,6 @@
         <input type="hidden" name="usuarioReasignacion" id="usuarioReasignacion" value="@ViewBag.Usuario" />
         <input type="hidden" name="documentoReasignacion" id="documentoReasignacion" value="@Model.IdDocumento" />
     }
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Agregar nueva nota</h4>
-                </div>
-                <div class="modal-body">
-                    Estimado usuario, antes de proceder, asegúrese de hacer click en el lugar del texto donde
-                    va a insertar la nueva nota.<br />
-
-                    <br />
-                    <!-- <input type="text" id="idNota" class="form-control" /> -->
-                    <select id="coleccionNota" class="form-control" multiple>
-                        @for (var x = 0; x < Model.Coleccion.Length; x++)
-                        {
-                            <option value="@Model.Coleccion[x]">@Model.Coleccion[x]</option>
-                        }
-                    </select>
-                    <br />
-                    <textarea id="txtNota" name="txtNota" class="form-control">@ViewBag.TextoNota</textarea>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" id="btnAceptarNota" class="btn btn-primary">Aceptar</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <!-- Modal -->
     <div class="modal fade" id="divDetalleListado" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
@@ -714,24 +594,10 @@
                     Indique una breve descripción de la modificación<br />
                     realizada al documento.
                     <br /><br />
-                    <textarea id="txtAreaModificacion" class="form-control" style="width: 100%" rows="5"></textarea>
-                    <br /><br />
-                    
-                    <div class="checkbox">
-                        <label>
-                            <input type="checkbox" id="chkCrearVersion" checked="checked" />Crear nueva versión
-                        </label>
-                    </div>
-                    <div id="dvDatosNuevaVersion">
-                        Esta acción creará una nueva versión del documento con los cambios indicados. Indique un título
-                        para la versión anterior.<br />
-                        <strong>(texto visible para el usuario)</strong>
-                        <br /><br />
-                        <textarea id="txtAreaTituloModificacion" class="form-control" style="width: 100%" rows="5"></textarea>
-                    </div>
+                    <textarea id="txtAreaModificacion" style="width: 100%" rows="5"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btnCerrarCambio">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                     <button type="button" id="btnAceptarCambio" class="btn btn-primary">Aceptar</button>
                 </div>
             </div>
@@ -835,25 +701,6 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!-- Elimina referencias -->
-    <div class="modal fade" id="divEliminaVersion" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="divTituloEliminaVersion">Eliminar versión</h4>
-                </div>
-                <div class="modal-body">
-                    ¿Está seguro que desa eliminar la versión indicada?
-                    <br /><br />
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">No</button>
-                    <button type="button" id="btnAceptarEliminarVersion" class="btn btn-primary">Sí</button>
                 </div>
             </div>
         </div>

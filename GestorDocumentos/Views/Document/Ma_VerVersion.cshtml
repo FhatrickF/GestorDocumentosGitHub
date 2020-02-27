@@ -3,6 +3,48 @@
     ViewBag.Title = "Versión de documento " + ViewBag.Version;
 }
 
+<script type="text/javascript">
+    ready(function () {
+        $('.linkNota').click(function () {
+            event.preventDefault();
+            var i = $(this).attr('id');
+            var cols = i.split('_');
+            var colecciones = "";
+            for (var x = 0; x < cols.length - 1; x++) {
+                if (colecciones != "")
+                    colecciones += ", ";
+                colecciones += cols[x];
+            }
+            colecciones = "Nota visible para " + colecciones;
+            var params = new Object();
+            params.Nota = new Object();
+            params.Nota.Result = 1;
+            params.Nota.TextoNota = i;
+            params.Nota.Coleccion = "@ViewBag.Coleccion"; //segun seleccion
+            $.ajax({
+                type: "POST",
+                url: "/Document/Nota",
+                content: "application/json; charset=utf-8",
+                dataType: "json",
+                data: params,
+                success: function (d) {
+                    if (d.Result == 0) {
+                        $("#aNota").attr("href", "@Url.Action("Ma_EditarDocumento", "Document", new { id = Model.IdDocumento })" + "-" + i);
+                        $('#detalleNota').modal('show')
+                        $('#txtDetalleNota').html(colecciones + "<br /><br />" + d.TextoNota);
+                    }
+                    else {
+                        alert(d.TextoNota);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    alert("Ocurrió un error al crear la nueva nota. Por favor, contáctese con el administrador.");
+                }
+            });
+        });
+    });
+</script>
+
 <section class="content">
     <div class="row">
         <div class="col-md-12">
@@ -17,6 +59,23 @@
                             @Html.Raw(Model.Texto)
                         </div>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div class="modal fade" id="detalleNota" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Notas</h4>
+                </div>
+                <div class="modal-body" id="txtDetalleNota">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
                 </div>
             </div>
         </div>

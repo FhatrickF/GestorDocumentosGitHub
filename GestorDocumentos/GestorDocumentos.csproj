@@ -3050,6 +3050,8 @@
     <Content Include="Views\Document\Ma_Error.cshtml" />
     <Content Include="Views\Document\Ma_DocumentoReasignado.cshtml" />
     <Content Include="upImageDoe.ashx" />
+    <Content Include="Views\Document\Ma_NuevoDocumento.cshtml" />
+    <Content Include="Views\Document\Ma_EditarVersion.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />

@@ -10,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Web;
 using System.Web.Configuration;
 
@@ -71,11 +72,21 @@ namespace GestorDocumentos.Indexador
 
         public static Documento getDocumentoById(string id, bool versiones)
         {
+            string response = "";
+            Documento doc = new Documento();
             try
             {
-                string query = "select?q=id%3A" + id + "%20OR%20IdDocumento%3A" + id;
-                Documento doc = new Documento();
-                string response = getResponseSolr(query);
+                for(var x = 0; x < 3; x++) { 
+                    string query = "select?q=id%3A" + id + "%20OR%20IdDocumento%3A" + id;                    
+                    response = getResponseSolr(query);
+                    var expConverter = new ExpandoObjectConverter();
+                    dynamic o = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
+                    if (o.response.numFound > 0)
+                        break;
+                    else
+                        Thread.Sleep(1000);
+                }
+
 
                 if (response != "")
                 {
@@ -196,7 +207,7 @@ namespace GestorDocumentos.Indexador
                             if (doc.Versiones == null)
                                 doc.Versiones = new List<VersionesDocumento>();
                             VersionesDocumento version = new VersionesDocumento();
-                            version.nombre = doc.IdDocumento;
+                            version.nombre = idDocumento;
                             version.id = "original";
                             doc.Versiones.Add(version);
                         }
@@ -359,6 +370,8 @@ namespace GestorDocumentos.Indexador
             xml += "<field name=\"Temas\">" + documento.Temas + "</field>";
             xml += "<field name=\"Titulo\">" + documento.Titulo + "</field>";
             xml += "<field name=\"Texto\">" + documento.Texto + "</field>";
+            xml += "<field name=\"Estado\">" + documento.Estado + "</field>";
+            xml += "<field name=\"Usuario\">" + documento.Usuario + "</field>";
             xml += "</doc></add>";
 
             if (sendDocument(xml))

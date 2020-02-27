@@ -39,6 +39,9 @@ namespace mvc4.Models
     {
         public string id { get; set; }
         public string nombre { get; set; }
+        public string descripcion { get; set; }
+        private int _estado = 0;
+        public int estado { get; set; }
     }
 
     public class DetalleDocumento
@@ -233,6 +236,7 @@ namespace mvc4.Models
         public int Estado { get; set; }
         public string Usuario { get; set; }
         public string TextoCambio { get; set; }
+        public string TextoDescripcionVersion { get; set; }
         [AllowHtml]
         [Required]
         public string Texto { get; set; }
