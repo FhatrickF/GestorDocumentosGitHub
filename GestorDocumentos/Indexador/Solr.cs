@@ -137,7 +137,8 @@ namespace GestorDocumentos.Indexador
 
                     if (Coleccion != "BITE" && Coleccion != "MA" && Coleccion != "LA")
                     {
-                        Fecha = Fecha.Substring(0, 10);
+                        //Fecha = Fecha.Substring(0, 10);
+                        Fecha = Convert.ToDateTime(Fecha).ToString("dd-MM-yyyy");
                         string[] f = Fecha.Split('-');
                         Fecha = f[2] + "\\" + f[1] + "\\" + f[0];
                         Coleccion = "DOE\\" + Fecha;

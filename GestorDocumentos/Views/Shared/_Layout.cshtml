@@ -66,7 +66,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Google Font -->
     <link rel="stylesheet"
           href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
-
 </head>
 <!--
 BODY TAG OPTIONS:
@@ -170,10 +169,23 @@ desired effect
                     <li class="active"><a href="@Url.Action("Index","Home")"><i class="fa fa-dashboard"></i> <span>Dashboard</span></a></li>
                     <li class="active"><a href="@Url.Action("Index","Document")"><i class="fa fa-file"></i> <span>Documentos</span></a></li>
                     <li class="active"><a href="@Url.Action("Index","Busqueda")"><i class="fa fa-search"></i> <span>Busqueda</span></a></li>
+                    @*<li class="active"><a href="@Url.Action("Index","Plantilla")"><i class="fa fa-files-o"></i> <span>Plantillas</span></a></li>*@
+                    <li class="active dropdown">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"><i class="fa fa-files-o"></i> <span>Plantillas</span><span class="caret"></span></a>
+                        <ul class="dropdown-menu bg-black-active" style="background-color:#000 !important; color:#fff !important;">
+                            <li><a href="@Url.Action("BuscarNG","Plantilla")">Normas Generales</a></li>
+                            <li><a href="@Url.Action("BuscarNP","Plantilla")">Normas Particulares</a></li>
+                            <li><a href="@Url.Action("BuscarPJ","Plantilla")">Publicaciones Judiciales</a></li>
+                            <li><a href="@Url.Action("BuscarA","Plantilla")">Avisos</a></li>
+                            <li><a href="@Url.Action("BuscarLA","Plantilla")">Legislación Actualizada</a></li>
+                            <li><a href="@Url.Action("BuscarNM","Plantilla")">Normativa Medioambiental</a></li>
+                            <li><a href="@Url.Action("BuscarBorradorOrPendiente","Plantilla")">Borradores o Pendientes</a></li>
+                        </ul>
+                    </li>
                     @if (rol == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
                     {
                         <li class="active"><a href="@Url.Action("Index", "User")"><i class="fa fa-user"></i> <span>Usuarios</span></a></li>
-                        <li class="active"><a href="@Url.Action("Index", "LogActividad")"><i class="fa fa-list-ol"></i> <span>Log de Actividades</span></a></li>
+                        <li class="active"><a href="@Url.Action("Index", "LogActividad")"><i class="fa fa-list-alt"></i> <span>Log de Actividades</span></a></li>
                     }
                 </ul>
                 <!-- /.sidebar-menu -->

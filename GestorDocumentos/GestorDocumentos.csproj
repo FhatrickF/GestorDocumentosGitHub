@@ -181,6 +181,7 @@
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\ImagenesDoeController.cs" />
     <Compile Include="Controllers\LogActividadController.cs" />
+    <Compile Include="Controllers\PlantillaController.cs" />
     <Compile Include="Controllers\UserController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
@@ -190,6 +191,12 @@
     <Compile Include="Models\Document\DocumentViewModel.cs" />
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
+    <Compile Include="Models\Plantillas\Avisos.cs" />
+    <Compile Include="Models\Plantillas\DatosAmbiental.cs" />
+    <Compile Include="Models\Plantillas\LegislacionActualizada.cs" />
+    <Compile Include="Models\Plantillas\NormasGenerales.cs" />
+    <Compile Include="Models\Plantillas\NormasPerticulares.cs" />
+    <Compile Include="Models\Plantillas\PublicacionesJudiciales.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="upImageDoe.ashx.cs">
@@ -2983,6 +2990,10 @@
     <Content Include="Scripts\jquery\src\var\toString.js" />
     <Content Include="Scripts\jquery\src\wrap.js" />
     <Content Include="Scripts\modernizr-2.8.3.js" />
+    <Content Include="Scripts\Pages\BuscarBorrador.js" />
+    <Content Include="Scripts\Pages\BuscarPlantillas.js" />
+    <Content Include="Scripts\Pages\BuscarPlantillasNM.js" />
+    <Content Include="Scripts\Pages\Plantillas.js" />
     <Content Include="Scripts\popper-utils.js" />
     <Content Include="Scripts\popper-utils.min.js" />
     <Content Include="Scripts\popper.js" />
@@ -3052,6 +3063,14 @@
     <Content Include="upImageDoe.ashx" />
     <Content Include="Views\Document\Ma_NuevoDocumento.cshtml" />
     <Content Include="Views\Document\Ma_EditarVersion.cshtml" />
+    <Content Include="Views\Plantilla\Index.cshtml" />
+    <Content Include="Views\Plantilla\BuscarNP.cshtml" />
+    <Content Include="Views\Plantilla\BuscarNG.cshtml" />
+    <Content Include="Views\Plantilla\BuscarPJ.cshtml" />
+    <Content Include="Views\Plantilla\BuscarA.cshtml" />
+    <Content Include="Views\Plantilla\BuscarLA.cshtml" />
+    <Content Include="Views\Plantilla\BuscarNM.cshtml" />
+    <Content Include="Views\Plantilla\BuscarBorradorOrPendiente.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
