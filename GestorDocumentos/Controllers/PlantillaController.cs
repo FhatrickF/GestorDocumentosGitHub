@@ -74,54 +74,85 @@ namespace GestorDocumentos.Controllers
                 string coleccion = "&q=Coleccion:'DONG'";
                 string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
-                if(!String.IsNullOrEmpty(nor.LY))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'LEY'" : "Norma:'LEY'";
+                if (!String.IsNullOrEmpty(nor.LY))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'LEY'" : "Norma:'LEY' ";
                 if (!String.IsNullOrEmpty(nor.RES))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION' ";
                 if (!String.IsNullOrEmpty(nor.CI))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR' ";
                 if (!String.IsNullOrEmpty(nor.DF))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DFL'" : "Norma:'DFL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DFL'" : "Norma:'DFL' ";
                 if (!String.IsNullOrEmpty(nor.PJ))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'NOMINA'" : "Norma:'NOMINA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'NOMINA'" : "Norma:'NOMINA' ";
                 if (!String.IsNullOrEmpty(nor.AA))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'AAC'" : "Norma:'AAC'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'AAC'" : "Norma:'AAC' ";
                 if (!String.IsNullOrEmpty(nor.ACBC))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ACUERDO&CERTIFICADO'" : "Norma:'ACUERDO&CERTIFICADO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ACUERDO' OR Norma:'CERTIFICADO'" : "Norma:'ACUERDO' OR Norma:'CERTIFICADO' ";
                 if (!String.IsNullOrEmpty(nor.DO))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DCTO&ORDENANZA'" : "Norma:'DCTO&ORDENANZA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DCTO' Norma:'ORDENANZA'" : "Norma:'DCTO' Norma:'ORDENANZA'";
                 if (!String.IsNullOrEmpty(nor.IG))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'INFORMACION&COREDE&INSTRUCTIVO&NORMA&ORDEN&SENTENCIA&RECTIFICACION&REGLAMENTO'" : "Norma:'INFORMACION&COREDE&INSTRUCTIVO&NORMA&ORDEN&SENTENCIA&RECTIFICACION&REGLAMENTO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'INFORMACION' OR Norma:'COREDE' OR Norma:'INSTRUCTIVO' OR Norma:'NORMA' Norma:'ORDEN' OR Norma:'SENTENCIA' OR Norma:'RECTIFICACION' OR Norma:'REGLAMENTO'" : "Norma:'INFORMACION' OR Norma:'COREDE' OR Norma:'INSTRUCTIVO' OR Norma:'NORMA' Norma:'ORDEN' OR Norma:'SENTENCIA' OR Norma:'RECTIFICACION' OR Norma:'REGLAMENTO'";
 
                 if (!String.IsNullOrEmpty(q))
                     bNorma = " AND (" + q + ")";
 
                 q = string.Empty;
 
-                if (nor.FechaD != null)
+                if (!string.IsNullOrEmpty(nor.FechaD))
                 {
                     fecha = nor.FechaD.Replace("/", "-");
+                    DateTime fechadoc = Convert.ToDateTime(fecha);
+                    fecha = fechadoc.ToString("dd-MM-yyyy");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    fecha2 = nor.FechaH.Replace("/", "-");
-                    f = fecha2.Split('-');
-                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
+
+
+                    if (!string.IsNullOrEmpty(nor.FechaH))
+                    {
+                        fecha2 = nor.FechaH.Replace("/", "-");
+                        fechadoc = Convert.ToDateTime(fecha2);
+                        fecha2 = fechadoc.ToString("dd-MM-yyyy");
+                        f = fecha2.Split('-');
+                        fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                        q += " AND Fecha:[" + fecha + " TO " + fecha2 + "]";
+                    }
+                    else
+                    {
+                        q += " AND Fecha:'" + fecha + "'";
+                    }
+
                 }
 
-                if (nor.num != null)
+                if (!String.IsNullOrEmpty(nor.exacta))
+                {
+                    q += " AND Texto:'" + nor.exacta + "'";
+                }
+
+                if (!string.IsNullOrEmpty(nor.num))
                     q += " AND Numero:'" + nor.num + "'";
 
                 if (!string.IsNullOrEmpty(nor.todas))
                 {
                     if (!string.IsNullOrEmpty(nor.ninguna))
-                        q += " AND Texto:'" + nor.todas + " NOT " + nor.ninguna + "'";
+                        q += " AND Texto:'" + nor.todas + "' AND NOT Texto:'" + nor.ninguna + "'";
                     else
                         q += " AND Texto:'" + nor.todas + "'";
                 }
 
-                string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.Pagina;
+                if (!string.IsNullOrEmpty(nor.ninguna))
+                    q += " AND NOT Texto :'" + nor.ninguna + "'";
+
+                if (!string.IsNullOrEmpty(nor.plus))
+                    q += " AND Texto:'*" + nor.plus + "*'";
+
+                if (q != "")
+                    bDatos = q;
+
+                string destacado = "&hl.fl=Texto&hl.simple.post=<%2Fspan>&hl.simple.pre=<span%20class%3D%27MatchDestacado%27>&hl=on";
+
+                string url = "select?fl=" + fl + coleccion + bNorma + bDatos + destacado + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.Pagina;
                 url = url.Replace("  ", " ");
+                url = url.Replace(",", "%2C").Replace(" ", "%20").Replace(":", "%3A").Replace("'", "%22");
 
                 string response = Indexador.Solr.getResponse(url);
 
@@ -205,30 +236,56 @@ namespace GestorDocumentos.Controllers
 
                 q = string.Empty;
 
-                if (nor.FechaD != null)
+                if (!string.IsNullOrEmpty(nor.FechaD))
                 {
                     fecha = nor.FechaD.Replace("/", "-");
+                    DateTime fechadoc = Convert.ToDateTime(fecha);
+                    fecha = fechadoc.ToString("dd-MM-yyyy");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    fecha2 = nor.FechaH.Replace("/", "-");
-                    f = fecha2.Split('-');
-                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
+
+
+                    if (!string.IsNullOrEmpty(nor.FechaH))
+                    {
+                        fecha2 = nor.FechaH.Replace("/", "-");
+                        fechadoc = Convert.ToDateTime(fecha2);
+                        fecha2 = fechadoc.ToString("dd-MM-yyyy");
+                        f = fecha2.Split('-');
+                        fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                        q += " AND Fecha:[" + fecha + " TO " + fecha2 + "]";
+                    }
+                    else
+                    {
+                        q += " AND Fecha:'" + fecha + "'";
+                    }
                 }
 
                 if (!string.IsNullOrEmpty(nor.n))
                     q += " AND Numero:'" + nor.n + "'";
 
+                if (!String.IsNullOrEmpty(nor.exacta))
+                {
+                    q += " AND Texto:'" + nor.exacta + "'";
+                }
+
                 if (!string.IsNullOrEmpty(nor.Todas))
                 {
                     if (!string.IsNullOrEmpty(nor.ninguna))
-                        q += " AND Texto:'" + nor.Todas + " NOT " + nor.ninguna + "'";
+                        q += " AND Texto:'" + nor.Todas + "' AND NOT Texto:'" + nor.ninguna + "'";
                     else
                         q += " AND Texto:'" + nor.Todas + "'";
                 }
+
+                if (!string.IsNullOrEmpty(nor.plus))
+                    q += " AND Texto:'*" + nor.plus + "*'";
+
+                if (!string.IsNullOrEmpty(nor.ninguna))
+                    q += " AND NOT Texto :'" + nor.ninguna + "'";
+            
                 
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.Pagina;
                 url = url.Replace("  ", " ");
+                url = url.Replace(",", "%2C").Replace(" ", "%20").Replace(":", "%3A").Replace("'", "%22");
 
                 string response = Indexador.Solr.getResponse(url);
 
@@ -298,7 +355,7 @@ namespace GestorDocumentos.Controllers
 
                 q = string.Empty;
 
-                if (nor.FechaD != null)
+                if (!string.IsNullOrEmpty(nor.FechaD))
                 {
                     fecha = nor.FechaD.Replace("/", "-");
                     string[] f = fecha.Split('-');
@@ -309,6 +366,11 @@ namespace GestorDocumentos.Controllers
                     q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
                 }
 
+                if (!String.IsNullOrEmpty(nor.exacta))
+                {
+                    q += " AND Texto:'" + nor.exacta + "'";
+                }
+
                 if (!string.IsNullOrEmpty(nor.Todas))
                 {
                     if (!string.IsNullOrEmpty(nor.ninguna))
@@ -317,8 +379,12 @@ namespace GestorDocumentos.Controllers
                         q += " AND Texto:'" + nor.Todas + "'";
                 }
 
+                if (!string.IsNullOrEmpty(nor.plus))
+                    q += " AND Texto:'*" + nor.plus + "*'";
+
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
                 url = url.Replace("  ", " ");
+                url = url.Replace(",", "%2C").Replace(" ", "%20").Replace(":", "%3A").Replace("'", "%22");
 
                 string response = Indexador.Solr.getResponse(url);
 
@@ -366,7 +432,7 @@ namespace GestorDocumentos.Controllers
                 string fecha = string.Empty;
                 string fecha2 = string.Empty;
                 string coleccion = "&q=Coleccion:'DOAV'";
-                string fl = "";
+                string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
                 if (!String.IsNullOrEmpty(nor.b))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'BALANCE'" : "Norma:'BALANCE'";
@@ -386,27 +452,53 @@ namespace GestorDocumentos.Controllers
 
                 q = string.Empty;
 
-                if (nor.FechaD != null)
+                if (!string.IsNullOrEmpty(nor.FechaD))
                 {
                     fecha = nor.FechaD.Replace("/", "-");
+                    DateTime fechadoc = Convert.ToDateTime(fecha);
+                    fecha = fechadoc.ToString("dd-MM-yyyy");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    fecha2 = nor.FechaH.Replace("/", "-");
-                    f = fecha2.Split('-');
-                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
+
+
+                    if (!string.IsNullOrEmpty(nor.FechaH))
+                    {
+                        fecha2 = nor.FechaH.Replace("/", "-");
+                        fechadoc = Convert.ToDateTime(fecha2);
+                        fecha2 = fechadoc.ToString("dd-MM-yyyy");
+                        f = fecha2.Split('-');
+                        fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                        q += " AND Fecha:[" + fecha + " TO " + fecha2 + "]";
+                    }
+                    else
+                    {
+                        q += " AND Fecha:'" + fecha + "'";
+                    }
+
+                }
+
+                if (!String.IsNullOrEmpty(nor.exacta))
+                {
+                    q += " AND Texto:'" + nor.exacta + "'";
                 }
 
                 if (!string.IsNullOrEmpty(nor.Todas))
                 {
-                    if(!string.IsNullOrEmpty(nor.ninguna))
-                        q += " AND Texto:'" + nor.Todas + " NOT " + nor.ninguna + "'";
+                    if (!string.IsNullOrEmpty(nor.ninguna))
+                        q += " AND Texto:'" + nor.Todas + "' AND NOT Texto:'" + nor.ninguna + "'";
                     else
                         q += " AND Texto:'" + nor.Todas + "'";
                 }
 
+                if (!string.IsNullOrEmpty(nor.ninguna))
+                    q += " AND NOT Texto :'" + nor.ninguna + "'";
+
+                if (!string.IsNullOrEmpty(nor.plus))
+                    q += " AND Texto:'*" + nor.plus + "*'";
+
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
                 url = url.Replace("  ", " ");
+                url = url.Replace(",", "%2C").Replace(" ", "%20").Replace(":", "%3A").Replace("'", "%22");
 
                 string response = Indexador.Solr.getResponse(url);
 
@@ -482,16 +574,49 @@ namespace GestorDocumentos.Controllers
 
                 q = string.Empty;
 
-                if (nor.FechaD != null)
+                if (!string.IsNullOrEmpty(nor.FechaD))
                 {
                     fecha = nor.FechaD.Replace("/", "-");
+                    DateTime fechadoc = Convert.ToDateTime(fecha);
+                    fecha = fechadoc.ToString("dd-MM-yyyy");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    fecha2 = nor.FechaH.Replace("/", "-");
-                    f = fecha2.Split('-');
-                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
+
+
+                    if (!string.IsNullOrEmpty(nor.FechaH))
+                    {
+                        fecha2 = nor.FechaH.Replace("/", "-");
+                        fechadoc = Convert.ToDateTime(fecha2);
+                        fecha2 = fechadoc.ToString("dd-MM-yyyy");
+                        f = fecha2.Split('-');
+                        fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                        q += " AND Fecha:[" + fecha + " TO " + fecha2 + "]";
+                    }
+                    else
+                    {
+                        q += " AND Fecha:'" + fecha + "'";
+                    }
+
                 }
+
+                if (!String.IsNullOrEmpty(nor.exacta))
+                {
+                    q += " AND Texto:'" + nor.exacta + "'";
+                }
+
+                if (!string.IsNullOrEmpty(nor.todas))
+                {
+                    if (!string.IsNullOrEmpty(nor.ninguna))
+                        q += " AND Texto:'" + nor.todas + "' AND NOT Texto:'" + nor.ninguna + "'";
+                    else
+                        q += " AND Texto:'" + nor.todas + "'";
+                }
+
+                if (!string.IsNullOrEmpty(nor.ninguna))
+                    q += " AND NOT Texto :'" + nor.ninguna + "'";
+
+                if (!string.IsNullOrEmpty(nor.plus))
+                    q += " AND Texto:'*" + nor.plus + "*'";
 
                 if (!string.IsNullOrEmpty(nor.norma))
                     q += " AND Norma:'" + nor.norma + "'";
@@ -505,6 +630,7 @@ namespace GestorDocumentos.Controllers
 
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
                 url = url.Replace("  ", " ");
+                url = url.Replace(",", "%2C").Replace(" ", "%20").Replace(":", "%3A").Replace("'", "%22");
 
                 string response = Indexador.Solr.getResponse(url);
 
@@ -576,7 +702,7 @@ namespace GestorDocumentos.Controllers
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'REGLAMENTO'" : "Norma:'REGLAMENTO'";
                 if (!String.IsNullOrEmpty(nor.res))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RES'" : "Norma:'RES'";
-                if(!String.IsNullOrEmpty(nor.pro))
+                if (!String.IsNullOrEmpty(nor.pro))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROTOCOLO'" : "Norma:'PROTOCOLO'";
 
                 if (!String.IsNullOrEmpty(nor.ap))
@@ -650,30 +776,62 @@ namespace GestorDocumentos.Controllers
 
                 q = string.Empty;
 
-                if (nor.FechaD != null)
+                if (!string.IsNullOrEmpty(nor.FechaD))
                 {
                     fecha = nor.FechaD.Replace("/", "-");
+                    DateTime fechadoc = Convert.ToDateTime(fecha);
+                    fecha = fechadoc.ToString("dd-MM-yyyy");
                     string[] f = fecha.Split('-');
                     fecha = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    fecha2 = nor.FechaH.Replace("/", "-");
-                    f = fecha2.Split('-');
-                    fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
-                    q += " AND Fecha:'" + fecha + " A " + fecha2 + "'";
+
+
+                    if (!string.IsNullOrEmpty(nor.FechaH))
+                    {
+                        fecha2 = nor.FechaH.Replace("/", "-");
+                        fechadoc = Convert.ToDateTime(fecha2);
+                        fecha2 = fechadoc.ToString("dd-MM-yyyy");
+                        f = fecha2.Split('-');
+                        fecha2 = f[2] + "-" + f[1] + "-" + f[0] + @"T00:00:00Z";
+                        q += " AND Fecha:[" + fecha + " TO " + fecha2 + "]";
+                    }
+                    else
+                    {
+                        q += " AND Fecha:'" + fecha + "'";
+                    }
+
                 }
 
-                if (!string.IsNullOrEmpty(nor.numNorma))
-                    q += " AND Numero:'" + nor.numNorma + "'";
                 if (!string.IsNullOrEmpty(nor.todas))
                 {
                     if (!string.IsNullOrEmpty(nor.ninguna))
-                        q += " AND Texto:'" + nor.todas + " NOT " + nor.ninguna + "'";
+                        q += " AND Texto:'" + nor.todas + "' AND NOT Texto:'" + nor.ninguna + "'";
                     else
                         q += " AND Texto:'" + nor.todas + "'";
                 }
 
+                if (!string.IsNullOrEmpty(nor.ninguna))
+                    q += " AND NOT Texto :'" + nor.ninguna + "'";
+
+                if (!String.IsNullOrEmpty(nor.exacta))
+                {
+                    q += " AND Texto:'" + nor.exacta + "'";
+                }
+
+                if (!string.IsNullOrEmpty(nor.plus))
+                    q += " AND Texto:'*" + nor.plus + "*'";
+
+                if (!string.IsNullOrEmpty(nor.num))
+                    q += " AND Numero:'" + nor.num + "'";
+
+                if (!string.IsNullOrEmpty(nor.numNorma))
+                    q += " AND Numero:'" + nor.numNorma + "'";
+
+                //if (!string.IsNullOrEmpty(nor.organismo))
+                //    q += " AND Organismo:'" + nor.organismo + "'";
 
                 string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
                 url = url.Replace("  ", " ");
+                url = url.Replace(",", "%2C").Replace(" ", "%20").Replace(":", "%3A").Replace("'", "%22");
 
                 string response = Indexador.Solr.getResponse(url);
 
