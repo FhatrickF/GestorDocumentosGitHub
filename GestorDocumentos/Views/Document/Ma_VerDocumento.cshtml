@@ -12,8 +12,9 @@
                 return;
             }
             var texto = $("#textoReferencia").val();
-            if (texto == "") {
-                alert("Debe indicar la descripción de la nueva referencia");
+            var texto2 = $("#textoReferenciaDestino").val();
+            if (texto == "" || texto2 == "") {
+                alert("Debe indicar la descripción para el link del documento original y del documento de destino");
             } else {
                 $("#form-referencia").submit();
             }
@@ -139,8 +140,11 @@
                             <div class="col-md-4" style="border-left: 1px solid gray">
                                 <h3>Datos nueva referencia</h3>
                                 <form method="post" action="~/Document/SetReferencia" id="form-referencia">
-                                    <label for="nuevaReferencia">Descripción</label>
-                                    <textarea rows="5" class="form-control" id="textoReferencia" name="textoReferencia"></textarea>
+                                    <label for="nuevaReferencia">Descripción documento inicial</label>
+                                    <textarea rows="4" class="form-control" id="textoReferencia" name="textoReferencia"></textarea>
+                                    <br />
+                                    <label for="nuevaReferenciaDestino">Descripción link documento destino</label>
+                                    <textarea rows="4" class="form-control" id="textoReferenciaDestino" name="textoReferenciaDestino"></textarea>
                                     <br />
                                     <label for="tipo">Tipo referencia</label>
                                     <select name="tipo" class="form-control" id="tipo">

@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Text;
 using System.Web;
 using System.Web.Configuration;
 using System.Web.Mvc;
@@ -47,6 +48,14 @@ namespace GestorDocumentos.Controllers
                 return RedirectToAction("Index", "Home");
             }
             
+        }
+
+        [HttpPost]
+        public string getIndice(string codigo)
+        {
+            string ruta = WebConfigurationManager.AppSettings["MVC-INDICES"];
+            string indice = System.IO.File.ReadAllText(ruta + "01_Indice_" + codigo + ".html", Encoding.UTF8);
+            return indice;
         }
 
         [HttpPost]

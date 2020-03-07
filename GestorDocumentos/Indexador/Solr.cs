@@ -59,6 +59,7 @@ namespace GestorDocumentos.Indexador
                     h.Tipo = Convert.ToInt32(d.Tipo);
                     h.IdOriginal = d.IdOriginal;
                     h.IdReferencia = d.IdReferencia;
+                    h.Texto = d.Texto;
                     historial.Add(h);
                 }
             }
@@ -297,6 +298,7 @@ namespace GestorDocumentos.Indexador
             xml += "<field name=\"IdOriginal\">" + historial.IdOriginal + "</field>";
             xml += "<field name=\"IdReferencia\">" + historial.IdReferencia + "</field>";
             xml += "<field name=\"Estado\">" + historial.Estado + "</field>";
+            xml += "<field name=\"Texto\">" + historial.Texto + "</field>";
             xml += "</doc></add>";
             sendHistorial(xml);
             return true;

@@ -59,36 +59,36 @@
 
         CKEDITOR.replace('Texto', {
             height: 500,
-            toolbarGroups: [{
-                "name": "basicstyles",
-                "groups": ["basicstyles"]
-            },
-            {
-                "name": "links",
-                "groups": ["links"]
-            },
-            {
-                "name": "paragraph",
-                "groups": ["list", "blocks", "align"]
-            },
-            {
-                "name": "document",
-                "groups": ["mode"]
-            },
-            {
-                "name": "insert",
-                "groups": ["insert"]
-            },
-            {
-                "name": "styles",
-                "groups": ["styles"]
-            },
-            {
-                "name": "about",
-                "groups": ["about"]
-            },
-            ],
-            removeButtons: 'Iframe'
+            //toolbarGroups: [{
+            //    "name": "basicstyles",
+            //    "groups": ["basicstyles"]
+            //},
+            //{
+            //    "name": "links",
+            //    "groups": ["links"]
+            //},
+            //{
+            //    "name": "paragraph",
+            //    "groups": ["list", "blocks", "align"]
+            //},
+            //{
+            //    "name": "document",
+            //    "groups": ["mode"]
+            //},
+            //{
+            //    "name": "insert",
+            //    "groups": ["insert"]
+            //},
+            //{
+            //    "name": "styles",
+            //    "groups": ["styles"]
+            //},
+            //{
+            //    "name": "about",
+            //    "groups": ["about"]
+            //},
+            //],
+            //removeButtons: 'Iframe'
         });
 
         $('#aTab4').click(function () {
@@ -157,23 +157,31 @@
 
         $('#btnAceptarCambio').click(function () {
             var versionFinal = true;
+
+            var tDesc = $('#TextoDescripcionVersion').val();
+            if (tDesc == "") {
+                alert("Debe indicar un texto descriptivo para el documento");
+                return 0;
+            }
+
             var t = $('#txtAreaModificacion').val();
-            var u = $('#txtAreaTituloModificacion').val();
+            //var u = $('#txtAreaTituloModificacion').val();
             if (!$('#chkCrearVersion').prop('checked')) {
                 versionFinal = false;
-                if (t == "") {
+                if (t == "") { // || u == "") {
                     alert("Debe indicar una descripción del cambio realizado.");
                     return 0;
                 }
-            } else {
-                if (t == "" || u == "") {
-                    alert("Debe indicar todas las descripciones solicitadas !!");
-                    return 0;
-                }
             }
+            //} else {
+            //    if (t == "") {
+            //        alert("Debe indicar todas las descripciones solicitadas !!");
+            //        return 0;
+            //    }
+            //}
             $('#VersionFinal').val(versionFinal);
             $('#TextoCambio').val(t);
-            $('#TextoDescripcionVersion').val(u);
+            //$('#TextoDescripcionVersion').val(u);
             $('#EsBorrador').val("false");
             $('#Publicar').val("true");
             $("#setForm").submit();
@@ -197,6 +205,8 @@
             for (var x = 0; x < n.length; x++) {
                 cn += n[x] + "_";
             }
+            params.Nota.Id = $('#txtIdNota').val();
+            params.Nota.IdDocumento = "@Model.IdDocumento";
             params.Nota.Coleccion = cn;
             $.ajax({
                 type: "POST",
@@ -310,7 +320,53 @@
             $('#dvDatosNuevaVersion').show();
             $('#chkCrearVersion').prop('checked', true);
         });
+
+        $('#btnCerrarEditarLink').click(function () {
+            $('#txtAreaModificacionLink').val("");
+            $('#divEditaLink').modal('hide');
+        });
+
+        $('#btnBuscarNota').click(function () {
+            var id = $("#txtIdNota").val();
+            if (id == "") {
+                alert("Por favor, indique el ID de la nota a modificar");
+                return 0;
+            }
+            var params = new Object();
+            params.Id = id;
+            $.ajax({
+                type: "POST",
+                url: "/Document/MA_GetNota",
+                content: "application/json; charset=utf-8",
+                dataType: "json",
+                data: params,
+                success: function (d) {
+                    if (d.indexOf("Error.-") < 0) {
+
+                        CKEDITOR.instances["txtNota"].setData(d);
+                    } else {
+                        alert(d);
+                    }
+                },
+                error: function (xhr, textStatus, errorThrown) {
+                    $('#dvCargandoHistorial').html("Ocurrió un error al buscar historial del documento");
+                }
+            });            
+        });
+        // txtIdNota btnBuscarNota
+         
     });
+
+    function editarReferencia(idRef, idDoc) {
+        // txtAreaModificacionLink - btnAceptarCambioLink - btnCerrarEditarLink
+        // txtIdLink txtIdDoc
+        var t = $('#link_' + idRef).html();
+        t = t.trim();
+        $('#txtAreaModificacionLink').val(t);
+        $('#txtIdLink').val(idRef);
+        $('#txtIdDoc').val(idDoc);
+        $('#divEditaLink').modal('show');
+    }
 
     function sendFile(file) {
 
@@ -447,7 +503,7 @@
                                 @Html.HiddenFor(m => m.CategoriaGlosa)
                                 @Html.HiddenFor(m => m.TemaGlosa)
                                 @Html.HiddenFor(m => m.TextoCambio)
-                                @Html.HiddenFor(m => m.TextoDescripcionVersion)
+
                                 @Html.HiddenFor(m => m.Fecha)
                                 @Html.HiddenFor(m => m.VersionFinal)
                                 <br />
@@ -498,6 +554,11 @@
                                     <div class="tab-content">
                                         <div id="tab_1" class="tab-pane active">
                                             @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                            <div class="form-group">
+                                                @Html.LabelFor(m => m.TextoDescripcionVersion, "Texto descriptivo del documento")
+                                                <br />(descripción para futuras versiones)
+                                                @Html.TextAreaFor(m => m.TextoDescripcionVersion, new { @class = "form-control", row = "10", cols = "80" })
+                                            </div>
                                             <div class="form-group">
                                                 <label>Colecciones: </label>
                                                 <div id="divColeccion">
@@ -618,14 +679,17 @@
                                                         <label>Visible para</label> @link.Colecciones <br />
                                                         @link.Tipo
                                                         <br />
-                                                        <a href="~/Document/Ma_EditarDocumento/@link.Url">
+                                                        <a href="~/Document/Ma_EditarDocumento/@link.Url" id="link_@link.Url">
                                                             @link.Texto
                                                         </a>
                                                         if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
                                                         {
                                                             <br />
-                                                            <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
+                                                            <label style="color: red; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
                                                                 [ Eliminar ]
+                                                            </label>
+                                                            <label style="color: blue; cursor: pointer" onclick="editarReferencia('@link.Url', '@Model.IdDocumento')">
+                                                                [ Editar ]
                                                             </label>
                                                         }
                                                         <br /><br />
@@ -660,11 +724,18 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h4 class="modal-title" id="myModalLabel">Agregar nueva nota</h4>
+                    <h4 class="modal-title" id="myModalLabel">Agregar / modificar nota</h4>
                 </div>
                 <div class="modal-body">
-                    Estimado usuario, antes de proceder, asegúrese de hacer click en el lugar del texto donde
-                    va a insertar la nueva nota.<br />
+
+                    <label>ID nota a modificar</label>
+                    <br />(Dejar en blanco para notas nuevas)
+                    <div class="input-group">
+                        <input class="form-control" id="txtIdNota" type="text" />
+                        <span class="input-group-btn">
+                            <button class="btn btn-info btn-flat" id="btnBuscarNota" type="button">Buscar</button>
+                        </span>
+                    </div> 
 
                     <br />
                     <!-- <input type="text" id="idNota" class="form-control" /> -->
@@ -702,6 +773,31 @@
             </div>
         </div>
     </div>
+    <!-- edita link -->
+    <div class="modal fade" id="divEditaLink" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="divDetalleListadoTitulo">Editar link referencia</h4>
+                </div>
+                @using (Html.BeginForm("Ma_EditarLink", "Document", FormMethod.Post, new { id = "setFormLink" })) {
+                <div class="modal-body" id="txtLink">
+                    Modifique el texto descriptivo del link
+                    <br /><br />
+                    <textarea id="txtAreaModificacionLink" name="txtAreaModificacionLink" class="form-control" style="width: 100%" rows="5"></textarea>
+                    <br /><br />
+                    <input type="hidden" id="txtIdLink" name="txtIdLink" value="" />
+                    <input type="hidden" id="txtIdDoc" name="txtIdDoc" value="" />
+                </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="btnCerrarEditarLink">Cerrar</button>
+                        <button type="submit" id="btnAceptarCambioLink" class="btn btn-primary">Aceptar</button>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
     <!-- texto motivo cambio -->
     <div class="modal fade" id="divTextoCambio" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
         <div class="modal-dialog" role="document">
@@ -716,22 +812,24 @@
                     <br /><br />
                     <textarea id="txtAreaModificacion" class="form-control" style="width: 100%" rows="5"></textarea>
                     <br /><br />
-                    
+
                     <div class="checkbox">
                         <label>
                             <input type="checkbox" id="chkCrearVersion" checked="checked" />Crear nueva versión
                         </label>
                     </div>
+                    <!--
                     <div id="dvDatosNuevaVersion">
                         Esta acción creará una nueva versión del documento con los cambios indicados. Indique un título
-                        para la versión anterior.<br />
+                        descriptivo.<br />
                         <strong>(texto visible para el usuario)</strong>
                         <br /><br />
                         <textarea id="txtAreaTituloModificacion" class="form-control" style="width: 100%" rows="5"></textarea>
                     </div>
+                    -->
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" id="btnCerrarCambio">Cerrar</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnCerrarCambio">Cerrar</button>
                     <button type="button" id="btnAceptarCambio" class="btn btn-primary">Aceptar</button>
                 </div>
             </div>

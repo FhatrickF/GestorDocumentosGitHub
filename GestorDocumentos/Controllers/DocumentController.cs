@@ -303,7 +303,7 @@ namespace GestorDocumentos.Controllers
             try
             {
                 Documento docOriginal = Indexador.Solr.getDocumentoById(doc.IdDocumento, true);
-                if(docOriginal.Version.IndexOf("_borrador") < 0)
+                if (docOriginal.Version.IndexOf("_borrador") < 0)
                     rutaBorrador = docOriginal.Version.Replace(".xml", "_borrador.xml");
                 else
                     rutaBorrador = docOriginal.Version;
@@ -325,24 +325,24 @@ namespace GestorDocumentos.Controllers
                     Link l = new Link();
                     l.Tipo = docOriginal.Norma;
                     l.Url = docOriginal.IdDocumento;
-                    string textoReferenciaDestino = "";
-                    if (docOriginal.Numero != null && docOriginal.Numero != "")
-                    {
-                        textoReferenciaDestino = "Número " + docOriginal.Numero;
-                    }
-                    else
-                    {
-                        if (docOriginal.Articulo != null && docOriginal.Articulo != "")
-                            textoReferenciaDestino += "Artículo N° " + docOriginal.Articulo;
-                        if (docOriginal.Inciso != null && docOriginal.Inciso != "")
-                            textoReferenciaDestino += ", Inciso " + docOriginal.Inciso;
-                        if (docOriginal.Tribunal != null && docOriginal.Tribunal != "")
-                            textoReferenciaDestino += docOriginal.Tribunal;
-                        if (docOriginal.Partes != null && docOriginal.Partes != "")
-                            textoReferenciaDestino += ".- " + docOriginal.Partes;
-                    }
-                    textoReferenciaDestino += ".- " + docOriginal.Titulo;
-                    l.Texto = textoReferenciaDestino;
+                    //string textoReferenciaDestino = "";
+                    //if (docOriginal.Numero != null && docOriginal.Numero != "")
+                    //{
+                    //    textoReferenciaDestino = "Número " + docOriginal.Numero;
+                    //}
+                    //else
+                    //{
+                    //    if (docOriginal.Articulo != null && docOriginal.Articulo != "")
+                    //        textoReferenciaDestino += "Artículo N° " + docOriginal.Articulo;
+                    //    if (docOriginal.Inciso != null && docOriginal.Inciso != "")
+                    //        textoReferenciaDestino += ", Inciso " + docOriginal.Inciso;
+                    //    if (docOriginal.Tribunal != null && docOriginal.Tribunal != "")
+                    //        textoReferenciaDestino += docOriginal.Tribunal;
+                    //    if (docOriginal.Partes != null && docOriginal.Partes != "")
+                    //        textoReferenciaDestino += ".- " + docOriginal.Partes;
+                    //}
+                    //textoReferenciaDestino += ".- " + docOriginal.Titulo;
+                    l.Texto = doc.TextoCambio; // textoReferenciaDestino;
                     l.Colecciones = string.Join(", ", docOriginal.Coleccion);
                     doc.Links.Add(l);
                     #endregion
@@ -368,7 +368,7 @@ namespace GestorDocumentos.Controllers
                     l.Texto = doc.Titulo;
                     l.Tipo = doc.Norma;
                     l.Url = doc.IdDocumento;
-                    l.Colecciones =  string.Join(", ", doc.Coleccion);
+                    l.Colecciones = string.Join(", ", doc.Coleccion);
                     links.Add(l);
 
                     foreach (Link link in docOriginal.Links)
@@ -388,12 +388,9 @@ namespace GestorDocumentos.Controllers
 
                     versionFinal = FileBo.SerializeXML(docOriginal);
                     FileBo.setXmlStringToFile(rutaBorrador, versionFinal);
-
-                    
                     Indexador.Solr.cambiaEstadoDocumento(docOriginal.id, 99, usuario);
-
-
                     Indexador.Solr.sendXmlDocumento(doc, true);
+                    setLog(doc, "Agrega referencia IdDoc=" + doc.IdDocumento);
                 }
                 return Redirect("~/Document/Ma_EditarDocumento/" + docOriginal.IdDocumento);
             }
@@ -470,9 +467,11 @@ namespace GestorDocumentos.Controllers
         public string Nota(Nota nota)
         {
             Nota notaResult = new Nota();
+            string txtLog = "";
+            string h = "";
             try
             {
-                string r = directorio_notas; // directorio + nota.Coleccion + "\\Notas\\";
+                string r = WebConfigurationManager.AppSettings["MVC-NOTAS"];
                 if (nota.Result == 1)
                 {
                     string txt = System.IO.File.ReadAllText(r + nota.TextoNota + ".html", Encoding.UTF8);
@@ -486,27 +485,37 @@ namespace GestorDocumentos.Controllers
                     if (!Directory.Exists(r))
                         Directory.CreateDirectory(r);
 
-                    string h = UtilesBO.getMd5(nota.TextoNota);
+                    if(nota.Id != "" && nota.Id != null)
+                    {
+                        txtLog = "Edita nota IdDoc=" + nota.IdDocumento + ", IdNota=" + nota.Id;
+                        if (System.IO.File.Exists(r + nota.Id + ".html"))
+                            r = r + nota.Id + ".html";
+                        else
+                            throw new Exception("");
+                    }
+                    else
+                    {                        
+                        h = UtilesBO.getMd5(nota.TextoNota);
+                        txtLog = "Agrega nota IdDoc=" + nota.IdDocumento + ", IdNota=" + h;
+                        r = r + "\\" + nota.Coleccion + h + ".html";
+                    }
+                    
 
-                    StreamWriter sw_ = new StreamWriter(r + "\\" + nota.Coleccion + h + ".html", false);
+                    StreamWriter sw_ = new StreamWriter(r, false);
                     sw_.Write(nota.TextoNota);
                     sw_.Close();
-
-                    log_documentoEntity log_ = new log_documentoEntity();
-                    log_.idUser = User.Identity.Name;
-                    log_.idDocumento = notaResult.Result.ToString();
-                    log_.descripcion = "Se crea nueva nota";
-
-                    LogBO.setLogCreateDoc(log_);
 
                     notaResult.TextoNota = nota.Coleccion + h;
                     notaResult.Coleccion = null;
                     notaResult.Result = 0;
+
+                    Documento ma = Indexador.Solr.getDocumentoById(nota.IdDocumento, true);
+                    setLog(ma, txtLog);
                 }
             }
             catch (Exception ex)
             {
-                new TechnicalException("Error al mostrar las notas", ex);
+                //new TechnicalException("Error al mostrar las notas", ex);
                 notaResult.Result = 1;
                 notaResult.TextoNota = "Error al buscar nota, por favor reintentar";
             }
@@ -525,6 +534,26 @@ namespace GestorDocumentos.Controllers
             catch (BusinessException bex)
             {
                 return "{\"Error\":\"" + bex.Message + "\"}";
+            }
+        }
+
+        [HttpPost]
+        public string Ma_GetNota(string Id)
+        {
+            string nota = "";
+            try
+            {
+                string ruta = WebConfigurationManager.AppSettings["MVC-NOTAS"];
+                if (System.IO.File.Exists(ruta + Id + ".html"))
+                    nota = System.IO.File.ReadAllText(ruta + Id + ".html");
+                else
+                    throw new BusinessException("Error.- No se encontró la nota para el ID indicado");
+
+                return JsonConvert.SerializeObject(nota);
+            }
+            catch (BusinessException bex)
+            {
+                return JsonConvert.SerializeObject(bex.Message);
             }
         }
 
@@ -582,7 +611,7 @@ namespace GestorDocumentos.Controllers
             }
         }
 
-        public ActionResult SetReferencia(string textoReferencia, string idDocumento, string tipo, string[] colecciones)
+        public ActionResult SetReferencia(string textoReferencia, string textoReferenciaDestino, string idDocumento, string tipo, string[] colecciones)
         {
             string idDocOriginal = "";
             try
@@ -597,26 +626,6 @@ namespace GestorDocumentos.Controllers
                 if (docOriginal != null)
                 {
                     #region documento original
-
-                    //string textoReferenciaDestino = "";
-                    //if (docOriginal.Organismo != "")
-                    //    textoReferenciaDestino = docOriginal.Organismo + "<br />";
-
-                    // textoReferenciaDestino += docOriginal.Norma + " ";
-                    //if (docOriginal.Numero != null && docOriginal.Numero != "")
-                    //{
-                    //    textoReferenciaDestino += "Número " + docOriginal.Numero;
-                    //}
-                    //else
-                    //{
-                    //    if (docOriginal.Articulo != null && docOriginal.Articulo != "")
-                    //        textoReferenciaDestino += "Artículo N° " + docOriginal.Articulo;
-                    //    if (docOriginal.Inciso != null && docOriginal.Inciso != "")
-                    //        textoReferenciaDestino += ", Inciso " + docOriginal.Inciso;
-                    //}
-                    //if (docOriginal.Titulo != "")
-                    //    textoReferenciaDestino += ".- " + docOriginal.Titulo;
-
 
                     if (docOriginal.Links == null)
                         docOriginal.Links = new List<Link>();
@@ -649,41 +658,14 @@ namespace GestorDocumentos.Controllers
                     else
                         FileBo.setXmlStringToFile(docOriginal.Version, versionFinal);
                     #endregion
-                    #region documento destino                   
-                    //if (docDestino.Links == null)
-                    //    docDestino.Links = new List<Link>();
-
-                    //links = new List<Link>();
-                    //l = new Link();
-                    //l.Texto = textoReferenciaDestino;
-                    //l.Tipo = docOriginal.Norma;
-                    //l.Url = idDocOriginal;
-                    //links.Add(l);
-
-                    //foreach (Link link in docDestino.Links)
-                    //{
-                    //    links.Add(link);
-                    //}
-                    //docDestino.Links = links;
-                    //norma = docDestino.Norma.Replace(" ", "_") + "\\";
-                    //versionFinal = FileBo.SerializeXML(docDestino);
-                    //FileBo.setXmlStringToFile(docDestino.Version, versionFinal);
-                    #endregion
                 }
-
-                //setLog(docOriginal, "Agrega referencia documento existente: " + textoReferencia);
-                //log_documentoEntity log_ = new log_documentoEntity();
-                //log_.idUser = User.Identity.Name;
-                //log_.idDocumento = idDocumento;
-                //log_.descripcion = "Se crea nueva referencia del documento " + docOriginal.IdDocumento + " al " + docDestino.IdDocumento;
-
-                //LogBO.setLogCreateDoc(log_);
 
                 Historial historial = new Historial();
                 historial.Tipo = 2; // agrega referencia doc existente
                 historial.Estado = 0; // pendiente
                 historial.IdOriginal = docOriginal.IdDocumento;
                 historial.IdReferencia = docDestino.IdDocumento;
+                historial.Texto = textoReferenciaDestino;
                 Indexador.Solr.sendXmlHistoria(historial);
                 System.Web.HttpContext.Current.Session["id-doc-referencia"] = null;
 
@@ -930,7 +912,7 @@ namespace GestorDocumentos.Controllers
                 string xml = System.IO.File.ReadAllText(d.Version);
                 Documento doc = (Documento)FileBo.DeserializeXML(d.GetType(), xml);
                 List<Link> links = new List<Link>();
-                foreach(Link l in doc.Links)
+                foreach (Link l in doc.Links)
                 {
                     if (l.Url != idReferencia)
                         links.Add(l);
@@ -942,7 +924,7 @@ namespace GestorDocumentos.Controllers
                 doc.Usuario = usuario;
                 doc.Estado = 99;
                 string versionFinal = FileBo.SerializeXML(doc);
-                if(d.Version.IndexOf("_borrador") > -1)
+                if (d.Version.IndexOf("_borrador") > -1)
                     FileBo.setXmlStringToFile(d.Version, versionFinal);
                 else
                     FileBo.setXmlStringToFile(d.Version.Replace(".xml", "_borrador.xml"), versionFinal);
@@ -955,7 +937,7 @@ namespace GestorDocumentos.Controllers
                 Indexador.Solr.sendXmlHistoria(historial);
                 Indexador.Solr.cambiaEstadoDocumento(d.id, 99, usuario);
                 //setLog(d, "Guarda borrador ELIMINA REFERENCIA.- " + textoReferencia);
-
+                setLog(d, "Elimina referencia IdDoc=" + idDocumento + ", IdRef=" + idReferencia);
             }
             catch (Exception)
             {
@@ -1060,7 +1042,7 @@ namespace GestorDocumentos.Controllers
 
 
                     ma.IdDocumento = UtilesBO.getMd5(FileBo.SerializeXML(ma));
-                    string xml = FileBo.SerializeXML(ma);                    
+                    string xml = FileBo.SerializeXML(ma);
 
                     string rutaBorrador = WebConfigurationManager.AppSettings["MVC-DATA"];
                     if (ma.Origen != "BITE" && ma.Origen != "MA" && ma.Origen != "LA")
@@ -1072,7 +1054,7 @@ namespace GestorDocumentos.Controllers
                     FileBo.setXmlStringToFile(rutaBorrador + ma.IdDocumento + "_borrador.xml", xml);
                     FileBo.setXmlStringToFile(rutaBorrador + ma.IdDocumento + ".xml", xml);
                     Indexador.Solr.sendXmlDocumento(ma, true);
-                    //Indexador.Solr.cambiaEstadoDocumento(d.id, estado, usuario); //borrador
+                    setLog(ma, "Crea nuevo documento");
                 }
                 return Redirect("~/Document/Ma_EditarDocumento/" + ma.IdDocumento);
 
@@ -1097,7 +1079,7 @@ namespace GestorDocumentos.Controllers
                 string[] d = (id.Replace("btnEliminarVersion_", "")).Split('_');
                 idDocumento = d[0];
                 Documento ma = Indexador.Solr.getDocumentoById(d[0], true);
-                foreach(VersionesDocumento v in ma.Versiones)
+                foreach (VersionesDocumento v in ma.Versiones)
                 {
                     if (v.nombre == d[0] + "_" + d[1])
                     {
@@ -1139,9 +1121,9 @@ namespace GestorDocumentos.Controllers
                 maV.Texto = doc.Texto;
                 string idv = "";
                 idDocumento = d[0];
-                foreach(VersionesDocumento v in maV.Versiones)
+                foreach (VersionesDocumento v in maV.Versiones)
                 {
-                    if(v.nombre == doc.IdDocumento)
+                    if (v.nombre == doc.IdDocumento)
                     {
                         v.descripcion = doc.TextoDescripcionVersion;
                     }
@@ -1284,14 +1266,17 @@ namespace GestorDocumentos.Controllers
                             totalVersiones = 1;
                             v.nombre = d.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones);
                             v.id = "1";
-                            v.descripcion = ma.TextoDescripcionVersion;
+                            if (ma.TextoDescripcionVersion == "" || ma.TextoDescripcionVersion == null)
+                                v.descripcion = ""; // ma.TextoDescripcionVersion;
+                            else
+                                v.descripcion = VersionOriginalMa.TextoDescripcionVersion;
                         }
                         else
                         {
                             totalVersiones = VersionOriginalMa.Versiones.Count + 1;
                             v.nombre = d.IdDocumento + "_" + string.Format("{0:0000000000}", totalVersiones);
                             v.id = Convert.ToString(totalVersiones);
-                            v.descripcion = ma.TextoDescripcionVersion;
+                            v.descripcion = VersionOriginalMa.TextoDescripcionVersion;
                         }
                         VersionOriginalMa.Versiones.Add(v);
 
@@ -1319,6 +1304,7 @@ namespace GestorDocumentos.Controllers
                     VersionOriginalMa.Estado = estado;
                     VersionOriginalMa.Usuario = usuario;
                     VersionOriginalMa.Links = docBorrador.Links;
+                    VersionOriginalMa.TextoDescripcionVersion = ma.TextoDescripcionVersion;
 
                     string versionFinal = FileBo.SerializeXML(VersionOriginalMa);
                     FileBo.setXmlStringToFile(d.Version.Replace("_borrador.xml", ".xml"), versionFinal);
@@ -1346,7 +1332,7 @@ namespace GestorDocumentos.Controllers
                                 {
                                     if (l.Url != h.IdOriginal)
                                         links.Add(l);
-                                }                              
+                                }
                                 docBorradorHistorial.Links = links;
                                 if (docBorradorHistorial.Norma == "COMENTARIO" || docBorradorHistorial.Norma == "EJEMPLO"
                                     || (docBorradorHistorial.Norma).Replace("_", " ") == "JURISPRUDENCIA JUDICIAL")
@@ -1376,7 +1362,7 @@ namespace GestorDocumentos.Controllers
                                     docBorradorHistorial.Links = new List<Link>();
 
                                 Link l = new Link();
-                                l.Texto = txtLink;
+                                l.Texto = h.Texto; // txtLink;
                                 l.Tipo = VersionOriginalMa.Norma;
                                 l.Url = VersionOriginalMa.IdDocumento;
                                 docBorradorHistorial.Links.Add(l);
@@ -1394,7 +1380,7 @@ namespace GestorDocumentos.Controllers
 
                     if (d.Estado == 98)
                         ma.TextoCambio = "(Acepta publicación) " + ma.TextoCambio;
-                    if(!ma.VersionFinal)
+                    if (!ma.VersionFinal)
                         ma.TextoCambio = "(Guardado sin versión) " + ma.TextoCambio;
                     setLog(VersionOriginalMa, ma.TextoCambio);
 
@@ -1411,6 +1397,27 @@ namespace GestorDocumentos.Controllers
                 return View(ma);
             }
             return Redirect("~/Document/Ma_EditarDocumento/" + ma.id);
+        }
+
+        [HttpPost]
+        public ActionResult Ma_EditarLink(string txtAreaModificacionLink, string txtIdLink, string txtIdDoc)
+        {
+            Documento d = Indexador.Solr.getDocumentoById(txtIdDoc, true);
+
+            foreach(Link link in d.Links)
+            {
+                if(link.Url == txtIdLink)
+                {
+                    link.Texto = txtAreaModificacionLink;
+                }
+            }
+            string xml = FileBo.SerializeXML(d);
+            FileBo.setXmlStringToFile(d.Version.Replace("_borrador.xml", ".xml"), xml);
+
+            string textoLog = "Edita referencia id=" + txtIdLink + " documento id=" + txtIdDoc;
+            setLog(d, textoLog);
+
+            return Redirect("~/Document/Ma_EditarDocumento/" + txtIdDoc);
         }
 
         private bool EliminaNorma(string id)

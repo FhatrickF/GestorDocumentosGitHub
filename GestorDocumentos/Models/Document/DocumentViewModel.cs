@@ -281,6 +281,8 @@ namespace mvc4.Models
     {
         [AllowHtml]
         public string TextoNota { get; set; }
+        public string Id { get; set; }
+        public string IdDocumento { get; set; }
         public string Coleccion { get; set; }
         public int Result { get; set; }
     }
@@ -292,5 +294,6 @@ namespace mvc4.Models
         public string IdOriginal { get; set; }
         public string IdReferencia { get; set; }
         public int Estado { get; set; }
+        public string Texto { get; set; }
     }
 }
