@@ -192,6 +192,7 @@
     <Compile Include="Models\IdentityModels.cs" />
     <Compile Include="Models\ManageViewModels.cs" />
     <Compile Include="Models\Plantillas\Avisos.cs" />
+    <Compile Include="Models\Plantillas\Bite.cs" />
     <Compile Include="Models\Plantillas\DatosAmbiental.cs" />
     <Compile Include="Models\Plantillas\LegislacionActualizada.cs" />
     <Compile Include="Models\Plantillas\NormasGenerales.cs" />
@@ -3071,6 +3072,7 @@
     <Content Include="Views\Plantilla\BuscarLA.cshtml" />
     <Content Include="Views\Plantilla\BuscarNM.cshtml" />
     <Content Include="Views\Plantilla\BuscarBorradorOrPendiente.cshtml" />
+    <Content Include="Views\Plantilla\BuscarBite.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
