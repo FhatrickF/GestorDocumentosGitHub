@@ -705,6 +705,7 @@ namespace GestorDocumentos.Controllers
         public ActionResult Ma_VerDocumento(string id)
         {
             Documento d = new Documento();
+
             Documento docR = new Documento();
             string rutaDoc = "";
             ViewBag.Referencia = false;
@@ -743,6 +744,8 @@ namespace GestorDocumentos.Controllers
             {
                 ModelState.AddModelError("Error", "No se encontro el xml del documento por favor verificar o comunicarse con el administrador.");
                 new TechnicalException("Error al ver documento, id :" + id, ex);
+                d = new Documento();
+                d.Links = new List<Link>();
                 return View(d);
             }
         }
@@ -832,7 +835,7 @@ namespace GestorDocumentos.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("Error", ex.Message);
                 return View(d);
             }
         }
@@ -1082,7 +1085,7 @@ namespace GestorDocumentos.Controllers
                 ViewBag.SelectNorma = ma.Norma;
                 ViewBag.ListaNormas = getNormas();
                 ma.EsBorrador = false;
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("Error", ex.Message);
                 return View(ma);
             }
         }
@@ -1166,7 +1169,7 @@ namespace GestorDocumentos.Controllers
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", ex.Message);
+                ModelState.AddModelError("Error", ex.Message);
                 return View(doc);
             }
             return Redirect("~/Document/Ma_EditarDocumento/" + idDocumento);

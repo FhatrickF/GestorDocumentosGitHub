@@ -109,7 +109,7 @@
                         for (var x = 0; x < d.length; x++) {
                             historial += d[x].idUser + ".- " + d[x].hora + "<br />";
                             historial += d[x].descripcion + "<br />";
-                            historial += "<br />";                           
+                            historial += "<br />";
                         }
                         $('#divHistorial').html(historial);
                     } else {
@@ -151,8 +151,8 @@
                 return 0;
             }
             $('#textoReasignacion').val(t);
-            $('#usuarioReasignacion').val($('#selecUsuarioReasignacion').val());           
-            $("#setFormRechaza").submit();           
+            $('#usuarioReasignacion').val($('#selecUsuarioReasignacion').val());
+            $("#setFormRechaza").submit();
         });
 
         $('#btnAceptarCambio').click(function () {
@@ -299,7 +299,7 @@
         });
 
         $('#chkCrearVersion').change(function () {
-            if ($('#chkCrearVersion').prop('checked')) 
+            if ($('#chkCrearVersion').prop('checked'))
                 $('#dvDatosNuevaVersion').show();
             else
                 $('#dvDatosNuevaVersion').hide();
@@ -402,245 +402,256 @@
                         <h3 class="box-title">Editar documento</h3>
                     </div>
                     <div class="box-body">
-                        <div class="row">
-                            <div class="col-md-8">
-                                @if (ViewBag.Estado == "Borrador")
-                                {
-                                    <div class="alert alert-danger alert-dismissable">
-                                        <button class="close" type="button" data-dismiss="alert" aria-hidden="true">x</button>
-                                        <h4>
-                                            <i class="icon fa fa-ban"></i>
-                                            Atención!
-                                        </h4>
-                                        Este es un borrador de la versión original
-                                        @if (User.Identity.GetUserName() != ViewBag.Usuario)
-                                        {
-                                            <br />
-                                            <strong>Este borrador fue iniciado el usuario @ViewBag.Usuario</strong>
-                                        }
-                                    </div>
-                                }
-                                else if (ViewBag.Estado == "Pendiente")
-                                {
-                                    <div class="alert alert-info alert-dismissable">
-                                        <button class="close" type="button" data-dismiss="alert" aria-hidden="true">x</button>
-                                        <h4>
-                                            <i class="icon fa fa-ban"></i>
-                                            Atención!
-                                        </h4>
-                                        El documento se encuentra en proceso de revisión. No se pueden realizar cambios.
-                                    </div>
-                                }
-                                <label>Texto del documento</label>
-
-                                <a href="~/Document/Ma_VerDocumento/@Model.IdDocumento" id="btn-vista-previa" class="btn btn-warning btn-block">Vista previa</a>
-                                <br />
-
-                                @Html.TextAreaFor(m => m.Texto, new { @class = "form-control", row = "10", cols = "80" })
-
-                                @Html.HiddenFor(m => m.IdDocumento)
-                                @Html.HiddenFor(m => m.id)
-                                @Html.HiddenFor(m => m.EsBorrador)
-                                @Html.HiddenFor(m => m.Publicar)
-                                @Html.HiddenFor(m => m.ColeccionGlosa)
-                                @Html.HiddenFor(m => m.SeccionGlosa)
-                                @Html.HiddenFor(m => m.CategoriaGlosa)
-                                @Html.HiddenFor(m => m.TemaGlosa)
-                                @Html.HiddenFor(m => m.TextoCambio)
-                                @Html.HiddenFor(m => m.TextoDescripcionVersion)
-                                @Html.HiddenFor(m => m.Fecha)
-                                @Html.HiddenFor(m => m.VersionFinal)
-                                <br />
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        @if (ViewBag.Estado != "Pendiente")
-                                        {
-                                            if (Model.EsBorrador)
-                                            {
-                                                <button id="btn-eliminarBorrador" type="button" class="btn btn-danger btn-block">Eliminar borrador</button>
-                                                if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
-                                                {
-                                                    <button id="btn-reasignarBorrador" type="button" class="btn btn-info btn-block">Asignar borrador @ViewBag.Usuario</button>
-                                                }
-                                            }
-                                        }
-                                    </div>
-                                    @if (ViewBag.Estado != "Pendiente")
+                        @if (!String.IsNullOrWhiteSpace(@Html.ValidationMessage("Error").ToString()))
+                        {
+                            <div class="row">
+                                <div class="col-md-8">
+                                    @Html.ValidationMessage("Error")
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="row">
+                                <div class="col-md-8">
+                                    @if (ViewBag.Estado == "Borrador")
                                     {
-                                        <div class="col-md-6" style="text-align: right">
-                                            <button id="btn-guardar" type="button" class="btn btn-primary btn-block">Guardar documento</button>
-                                            @if (Model.EsBorrador)
+                                        <div class="alert alert-danger alert-dismissable">
+                                            <button class="close" type="button" data-dismiss="alert" aria-hidden="true">x</button>
+                                            <h4>
+                                                <i class="icon fa fa-ban"></i>
+                                                Atención!
+                                            </h4>
+                                            Este es un borrador de la versión original
+                                            @if (User.Identity.GetUserName() != ViewBag.Usuario)
                                             {
-                                                <button id="btn-publicar" type="button" class="btn btn-success btn-block">Publicar</button>
                                                 <br />
-
+                                                <strong>Este borrador fue iniciado el usuario @ViewBag.Usuario</strong>
                                             }
                                         </div>
                                     }
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="nav-tabs-custom">
-                                    <ul class="nav nav-tabs">
-                                        <li class="active">
-                                            <a href="#tab_1" data-toggle="tab">Metadatos</a>
-                                        </li>
-                                        <li>
-                                            <a href="#tab_2" data-toggle="tab">Versiones</a>
-                                        </li>
-                                        <li>
-                                            <a href="#tab_3" data-toggle="tab">Referencias</a>
-                                        </li>
-                                        <li>
-                                            <a id="aTab4" href="#tab_4" data-toggle="tab">Historial</a>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content">
-                                        <div id="tab_1" class="tab-pane active">
-                                            @Html.ValidationSummary(true, "", new { @class = "text-danger" })
-                                            <div class="form-group">
-                                                <label>Colecciones: </label>
-                                                <div id="divColeccion">
-                                                    @Html.Raw(Model.ColeccionGlosa)
-                                                </div> <span><a href="#" id="Coleccion" style="display: inline;">[Editar]</a></span>
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Norma, "Norma")
-                                                @Html.TextBoxFor(m => m.Norma, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Numero, "Número")
-                                                @Html.TextBoxFor(m => m.Numero, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Organismo, "Organismo")
-                                                @Html.TextBoxFor(m => m.Organismo, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Suborganismo, "Sub organismo")
-                                                @Html.TextBoxFor(m => m.Suborganismo[0], new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Titulo, "Título")
-                                                @Html.TextAreaFor(m => m.Titulo, new { @class = "form-control", row = "10", cols = "80" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Articulo, "Artículo")
-                                                @Html.TextBoxFor(m => m.Articulo, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Inciso, "Inciso")
-                                                @Html.TextBoxFor(m => m.Inciso, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Tribunal, "Tribunal")
-                                                @Html.TextBoxFor(m => m.Tribunal, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                @Html.LabelFor(m => m.Partes, "Partes")
-                                                @Html.TextBoxFor(m => m.Partes, new { @class = "form-control" })
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Seccion: </label>
-                                                <div id="divSeccion">
-                                                    @Html.Raw(Model.SeccionGlosa)
-                                                </div> <span><a href="#" id="Seccion" style="display: inline;">[Editar]</a></span>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Categoría: </label>
-                                                <div id="divCategoria">
-                                                    @Html.Raw(Model.CategoriaGlosa)
-                                                </div> <span><a href="#" id="Categoria" style="display: inline;">[Editar]</a></span>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>Tema: </label>
-                                                <div id="divTema">
-                                                    @Html.Raw(Model.TemaGlosa)
-                                                </div> <span><a href="#" id="Tema" style="display: inline;">[Editar]</a></span>
-                                            </div>
+                                    else if (ViewBag.Estado == "Pendiente")
+                                    {
+                                        <div class="alert alert-info alert-dismissable">
+                                            <button class="close" type="button" data-dismiss="alert" aria-hidden="true">x</button>
+                                            <h4>
+                                                <i class="icon fa fa-ban"></i>
+                                                Atención!
+                                            </h4>
+                                            El documento se encuentra en proceso de revisión. No se pueden realizar cambios.
                                         </div>
-                                        <div id="tab_2" class="tab-pane">
-                                            @if (Model.Versiones.Count > 0)
-                                            {
-                                                foreach (var version in Model.Versiones)
-                                                {
-                                                    if (version.nombre.IndexOf("borrador") < 0 && version.id != "original")
-                                                    {
-                                                        <a target="_blank" href="~/Document/Ma_VerVersion/@version.nombre" class="text-blue">
-                                                            @if (version.descripcion == null)
-                                                            {
-                                                                <label>Versión</label> @version.id
-                                                            }
-                                                            else
-                                                            {
-                                                                <label>Versión @version.id.- </label> @version.descripcion<br />
-                                                            }
-                                                        </a>
-                                                        if (ViewBag.Estado != "Pendiente" && ViewBag.Estado != "Borrador")
-                                                        {
-                                                            if (version.estado == 0)
-                                                            {
-                                                                <a href="~/Document/Ma_EditarVersion/@version.nombre" class="text-blue">Editar</a>
-                                                                <span> | </span>
-                                                                <a href="#" id="btnEliminarVersion_@version.nombre" class="text-red btnEliminarVersion">Eliminar</a>
-                                                            }
-                                                            else
-                                                            {
-                                                                <label class="text-red">---- Eliminada ----</label>
-                                                            }
-                                                        }
-                                                        <br /><br />
-                                                    }
-                                                }
-                                            }
-                                        </div>
-                                        <div id="tab_3" class="tab-pane">
+                                    }
+                                    <label>Texto del documento</label>
+
+                                    <a href="~/Document/Ma_VerDocumento/@Model.IdDocumento" id="btn-vista-previa" class="btn btn-warning btn-block">Vista previa</a>
+                                    <br />
+
+                                    @Html.TextAreaFor(m => m.Texto, new { @class = "form-control", row = "10", cols = "80" })
+
+                                    @Html.HiddenFor(m => m.IdDocumento)
+                                    @Html.HiddenFor(m => m.id)
+                                    @Html.HiddenFor(m => m.EsBorrador)
+                                    @Html.HiddenFor(m => m.Publicar)
+                                    @Html.HiddenFor(m => m.ColeccionGlosa)
+                                    @Html.HiddenFor(m => m.SeccionGlosa)
+                                    @Html.HiddenFor(m => m.CategoriaGlosa)
+                                    @Html.HiddenFor(m => m.TemaGlosa)
+                                    @Html.HiddenFor(m => m.TextoCambio)
+                                    @Html.HiddenFor(m => m.TextoDescripcionVersion)
+                                    @Html.HiddenFor(m => m.Fecha)
+                                    @Html.HiddenFor(m => m.VersionFinal)
+                                    <br />
+                                    <div class="row">
+                                        <div class="col-md-6">
                                             @if (ViewBag.Estado != "Pendiente")
                                             {
-                                                <button type="button" class="btn btn-block btn-primary btn-sm" id="btnMyModal">Agregar/modificar nota</button>
-                                                <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
-
-                                                <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
-
-                                                <button type="button" class="btn btn-block btn-success btn-sm" id="btnDialogImagen">Insertar imagen</button>
-                                                <br />
-                                            }
-                                            @if (Model.Links != null)
-                                            {
-                                                foreach (var link in Model.Links)
+                                                if (Model.EsBorrador)
                                                 {
-                                                    if (link.Tipo.IndexOf("no contiene referencias") > 0)
+                                                    <button id="btn-eliminarBorrador" type="button" class="btn btn-danger btn-block">Eliminar borrador</button>
+                                                    if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
                                                     {
-                                                        @link.Tipo
-                                                    }
-                                                    else
-                                                    {
-                                                        <label>Visible para</label> @link.Colecciones <br />
-                                                        @link.Tipo
-                                                        <br />
-                                                        <a href="~/Document/Ma_EditarDocumento/@link.Url">
-                                                            @link.Texto
-                                                        </a>
-                                                        if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
-                                                        {
-                                                            <br />
-                                                            <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
-                                                                [ Eliminar ]
-                                                            </label>
-                                                        }
-                                                        <br /><br />
+                                                        <button id="btn-reasignarBorrador" type="button" class="btn btn-info btn-block">Asignar borrador @ViewBag.Usuario</button>
                                                     }
                                                 }
                                             }
                                         </div>
-                                        <div id="tab_4" class="tab-pane">
-                                            <div style="color: red" id="dvCargandoHistorial"></div>
-                                            <div id="divHistorial"></div>
+                                        @if (ViewBag.Estado != "Pendiente")
+                                        {
+                                            <div class="col-md-6" style="text-align: right">
+                                                <button id="btn-guardar" type="button" class="btn btn-primary btn-block">Guardar documento</button>
+                                                @if (Model.EsBorrador)
+                                                {
+                                                    <button id="btn-publicar" type="button" class="btn btn-success btn-block">Publicar</button>
+                                                    <br />
+
+                                                }
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="nav-tabs-custom">
+                                        <ul class="nav nav-tabs">
+                                            <li class="active">
+                                                <a href="#tab_1" data-toggle="tab">Metadatos</a>
+                                            </li>
+                                            <li>
+                                                <a href="#tab_2" data-toggle="tab">Versiones</a>
+                                            </li>
+                                            <li>
+                                                <a href="#tab_3" data-toggle="tab">Referencias</a>
+                                            </li>
+                                            <li>
+                                                <a id="aTab4" href="#tab_4" data-toggle="tab">Historial</a>
+                                            </li>
+                                        </ul>
+                                        <div class="tab-content">
+                                            <div id="tab_1" class="tab-pane active">
+                                                @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+                                                <div class="form-group">
+                                                    <label>Colecciones: </label>
+                                                    <div id="divColeccion">
+                                                        @Html.Raw(Model.ColeccionGlosa)
+                                                    </div> <span><a href="#" id="Coleccion" style="display: inline;">[Editar]</a></span>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Norma, "Norma")
+                                                    @Html.TextBoxFor(m => m.Norma, new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Numero, "Número")
+                                                    @Html.TextBoxFor(m => m.Numero, new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Organismo, "Organismo")
+                                                    @Html.TextBoxFor(m => m.Organismo, new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Suborganismo, "Sub organismo")
+                                                    @Html.TextBoxFor(m => m.Suborganismo[0], new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Titulo, "Título")
+                                                    @Html.TextAreaFor(m => m.Titulo, new { @class = "form-control", row = "10", cols = "80" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Articulo, "Artículo")
+                                                    @Html.TextBoxFor(m => m.Articulo, new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Inciso, "Inciso")
+                                                    @Html.TextBoxFor(m => m.Inciso, new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Tribunal, "Tribunal")
+                                                    @Html.TextBoxFor(m => m.Tribunal, new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.Partes, "Partes")
+                                                    @Html.TextBoxFor(m => m.Partes, new { @class = "form-control" })
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Seccion: </label>
+                                                    <div id="divSeccion">
+                                                        @Html.Raw(Model.SeccionGlosa)
+                                                    </div> <span><a href="#" id="Seccion" style="display: inline;">[Editar]</a></span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Categoría: </label>
+                                                    <div id="divCategoria">
+                                                        @Html.Raw(Model.CategoriaGlosa)
+                                                    </div> <span><a href="#" id="Categoria" style="display: inline;">[Editar]</a></span>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label>Tema: </label>
+                                                    <div id="divTema">
+                                                        @Html.Raw(Model.TemaGlosa)
+                                                    </div> <span><a href="#" id="Tema" style="display: inline;">[Editar]</a></span>
+                                                </div>
+                                            </div>
+                                            <div id="tab_2" class="tab-pane">
+                                                @if (Model.Versiones.Count > 0)
+                                                {
+                                                    foreach (var version in Model.Versiones)
+                                                    {
+                                                        if (version.nombre.IndexOf("borrador") < 0 && version.id != "original")
+                                                        {
+                                                            <a target="_blank" href="~/Document/Ma_VerVersion/@version.nombre" class="text-blue">
+                                                                @if (version.descripcion == null)
+                                                                {
+                                                                    <label>Versión</label> @version.id
+                                                                }
+                                                                else
+                                                                {
+                                                                    <label>Versión @version.id.- </label> @version.descripcion<br />
+                                                                }
+                                                            </a>
+                                                            if (ViewBag.Estado != "Pendiente" && ViewBag.Estado != "Borrador")
+                                                            {
+                                                                if (version.estado == 0)
+                                                                {
+                                                                    <a href="~/Document/Ma_EditarVersion/@version.nombre" class="text-blue">Editar</a>
+                                                                    <span> | </span>
+                                                                    <a href="#" id="btnEliminarVersion_@version.nombre" class="text-red btnEliminarVersion">Eliminar</a>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <label class="text-red">---- Eliminada ----</label>
+                                                                }
+                                                            }
+                                                            <br /><br />
+                                                        }
+                                                    }
+                                                }
+                                            </div>
+                                            <div id="tab_3" class="tab-pane">
+                                                @if (ViewBag.Estado != "Pendiente")
+                                                {
+                                                    <button type="button" class="btn btn-block btn-primary btn-sm" id="btnMyModal">Agregar/modificar nota</button>
+                                                    <a href="~/Busqueda/Index/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia a partir de documento existente</a>
+
+                                                    <a href="~/Document/Ma_NuevaReferencia/@Model.IdDocumento" class="btn btn-block btn-primary btn-sm">Nueva referencia vacía</a>
+
+                                                    <button type="button" class="btn btn-block btn-success btn-sm" id="btnDialogImagen">Insertar imagen</button>
+                                                    <br />
+                                                }
+                                                @if (Model.Links != null)
+                                                {
+                                                    foreach (var link in Model.Links)
+                                                    {
+                                                        if (link.Tipo.IndexOf("no contiene referencias") > 0)
+                                                        {
+                                                            @link.Tipo
+                                                        }
+                                                        else
+                                                        {
+                                                            <label>Visible para</label> @link.Colecciones <br />
+                                                            @link.Tipo
+                                                            <br />
+                                                            <a href="~/Document/Ma_EditarDocumento/@link.Url">
+                                                                @link.Texto
+                                                            </a>
+                                                            if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
+                                                            {
+                                                                <br />
+                                                                <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
+                                                                    [ Eliminar ]
+                                                                </label>
+                                                            }
+                                                            <br /><br />
+                                                        }
+                                                    }
+                                                }
+                                            </div>
+                                            <div id="tab_4" class="tab-pane">
+                                                <div style="color: red" id="dvCargandoHistorial"></div>
+                                                <div id="divHistorial"></div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        }
                     </div>
                 </div>
             </div>
@@ -716,7 +727,7 @@
                     <br /><br />
                     <textarea id="txtAreaModificacion" class="form-control" style="width: 100%" rows="5"></textarea>
                     <br /><br />
-                    
+
                     <div class="checkbox">
                         <label>
                             <input type="checkbox" id="chkCrearVersion" checked="checked" />Crear nueva versión
