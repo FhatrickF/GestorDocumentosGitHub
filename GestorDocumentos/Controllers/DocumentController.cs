@@ -40,6 +40,16 @@ namespace GestorDocumentos.Controllers
         }
 
         [HttpGet]
+        public ActionResult Ma_BuscarDocumento(string id)
+        {
+            string _id = Indexador.Solr.getIdByJd(id);
+            if(_id != "0")
+                return Redirect("~/Document/Ma_VerDocumento/" + _id);
+            else
+                return Redirect("~/Document/Ma_Error/");
+        }
+
+        [HttpGet]
         public ActionResult ImagenesDoe(string imagen)
         {
             //20180102AEAB1C1AA5356B551760805CE8686A7C
@@ -937,6 +947,7 @@ namespace GestorDocumentos.Controllers
                 historial.Estado = 0; // pendiente
                 historial.IdOriginal = idDocumento;
                 historial.IdReferencia = idReferencia;
+                historial.Texto = "--";
                 Indexador.Solr.sendXmlHistoria(historial);
                 Indexador.Solr.cambiaEstadoDocumento(d.id, 99, usuario);
                 //setLog(d, "Guarda borrador ELIMINA REFERENCIA.- " + textoReferencia);
@@ -1348,23 +1359,24 @@ namespace GestorDocumentos.Controllers
                             }
                             if (h.Tipo == 2) // agrega ref doc existente
                             {
-                                string txtLink = "";
-                                if (VersionOriginalMa.Organismo != null && VersionOriginalMa.Organismo != "")
-                                    txtLink += VersionOriginalMa.Organismo + ".- ";
-                                if (VersionOriginalMa.Norma != null && VersionOriginalMa.Norma != "")
-                                    txtLink += VersionOriginalMa.Norma;
-                                if (VersionOriginalMa.Numero != null && VersionOriginalMa.Numero != "")
-                                    txtLink += " Número " + VersionOriginalMa.Numero;
-                                if (VersionOriginalMa.Articulo != null && VersionOriginalMa.Articulo != "")
-                                    txtLink += " Artículo " + VersionOriginalMa.Articulo;
-                                if (VersionOriginalMa.Inciso != null && VersionOriginalMa.Inciso != "")
-                                    txtLink += ", Inciso " + VersionOriginalMa.Inciso;
-                                if (VersionOriginalMa.Titulo != null && VersionOriginalMa.Titulo != "")
-                                    txtLink += ".- " + VersionOriginalMa.Titulo;
-                                if (docBorradorHistorial.Links == null)
-                                    docBorradorHistorial.Links = new List<Link>();
+                                //string txtLink = "";
+                                //if (VersionOriginalMa.Organismo != null && VersionOriginalMa.Organismo != "")
+                                //    txtLink += VersionOriginalMa.Organismo + ".- ";
+                                //if (VersionOriginalMa.Norma != null && VersionOriginalMa.Norma != "")
+                                //    txtLink += VersionOriginalMa.Norma;
+                                //if (VersionOriginalMa.Numero != null && VersionOriginalMa.Numero != "")
+                                //    txtLink += " Número " + VersionOriginalMa.Numero;
+                                //if (VersionOriginalMa.Articulo != null && VersionOriginalMa.Articulo != "")
+                                //    txtLink += " Artículo " + VersionOriginalMa.Articulo;
+                                //if (VersionOriginalMa.Inciso != null && VersionOriginalMa.Inciso != "")
+                                //    txtLink += ", Inciso " + VersionOriginalMa.Inciso;
+                                //if (VersionOriginalMa.Titulo != null && VersionOriginalMa.Titulo != "")
+                                //    txtLink += ".- " + VersionOriginalMa.Titulo;
+                                //if (docBorradorHistorial.Links == null)
+                                //    docBorradorHistorial.Links = new List<Link>();
 
                                 Link l = new Link();
+                                l.Colecciones = string.Join(", ", VersionOriginalMa.Coleccion);
                                 l.Texto = h.Texto; // txtLink;
                                 l.Tipo = VersionOriginalMa.Norma;
                                 l.Url = VersionOriginalMa.IdDocumento;
@@ -1403,7 +1415,7 @@ namespace GestorDocumentos.Controllers
         }
 
         [HttpPost]
-        public ActionResult Ma_EditarLink(string txtAreaModificacionLink, string txtIdLink, string txtIdDoc)
+        public ActionResult Ma_EditarLink(string txtAreaModificacionLink, string txtIdLink, string txtIdDoc, string[] coleccionSelect)
         {
             Documento d = Indexador.Solr.getDocumentoById(txtIdDoc, true);
 
@@ -1411,6 +1423,7 @@ namespace GestorDocumentos.Controllers
             {
                 if(link.Url == txtIdLink)
                 {
+                    link.Colecciones = string.Join(", ", coleccionSelect);
                     link.Texto = txtAreaModificacionLink;
                 }
             }

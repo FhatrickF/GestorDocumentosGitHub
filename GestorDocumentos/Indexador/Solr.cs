@@ -71,6 +71,29 @@ namespace GestorDocumentos.Indexador
             return historial;
         }
 
+        public static string getIdByJd(string id)
+        {
+            string response = "";
+            string query = "select?q=JD%3A" + id;
+            response = getResponseSolr(query);
+            string id_ = "";
+            if (response != "")
+            {
+                var expConverter = new ExpandoObjectConverter();
+                dynamic obj = JsonConvert.DeserializeObject<ExpandoObject>(response, expConverter);
+                foreach (var doc_ in obj.response.docs)
+                {
+                    id_ = doc_.id;
+                    break;
+                }
+                return id_;
+            }
+            else
+            {
+                return "0";
+            }
+        }
+
         public static Documento getDocumentoById(string id, bool versiones)
         {
             string response = "";

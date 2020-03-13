@@ -353,8 +353,18 @@
                 }
             });            
         });
-        // txtIdNota btnBuscarNota
-         
+
+        $("#setFormLink").submit(function (event) {
+            var coleccion = $('#coleccionSelect').val();
+            if (coleccion.length > 0 && $('#txtAreaModificacionLink').val() != "") {
+                return;
+            } else {
+                alert("Todos los campos son obligatorios !!");
+            }
+
+            event.preventDefault();
+        });
+
     });
 
     function editarReferencia(idRef, idDoc) {
@@ -362,6 +372,23 @@
         // txtIdLink txtIdDoc
         var t = $('#link_' + idRef).html();
         t = t.trim();
+
+        var c = $('#coleccionLink').html();
+        c = c.trim();
+        var col = c.split(", ");
+        //for (var x = 0; x < col.length; x++) {
+        //    alert(col[x]);
+        //}
+
+        $("#coleccionSelect option").each(function () {
+            // Marcamos cada valor como seleccionado
+            //$("#" + id + " option[value=" + this.value + "]").prop("selected", true);
+            var t = $("#coleccionSelect option[value=" + this.value + "]").val();
+            if (c.indexOf(t) > -1) {
+                $("#coleccionSelect option[value=" + this.value + "]").attr("selected", true);
+            }
+        });
+
         $('#txtAreaModificacionLink').val(t);
         $('#txtIdLink').val(idRef);
         $('#txtIdDoc').val(idDoc);
@@ -458,16 +485,6 @@
                         <h3 class="box-title">Editar documento</h3>
                     </div>
                     <div class="box-body">
-                        @if (!String.IsNullOrWhiteSpace(@Html.ValidationMessage("Error").ToString()))
-                        {
-                            <div class="row">
-                                <div class="col-md-8">
-                                    @Html.ValidationMessage("Error")
-                                </div>
-                            </div>
-                        }
-                        else
-                        {
                             <div class="row">
                                 <div class="col-md-8">
                                     @if (ViewBag.Estado == "Borrador")
@@ -513,7 +530,6 @@
                                     @Html.HiddenFor(m => m.CategoriaGlosa)
                                     @Html.HiddenFor(m => m.TemaGlosa)
                                     @Html.HiddenFor(m => m.TextoCambio)
-                                    @Html.HiddenFor(m => m.TextoDescripcionVersion)
                                     @Html.HiddenFor(m => m.Fecha)
                                     @Html.HiddenFor(m => m.VersionFinal)
                                     <br />
@@ -569,6 +585,10 @@
                                                     <div id="divColeccion">
                                                         @Html.Raw(Model.ColeccionGlosa)
                                                     </div> <span><a href="#" id="Coleccion" style="display: inline;">[Editar]</a></span>
+                                                </div>
+                                                <div class="form-group">
+                                                    @Html.LabelFor(m => m.TextoDescripcionVersion, "Descripción de la versión")
+                                                    @Html.TextAreaFor(m => m.TextoDescripcionVersion, new { @class = "form-control", row = "10", cols = "80" })
                                                 </div>
                                                 <div class="form-group">
                                                     @Html.LabelFor(m => m.Norma, "Norma")
@@ -681,17 +701,21 @@
                                                         }
                                                         else
                                                         {
-                                                            <label>Visible para</label> @link.Colecciones <br />
+                                                            <label>Visible para: </label> <span id="coleccionLink">@link.Colecciones</span> <br />
                                                             @link.Tipo
                                                             <br />
-                                                            <a href="~/Document/Ma_EditarDocumento/@link.Url">
+                                                            <a id="link_@link.Url" href="~/Document/Ma_EditarDocumento/@link.Url">
                                                                 @link.Texto
                                                             </a>
                                                             if (rolUs == GestorDocumentosEntities.Sys_RolEntity.ADMINISTRADOR)
                                                             {
                                                                 <br />
-                                                                <label style="color: blue; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
-                                                                    [ Eliminar ]
+                                                                <!-- idRef, idDoc -->
+                                                                <label style="color: red; cursor: pointer" onclick="eliminaReferencia('@link.Url', '@Model.IdDocumento')">
+                                                                    [ Eliminar ] | 
+                                                                </label>
+                                                                <label style="color: blue; cursor: pointer" onclick="editarReferencia('@link.Url', '@Model.IdDocumento')">
+                                                                    [ Editar ]
                                                                 </label>
                                                             }
                                                             <br /><br />
@@ -707,7 +731,6 @@
                                     </div>
                                 </div>
                             </div>
-                        }
                     </div>
                 </div>
             </div>
@@ -788,6 +811,13 @@
                 <div class="modal-body" id="txtLink">
                     Modifique el texto descriptivo del link
                     <br /><br />
+                    <select id="coleccionSelect" name="coleccionSelect" class="form-control" multiple>
+                        @for (var x = 0; x < Model.Coleccion.Length; x++)
+                        {
+                            <option value="@Model.Coleccion[x]">@Model.Coleccion[x]</option>
+                        }
+                    </select>
+                    <br />
                     <textarea id="txtAreaModificacionLink" name="txtAreaModificacionLink" class="form-control" style="width: 100%" rows="5"></textarea>
                     <br /><br />
                     <input type="hidden" id="txtIdLink" name="txtIdLink" value="" />
@@ -821,15 +851,6 @@
                             <input type="checkbox" id="chkCrearVersion" checked="checked" />Crear nueva versión
                         </label>
                     </div>
-                    <!--
-                    <div id="dvDatosNuevaVersion">
-                        Esta acción creará una nueva versión del documento con los cambios indicados. Indique un título
-                        descriptivo.<br />
-                        <strong>(texto visible para el usuario)</strong>
-                        <br /><br />
-                        <textarea id="txtAreaTituloModificacion" class="form-control" style="width: 100%" rows="5"></textarea>
-                    </div>
-                    -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal" id="btnCerrarCambio">Cerrar</button>
