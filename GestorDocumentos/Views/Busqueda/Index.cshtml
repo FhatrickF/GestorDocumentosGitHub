@@ -18,7 +18,6 @@
 <script>
     var p_ = 1;
     var referencia = "@ViewBag.Referencia";
-    var idAnterior = "";
     ready(function () {
         $('#Fecha').datepicker({
             autoclose: true,
@@ -31,60 +30,9 @@
         });
 
         $('#btn-guardar').click(function () {
-            $('#dvResultados').show();
-            $('#dvIndice').show().html("");
             p_ = 1;
             setPaginacion();
-            location.href = "#dvResultados";
         });
-
-        $('#verCodigo').click(function (event) {
-            event.preventDefault();
-            var codigo = $("#codigoLa option:selected").val();            
-            if (codigo == "") {
-                alert("Debe seleccionar un código");
-                return 0;
-            }
-            var params = new Object();
-            params.codigo = codigo;
-            $.ajax({
-                type: "POST",
-                url: "/Busqueda/getIndice",
-                content: "application/json; charset=utf-8",
-                dataType: "html",
-                data: params,
-                success: function (d) {
-                    if (d.indexOf("Error" < 0)) {
-                        $('#dvResultados').hide();
-                        $('#dvIndice').show().html(d);
-                        location.href = "#dvIndice";
-                    } else {
-                        alert(d);
-                    }
-                },
-                error: function (xhr, textStatus, errorThrown) {
-                    alert("Ocurrió un error al buscar el índice solicitado. Por favor, inténtelo nuevamente");
-                }
-            });
-            event.preventDefault();
-        })
-
-        $('body').on('click', '.linkDocumento', function myfunction() {
-            var acc = "MA_VerDocumento";
-            if ($("#rdEditar").is(':checked'))
-                acc = "MA_EditarDocumento";
-
-            if (idAnterior != "") {
-                $('#' + idAnterior).removeClass('divSelected');
-            }
-
-            var id = $(this).prop("id");
-            idAnterior = id;
-            $('#' + id).addClass('divSelected');
-
-            window.open("../Document/" + acc + "?id=" + id, '_blank');
-            event.preventDefault();
-        })
     });
 
     function pagina(p) {
@@ -333,64 +281,6 @@
                                         </div>
                                         <div class="row">
                                             <div class="col-md-12">
-                                                <hr />
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <label>Códigos LA</label>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-8">
-                                                <div class="form-group">
-                                                    <select id="codigoLa" name="codigoLa" class="form-control">
-                                                        <option value="">Seleccionar</option>
-                                                        <!-- <option value="CPE">Constitución Política</option> -->
-                                                        <option value="CC">Código Civil</option>
-                                                        <option value="CCOM">Código de Comercio</option>
-                                                        <option value="CP">Código Penal</option>
-                                                        <option value="CPC">Código de Procedimiento Civil</option>
-                                                        <option value="CPP">Código de Procedimiento Penal</option>
-                                                        <option value="CPRO">Código Procesal Penal</option>
-                                                        <option value="COT">Código Orgánico de Tribunales</option>
-                                                        <option value="COTREF">Código Orgánico de Tribunales Reformado</option>
-                                                        <option value="CTRAB">Código del Trabajo</option>
-                                                        <option value="CMIN">Código de Minería</option>
-                                                        <option value="CTRIB">Código Tributario</option>
-                                                        <option value="CDA">Código de Aguas</option>
-                                                        <option value="CSAN">Código Sanitario</option>
-                                                        <option value="CAE">Código Aeronáutico</option>
-                                                        <option value="CIPR">Código de Derecho Internacional Privado</option>
-                                                        <option value="CJM">Código de Justicia</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-4">
-                                                <button id="verCodigo" class="btn btn-primary btn-block">Ver código</button>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="indiceVer">Ver link</label>
-                                                    <input type="radio" id="rdVer" checked="checked" name="rdLink" value="ver">
-                                                </div>
-                                            </div>
-                                            <div class="col-md-6">
-                                                <div class="form-group">
-                                                    <label for="indiceVer">Editar link</label>
-                                                    <input type="radio" id="rdEditar" name="rdLink" value="editar">
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12">
-                                                <hr />
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col-md-12">
                                                 <label>Seleccione producto</label>
                                                 <select name="Coleccion" class="form-control">
                                                     <option value="BITE">BITE</option>
@@ -406,6 +296,34 @@
                                                 </select>
                                             </div>
                                         </div>
+                                        <!--
+                                        <div class="row prod-MA">
+                                            <br />
+                                            <div class="col-md-12">
+                                                <label>Códigos de la República</label>
+                                                <select name="codigo" id="codigo" class="form-control">
+                                                    <option value="*">Seleccionar</option>
+                                                    <option value="Codigo CPE">Constitución política</option>
+                                                    <option value="Codigo CC">Código Civil</option>
+                                                    <option value="Codigo CCOM">Código de Comercio</option>
+                                                    <option value="Codigo CP">Código Penal</option>
+                                                    <option value="Codigo CPC">Código de Procedimiento Civil</option>
+                                                    <option value="Codigo CPP">Código de Procedimiento Penal</option>
+                                                    <option value="Codigo CPRO">Código Procesal Penal</option>
+                                                    <option value="Codigo COT">Código Orgánico de Tribunales</option>
+                                                    <option value="Codigo COTREF">Código Orgánico de Tribunales Reformado</option>
+                                                    <option value="Codigo CTRAB">Código del Trabajo</option>
+                                                    <option value="Codigo CMIN">Código de Minería</option>
+                                                    <option value="Codigo CTRIB">Código Tributario</option>
+                                                    <option value="Codigo CDA">Codigo de Aguas</option>
+                                                    <option value="Codigo CSAN">Código Sanitario</option>
+                                                    <option value="Codigo CAE">Código Aeronáutico</option>
+                                                    <option value="Codigo CIPR">Código de Derecho Penal Privado</option>
+                                                    <option value="Codigo CJM">Código de Justicia Militar</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        -->
                                         <div class="row">
                                             <br />
                                             <div class="col-md-6">
@@ -523,17 +441,14 @@
             <!-- fin bite -->
             <!-- fin formulario -->
         </div>
-        <div class="col-md-8">
+        <div class="col-md-7">
             <div class="row">
                 <div class="box box-default">
                     <div class="box-header with-border">
                         <i class="fa fa-file-text-o"></i>
                         <h3 class="box-title">Resultados</h3>
                     </div>
-                    <div id="dvIndice" class="box-body" style="display: none;">
-
-                    </div>
-                    <div class="box-body" id="dvResultados">
+                    <div class="box-body">
                         @if (ViewBag.Referencia)
                         {
                             <div class="row">
