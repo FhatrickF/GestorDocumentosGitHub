@@ -8,7 +8,9 @@ using System;
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Text;
 using System.Web;
+using System.Web.Configuration;
 using System.Web.Mvc;
 
 namespace GestorDocumentos.Controllers
@@ -207,7 +209,7 @@ namespace GestorDocumentos.Controllers
                 if (!String.IsNullOrEmpty(nor.dc))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO'" : "Norma:'DECRETO'";
                 if (!String.IsNullOrEmpty(nor.soc))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'SOCIEDAD*'" : "Norma:'SOCIEDAD*'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'SOCIEDAD'" : "Norma:'SOCIEDAD'";
                 if (!String.IsNullOrEmpty(nor.pre))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PRENDA'" : "Norma:'PRENDA'";
                 if (!String.IsNullOrEmpty(nor.da))
@@ -216,12 +218,12 @@ namespace GestorDocumentos.Controllers
                 }
                 if (!String.IsNullOrEmpty(nor.dc))
                 {
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DECRETO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'" : "Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DECRETO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DCTO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'" : "Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DCTO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'";
                 }
                 if (!String.IsNullOrEmpty(nor.res))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
                 if (!String.IsNullOrEmpty(nor.eirl))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'Empresa Individual*'" : "Norma:'Empresa Individual*'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'EMPRESA INDIVIDUAL DISOLUCION' OR Norma:'EMPRESA INDIVIDUAL CONSTITUCION' OR Norma:'EMPRESA INDIVIDUAL DISOLUCION' OR Norma:'EMPRESA INDIVIDUAL MODIFICACION'" : "Norma:'EMPRESA INDIVIDUAL DISOLUCION' OR Norma:'EMPRESA INDIVIDUAL CONSTITUCION' OR Norma:'EMPRESA INDIVIDUAL DISOLUCION' OR Norma:'EMPRESA INDIVIDUAL MODIFICACION'";
                 if (!String.IsNullOrEmpty(nor.mc))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'MARCA'" : "Norma:'MARCA'";
                 if (!String.IsNullOrEmpty(nor.spo))
@@ -232,6 +234,8 @@ namespace GestorDocumentos.Controllers
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PATENTE' OR Norma:'MODELO' OR Norma:'DISEÑO'" : "Norma:'DECRETO' OR Norma:'MODELO' OR Norma:'DISEÑO'";
                 if (!String.IsNullOrEmpty(nor.pm))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ART 83' OR Norma:'PEDIMENTOS MINEROS' OR Norma:'MANIFESTACIONES MINERAS' OR Norma:'SOLICITUDES DE MENSURA' OR Norma:'SENTENCIA EXPLORACION' OR Norma:'SENTENCIA EXPLOTACION' OR Norma:'VIGENCIA MENSURA' OR Norma:'RENUNCIA CONCESION' OR Norma:'PRORROGA EXPLORACION' OR Norma:'NOMINA REMATE' OR Norma:'ACUERDO JUNTA' OR Norma:'CITACION JUNTA' OR Norma:'NOMINA PATENTE' OR Norma:'ACUERDO CONCESION'" : "Norma:'ART 83' OR Norma:'PEDIMENTOS MINEROS' OR Norma:'MANIFESTACIONES MINERAS' OR Norma:'SOLICITUDES DE MENSURA' OR Norma:'SENTENCIA EXPLORACION' OR Norma:'SENTENCIA EXPLOTACION' OR Norma:'VIGENCIA MENSURA' OR Norma:'RENUNCIA CONCESION' OR Norma:'PRORROGA EXPLORACION' OR Norma:'NOMINA REMATE' OR Norma:'ACUERDO JUNTA' OR Norma:'CITACION JUNTA' OR Norma:'NOMINA PATENTE' OR Norma:'ACUERDO CONCESION'";
+                if (!String.IsNullOrEmpty(nor.ot))
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DCTO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'" : "Norma:'PROTOCOLIZACION' OR Norma:'INFORMACION SORTEO' OR Norma:'CERTIFICACION' OR Norma:'CERTIFICADO' OR Norma:'LISTA DCTO' OR Norma:'IMPACTO AMBIENTAL' OR Norma:'PLANTA RESIDUOS' OR Norma:'ACUERDO' OR Norma:'REGISTRO VARIEDAD' OR Norma:'LISTA NOMBRAMIENTO' OR Norma:'PARTIDO'";
 
                 if (!String.IsNullOrEmpty(q))
                     bNorma = " AND (" + q + ")";
@@ -346,7 +350,7 @@ namespace GestorDocumentos.Controllers
                 if (!String.IsNullOrEmpty(nor.n))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'NOTIFICACION'" : "Norma:'NOTIFICACION'";
                 if (!String.IsNullOrEmpty(nor.ed))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'EXTRAVIOS DE DOCUMENTOS'" : "Norma:'EXTRAVIOS DE DOCUMENTOS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'EXTRAVIO'" : "Norma:'EXTRAVIO'";
                 if (!String.IsNullOrEmpty(nor.rd))
                     q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DOMINIO'" : "Norma:'DOMINIO'";
 
@@ -654,6 +658,15 @@ namespace GestorDocumentos.Controllers
             }
         }
 
+
+        [HttpPost]
+        public string getIndice(string codigo)
+        {
+            string ruta = WebConfigurationManager.AppSettings["MVC-INDICES"];
+            string indice = System.IO.File.ReadAllText(ruta + "01_Indice_" + codigo + ".html", Encoding.UTF8);
+            return indice;
+        }
+
         public ActionResult BuscarNM()
         {
             var login = User.Identity.IsAuthenticated;
@@ -680,99 +693,124 @@ namespace GestorDocumentos.Controllers
                 string fecha = string.Empty;
                 string fecha2 = string.Empty;
                 string coleccion = "&q=Coleccion:'MA'";
+                string categoria = string.Empty;
+                string tema = string.Empty;
                 string fl = "Norma,Numero,Articulo,Inciso,Titulo,Fecha,IdDocumento,Organismo,Estado,Partes,Tribunal,Propiedad";
 
                 if (!String.IsNullOrEmpty(nor.ley))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'LEY'" : "Norma:'LEY'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'LEY'" : " Norma:'LEY'";
                 if (!String.IsNullOrEmpty(nor.cir))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CIRCULAR'" : "Norma:'CIRCULAR'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CIRCULAR'" : " Norma:'CIRCULAR'";
                 if (!String.IsNullOrEmpty(nor.dfl))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO CON FUERZA DE LEY'" : "Norma:'DECRETO CON FUERZA DE LEY'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO CON FUERZA DE LEY'" : " Norma:'DECRETO CON FUERZA DE LEY'";
                 if (!String.IsNullOrEmpty(nor.con))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CONVENIO'" : "Norma:'CONVENIO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'CONVENIO'" : " Norma:'CONVENIO'";
                 if (!String.IsNullOrEmpty(nor.dl))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO LEY'" : "Norma:'DECRETO LEY'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO LEY'" : " Norma:'DECRETO LEY'";
                 if (!String.IsNullOrEmpty(nor.acu))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ACUERDO'" : "Norma:'ACUERDO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'ACUERDO'" : " Norma:'ACUERDO'";
                 if (!String.IsNullOrEmpty(nor.ds))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO SUPREMO'" : "Norma:'DECRETO SUPREMO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO SUPREMO'" : " Norma:'DECRETO SUPREMO'";
                 if (!String.IsNullOrEmpty(nor.tra))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'TRATADO'" : "Norma:'TRATADO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'TRATADO'" : " Norma:'TRATADO'";
                 if (!String.IsNullOrEmpty(nor.dcto))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO'" : "Norma:'DECRETO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'DECRETO'" : " Norma:'DECRETO'";
                 if (!String.IsNullOrEmpty(nor.reg))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'REGLAMENTO'" : "Norma:'REGLAMENTO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'REGLAMENTO'" : " Norma:'REGLAMENTO'";
                 if (!String.IsNullOrEmpty(nor.res))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RESOLUCION'" : "Norma:'RESOLUCION'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'RESOLUCION'" : " Norma:'RESOLUCION'";
                 if (!String.IsNullOrEmpty(nor.pro))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROTOCOLO'" : "Norma:'PROTOCOLO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Norma:'PROTOCOLO'" : " Norma:'PROTOCOLO'";
+                string qq = string.Empty;
+                if (!string.IsNullOrEmpty(q))
+                {
+                    categoria += (!String.IsNullOrEmpty(categoria)) ? " OR Categoria: 'BIOTICO'" : " Categoria: 'BIOTICO'";
+                    tema += (!String.IsNullOrEmpty(categoria)) ? " OR Tema: 'BIOTICO'" : " Tema: 'BIOTICO'";
+                    qq += q;
+                }
+                    
 
                 if (!String.IsNullOrEmpty(nor.ap))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AREAS PROTEGIDAS'" : "Tema:'AREAS PROTEGIDAS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AREAS PROTEGIDAS'" : " Tema:'AREAS PROTEGIDAS'";
                 if (!String.IsNullOrEmpty(nor.ap))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AREAS PROTEGIDAS'" : "Tema:'AREAS PROTEGIDAS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AREAS PROTEGIDAS'" : " Tema:'AREAS PROTEGIDAS'";
                 if (!String.IsNullOrEmpty(nor.agu))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AGUA'" : "Tema:'AGUA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AGUA'" : " Tema:'AGUA'";
                 if (!String.IsNullOrEmpty(nor.al))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AMBIENTE LABORAL'" : "Tema:'AMBIENTE LABORAL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AMBIENTE LABORAL'" : " Tema:'AMBIENTE LABORAL'";
                 if (!String.IsNullOrEmpty(nor.bio))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'BIODIVERSIDAD'" : "Tema:'BIODIVERSIDAD'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'BIODIVERSIDAD'" : " Tema:'BIODIVERSIDAD'";
                 if (!String.IsNullOrEmpty(nor.arq))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'ARQUEOLOGIA'" : "Tema:'ARQUEOLOGIA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'ARQUEOLOGIA'" : " Tema:'ARQUEOLOGIA'";
                 if (!String.IsNullOrEmpty(nor.air))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AIRE'" : "Tema:'AIRE'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AIRE'" : " Tema:'AIRE'";
                 if (!String.IsNullOrEmpty(nor.cde))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'CLASIFICACION DE ESPECIES'" : "Tema:'CLASIFICACION DE ESPECIES'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'CLASIFICACION DE ESPECIES'" : " Tema:'CLASIFICACION DE ESPECIES'";
                 if (!String.IsNullOrEmpty(nor.com))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'COMBUSTIBLE'" : "Tema:'COMBUSTIBLE'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'COMBUSTIBLE'" : " Tema:'COMBUSTIBLE'";
                 if (!String.IsNullOrEmpty(nor.adr))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AREAS DE RIESGO'" : "Tema:'AREAS DE RIESGO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'AREAS DE RIESGO'" : " Tema:'AREAS DE RIESGO'";
                 if (!String.IsNullOrEmpty(nor.ft))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'FAUNA TERRESTRE'" : "Tema:'FAUNA TERRESTRE'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'FAUNA TERRESTRE'" : " Tema:'FAUNA TERRESTRE'";
                 if (!String.IsNullOrEmpty(nor.ind))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'INDIGENA'" : "Tema:'INDIGENA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'INDIGENA'" : " Tema:'INDIGENA'";
                 if (!String.IsNullOrEmpty(nor.cyp))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'CLIMA Y PAISAJE'" : "Tema:'CLIMA Y PAISAJE'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'CLIMA Y PAISAJE'" : " Tema:'CLIMA Y PAISAJE'";
                 if (!String.IsNullOrEmpty(nor.ffm))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'FLORA Y FAUNA MARINA'" : "Tema:'FLORA Y FAUNA MARINA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'FLORA Y FAUNA MARINA'" : " Tema:'FLORA Y FAUNA MARINA'";
                 if (!String.IsNullOrEmpty(nor.inf))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'INFRAESTRUCTURA'" : "Tema:'INFRAESTRUCTURA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'INFRAESTRUCTURA'" : " Tema:'INFRAESTRUCTURA'";
                 if (!String.IsNullOrEmpty(nor.ene))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'ENERGIA'" : "Tema:'ENERGIA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'ENERGIA'" : " Tema:'ENERGIA'";
                 if (!String.IsNullOrEmpty(nor.fyv))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'FLORA Y VEGETACION'" : "Tema:'FLORA Y VEGETACION'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'FLORA Y VEGETACION'" : " Tema:'FLORA Y VEGETACION'";
                 if (!String.IsNullOrEmpty(nor.pte))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'PLANIFICACION TERRITORIAL'" : "Tema:'PLANIFICACION TERRITORIAL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'PLANIFICACION TERRITORIAL'" : " Tema:'PLANIFICACION TERRITORIAL'";
                 if (!String.IsNullOrEmpty(nor.lum))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'LUMINICA'" : "Tema:'LUMINICA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'LUMINICA'" : " Tema:'LUMINICA'";
                 if (!String.IsNullOrEmpty(nor.pcu))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'PATRIMONIO CULTURAL'" : "Tema:'PATRIMONIO CULTURAL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'PATRIMONIO CULTURAL'" : " Tema:'PATRIMONIO CULTURAL'";
                 if (!String.IsNullOrEmpty(nor.ryv))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'RUIDO Y VIBRACIONES'" : "Tema:'RUIDO Y VIBRACIONES'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'RUIDO Y VIBRACIONES'" : " Tema:'RUIDO Y VIBRACIONES'";
                 if (!String.IsNullOrEmpty(nor.pla))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'PLAGUICIDAS'" : "Tema:'PLAGUICIDAS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'PLAGUICIDAS'" : " Tema:'PLAGUICIDAS'";
                 if (!String.IsNullOrEmpty(nor.sue))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'SUELO'" : "Tema:'SUELO'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'SUELO'" : " Tema:'SUELO'";
                 if (!String.IsNullOrEmpty(nor.resi))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'RESIDUOS'" : "Tema:'RESIDUOS'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Tema:'RESIDUOS'" : " Tema:'RESIDUOS'";
+
+                if (!string.IsNullOrEmpty(q))
+                {
+                    categoria += (!String.IsNullOrEmpty(categoria)) ? " OR Categoria: 'SOCIAL' OR Categoria: 'CONSTRUIDO'" : " Categoria: 'BIOTICO' OR Categoria: 'CONSTRUIDO'";
+                    tema += (!String.IsNullOrEmpty(categoria)) ? " OR Tema: 'SOCIAL'" : " Tema: 'SOCIAL'";
+                    qq += q;
+                }
 
                 if (!String.IsNullOrEmpty(nor.tribunal))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'TRIBUNAL CONSTITUCIONAL'" : "Organismo:'TRIBUNAL CONSTITUCIONAL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'TRIBUNAL CONSTITUCIONAL'" : " Organismo:'TRIBUNAL CONSTITUCIONAL'";
                 if (!String.IsNullOrEmpty(nor.pta))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'PRIMER TRIBUNAL AMBIENTAL'" : "Organismo:'PRIMER TRIBUNAL AMBIENTAL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'PRIMER TRIBUNAL AMBIENTAL'" : " Organismo:'PRIMER TRIBUNAL AMBIENTAL'";
                 if (!String.IsNullOrEmpty(nor.dict))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'CONTRALORIA'" : "Organismo:'CONTRALORIA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'CONTRALORIA'" : " Organismo:'CONTRALORIA'";
                 if (!String.IsNullOrEmpty(nor.sanit))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'SUPERINTENDENCIA DEL MEDIO AMBIENTE'" : "Organismo:'SUPERINTENDENCIA DEL MEDIO AMBIENTE'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'SUPERINTENDENCIA DEL MEDIO AMBIENTE'" : " Organismo:'SUPERINTENDENCIA DEL MEDIO AMBIENTE'";
                 if (!String.IsNullOrEmpty(nor.csuprema))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'CORTE SUPREMA'" : "Organismo:'CORTE SUPREMA'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'CORTE SUPREMA'" : " Organismo:'CORTE SUPREMA'";
                 if (!String.IsNullOrEmpty(nor.stp))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'SEGUNDO TRIBUNAL AMBIENTAL'" : "Organismo:'SEGUNDO TRIBUNAL AMBIENTAL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'SEGUNDO TRIBUNAL AMBIENTAL'" : " Organismo:'SEGUNDO TRIBUNAL AMBIENTAL'";
                 if (!String.IsNullOrEmpty(nor.capelaciones))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'CORTE DE APELACIONES'" : "Organismo:'CORTE DE APELACIONES'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'CORTE DE APELACIONES'" : " Organismo:'CORTE DE APELACIONES'";
                 if (!String.IsNullOrEmpty(nor.ttp))
-                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'TERCER TRIBUNAL AMBIENTAL'" : "Organismo:'TERCER TRIBUNAL AMBIENTAL'";
+                    q += (!String.IsNullOrEmpty(q)) ? " OR Organismo:'TERCER TRIBUNAL AMBIENTAL'" : " Organismo:'TERCER TRIBUNAL AMBIENTAL'";
 
+                if (!string.IsNullOrEmpty(q))
+                {
+                    categoria += (!String.IsNullOrEmpty(categoria)) ? " Categoria: 'FISICO' " : " OR Categoria: 'FISICO'";
+                    tema += (!String.IsNullOrEmpty(categoria)) ? " Tema: 'FISICO'" : " OR Tema: 'FISICO'";
+                    qq += q;
+                }
+
+                q = qq;
                 if (!String.IsNullOrEmpty(q))
                     bNorma = " AND (" + q + ")";
 
@@ -831,7 +869,7 @@ namespace GestorDocumentos.Controllers
                 //if (!string.IsNullOrEmpty(nor.organismo))
                 //    q += " AND Organismo:'" + nor.organismo + "'";
 
-                string url = "select?fl=" + fl + coleccion + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
+                string url = "select?fl=" + fl + coleccion + coleccion + tema + bNorma + bDatos + "&q=Estado:'98'&sort=Fecha asc &start=" + nor.pagina;
                 url = url.Replace("  ", " ");
                 url = url.Replace(",", "%2C").Replace(" ", "%20").Replace(":", "%3A").Replace("'", "%22");
 
