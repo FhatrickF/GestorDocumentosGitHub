@@ -486,7 +486,7 @@ namespace GestorDocumentos.Controllers
                 {
                     string txt = System.IO.File.ReadAllText(r + nota.TextoNota + ".html", Encoding.UTF8);
                     notaResult.TextoNota = txt;
-                    notaResult.Result = 0;
+                    notaResult.Result = 1;
                     notaResult.Coleccion = null;
                 }
                 else
@@ -502,12 +502,14 @@ namespace GestorDocumentos.Controllers
                             r = r + nota.Id + ".html";
                         else
                             throw new Exception("");
+                        notaResult.Result = 2;
                     }
                     else
                     {                        
                         h = UtilesBO.getMd5(nota.TextoNota);
                         txtLog = "Agrega nota IdDoc=" + nota.IdDocumento + ", IdNota=" + h;
                         r = r + "\\" + nota.Coleccion + h + ".html";
+                        notaResult.Result = 3;
                     }
                     
 
@@ -517,7 +519,7 @@ namespace GestorDocumentos.Controllers
 
                     notaResult.TextoNota = nota.Coleccion + h;
                     notaResult.Coleccion = null;
-                    notaResult.Result = 0;
+                    //notaResult.Result = 2;
 
                     Documento ma = Indexador.Solr.getDocumentoById(nota.IdDocumento, true);
                     setLog(ma, txtLog);
@@ -526,7 +528,7 @@ namespace GestorDocumentos.Controllers
             catch (Exception ex)
             {
                 //new TechnicalException("Error al mostrar las notas", ex);
-                notaResult.Result = 1;
+                notaResult.Result = 0;
                 notaResult.TextoNota = "Error al buscar nota, por favor reintentar";
             }
 

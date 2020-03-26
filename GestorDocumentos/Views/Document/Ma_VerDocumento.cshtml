@@ -48,7 +48,7 @@
                 dataType: "json",
                 data: params,
                 success: function (d) {
-                    if (d.Result == 0) {
+                    if (d.Result == 1) {
                         $("#aNota").attr("href", "@Url.Action("Ma_EditarDocumento", "Document", new { id = Model.IdDocumento })" + "-" + i);
                         $('#detalleNota').modal('show')
                         $('#txtDetalleNota').html(colecciones + "<br /><br />" + d.TextoNota);

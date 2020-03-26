@@ -215,12 +215,11 @@
                 dataType: "json",
                 data: params,
                 success: function (d) {
-                    if (d.Result == 0) {
-                        //var inserta = '<a href="#" class="linkNota" style="color:blue; cursor:pointer" id="' + d.TextoNota + '">[Nota]</a>';
+                    if (d.Result == 3) {
                         var inserta = "<img class=\"linkNota\" id=\"" + d.TextoNota + "\" src=\"/Content/img/flecha.png\" style=\"cursor:pointer; display:inline; height:12px; width:15px\" />";
                         CKEDITOR.instances['Texto'].insertHtml(inserta);
                     }
-                    else {
+                    else if (d.Result == 0) {
                         alert(d.TextoNota);
                     }
                 },
